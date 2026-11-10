@@ -27,7 +27,8 @@ npm run scan -- /proje/klasoru --out rapor
 
 **Ne bulur:**
 
-- **Paketler:** kilit ve manifest dosyalarından (npm, PyPI, Go, RubyGems, Cargo, Maven, NuGet).
+- **Paketler:** kilit ve manifest dosyalarından (npm, PyPI, Go, RubyGems, Cargo, Maven, NuGet). Alt klasörlerdeki
+  projeler de taranır (monorepo: `web/`, `services/api/` …); `node_modules`, `.git`, `venv` ve derleme çıktıları atlanır.
 - **Bilinen açıklar:** OSV.dev'den; GitHub (GHSA) şiddeti ya da CVSS v3 vektöründen tahmin, CVE takma adları ve
   düzeltilmiş sürüm.
 - **Lisanslar:** npm paketlerinde `package.json`'daki beyan, diğerlerinde LICENSE metni; serbest, zayıf copyleft,
@@ -38,7 +39,7 @@ npm run scan -- /proje/klasoru --out rapor
 
 ## Durum ve bilinen eksikler
 
-- Tek komutluk tarayıcı (`cli/`) ve tarama motoru (`worker/src/scanners.ts`) çalışıyor; 475 test geçiyor.
+- Tek komutluk tarayıcı (`cli/`) ve tarama motoru (`worker/src/scanners.ts`) çalışıyor; 477 test geçiyor.
 - Lisanslar ancak bağımlılıkları kurulmuş projede (`node_modules` vb.) tam okunur.
 - OSV toplu sorgusu tek istekte gönderilir; çok büyük projelerde (1000+ paket) bölünmesi gerekecek.
 - **Sunucu platformu (`api/`, `worker/`) deneysel.** PostgreSQL, Redis ve imzalı bir lisans dosyası ister.

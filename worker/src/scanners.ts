@@ -1528,38 +1528,63 @@ function buildCycloneDx(
   };
 }
 
+const MANIFEST_FILE_PATTERN =
+  /^(package-lock\.json|npm-shrinkwrap\.json|pnpm-lock\.yaml|yarn\.lock|requirements[\w.-]*\.txt|poetry\.lock|Pipfile\.lock|go\.(mod|sum)|Gemfile\.lock|Cargo\.lock|pom\.xml|build\.gradle(\.kts)?|packages\.lock\.json|.+\.csproj)$/u;
+const PROJECT_SKIP_DIRECTORIES = new Set([
+  'node_modules', '.git', 'vendor', 'venv', '.venv', 'env', '__pycache__', 'dist', 'build', 'target', '.next',
+  'coverage', '.tox', '.gradle', 'bin', 'obj'
+]);
+
+/**
+ * Kok dizin ve icinde kilit/manifest dosyasi bulunan alt dizinler (monorepo alt projeleri: web/, services/x ...).
+ * Bagimlilik ve derleme ciktisi klasorleri atlanir.
+ */
+export async function findProjectRoots(workspacePath: string, maxDepth = 6): Promise<string[]> {
+  const roots: string[] = [workspacePath];
+
+  async function walk(dir: string, depth: number): Promise<void> {
+    if (depth > maxDepth) {
+      return;
+    }
+    let entries: Array<import('node:fs').Dirent>;
+    try {
+      entries = await fs.readdir(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    if (dir !== workspacePath && entries.some((entry) => entry.isFile() && MANIFEST_FILE_PATTERN.test(entry.name))) {
+      roots.push(dir);
+    }
+    for (const entry of entries) {
+      if (entry.isDirectory() && !PROJECT_SKIP_DIRECTORIES.has(entry.name) && !entry.name.startsWith('.')) {
+        await walk(join(dir, entry.name), depth + 1);
+      }
+    }
+  }
+
+  await walk(workspacePath, 0);
+  return roots;
+}
+
 export async function runScanners(workspacePath: string, options: ScannerOptions = {}): Promise<ScannerResult> {
   const packagesMap = new Map<string, PackageSummary>();
-  const [
-    nodePackages,
-    pythonPackages,
-    goPackages,
-    rubyPackages,
-    cargoPackages,
-    javaPackages,
-    dotnetPackages,
-    ociPackages
-  ] = await Promise.all([
-    collectNodePackages(workspacePath),
-    collectPythonPackages(workspacePath),
-    collectGoPackages(workspacePath),
-    collectRubyPackages(workspacePath),
-    collectCargoPackages(workspacePath),
-    collectJavaPackages(workspacePath),
-    collectDotnetPackages(workspacePath),
-    collectOciPackages(options.ociLayersPath)
-  ]);
+  const roots = await findProjectRoots(workspacePath);
+  const perRoot = await Promise.all(
+    roots.map((root) =>
+      Promise.all([
+        collectNodePackages(root),
+        collectPythonPackages(root),
+        collectGoPackages(root),
+        collectRubyPackages(root),
+        collectCargoPackages(root),
+        collectJavaPackages(root),
+        collectDotnetPackages(root)
+      ])
+    )
+  );
+  const ociPackages = await collectOciPackages(options.ociLayersPath);
 
-  for (const pkg of [
-    ...nodePackages.values(),
-    ...pythonPackages.values(),
-    ...goPackages.values(),
-    ...rubyPackages.values(),
-    ...cargoPackages.values(),
-    ...javaPackages.values(),
-    ...dotnetPackages.values(),
-    ...ociPackages.values()
-  ]) {
+  for (const pkg of [...perRoot.flat().flatMap((collected) => [...collected.values()]), ...ociPackages.values()]) {
     addPackage(packagesMap, pkg);
   }
 
