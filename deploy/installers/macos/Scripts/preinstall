@@ -1,0 +1,43 @@
+#!/bin/sh
+set -eu
+
+EULA_FLAG_FILE="/Library/Application Support/Atlas SCA/eula.accepted"
+
+if [ "${ALTERA_EULA_ACCEPTED:-0}" = "1" ]; then
+  exit 0
+fi
+
+if [ -L "$EULA_FLAG_FILE" ]; then
+  cat <<USAGE >&2
+Atlas SCA requires acceptance of the ComplianceForge lisans (MIT) before installation.
+The acceptance marker must be a regular file with 0600 permissions (no symlinks).
+Remove the symlink and recreate the marker with owner-only access:
+  sudo rm -f "$EULA_FLAG_FILE"
+  sudo install -d -m 755 "/Library/Application Support/Atlas SCA"
+  sudo install -m 600 /dev/null "$EULA_FLAG_FILE"
+USAGE
+  exit 1
+fi
+
+if [ -f "$EULA_FLAG_FILE" ]; then
+  perms="$(stat -f "%Lp" "$EULA_FLAG_FILE")"
+  if [ "$perms" = "600" ]; then
+    exit 0
+  fi
+  cat <<USAGE >&2
+Atlas SCA requires acceptance of the ComplianceForge lisans (MIT) before installation.
+Existing acceptance markers must be 0600 (owner read/write only).
+Fix the permissions before retrying the installer:
+  sudo chmod 600 "$EULA_FLAG_FILE"
+USAGE
+  exit 1
+fi
+
+cat <<USAGE >&2
+Atlas SCA requires acceptance of the ComplianceForge lisans (MIT) before installation.
+Set ALTERA_EULA_ACCEPTED=1 when invoking the installer or create the acceptance marker:
+  sudo install -d -m 755 "/Library/Application Support/Atlas SCA"
+  sudo install -m 600 /dev/null "$EULA_FLAG_FILE"
+USAGE
+
+exit 1

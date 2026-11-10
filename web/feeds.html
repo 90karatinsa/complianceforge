@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Feed Yönetimi - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.95);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-success: #22c55e;
+        --color-danger: #ef4444;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-success: #166534;
+        --color-danger: #7f1d1d;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 56px;
+        display: grid;
+        gap: 24px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+      }
+
+      .panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      label {
+        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      input[type='file'],
+      input[type='text'],
+      textarea,
+      select {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        padding: 10px 12px;
+      }
+
+      button {
+        background: rgba(56, 189, 248, 0.15);
+        color: var(--color-accent);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button[data-action='activate'] {
+        background: rgba(34, 197, 94, 0.2);
+        color: var(--color-success);
+        border-color: rgba(34, 197, 94, 0.4);
+      }
+
+      .progress-state {
+        display: grid;
+        gap: 8px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(30, 41, 59, 0.55);
+        padding: 12px;
+      }
+
+      .history-feedback {
+        margin-top: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(30, 41, 59, 0.55);
+        padding: 12px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .history-feedback[hidden] {
+        display: none;
+      }
+
+      .history-status {
+        margin-top: 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(30, 41, 59, 0.55);
+        padding: 12px;
+        color: var(--color-muted);
+        min-height: 1rem;
+      }
+
+      .history-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        color: var(--color-muted);
+        font-size: 0.95rem;
+        margin: 0;
+      }
+
+      .history-summary span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .history-summary strong {
+        color: var(--color-text);
+        font-weight: 600;
+      }
+
+      .history-status[data-state='loading'] {
+        color: var(--color-accent);
+      }
+
+      .history-status[data-state='error'] {
+        color: var(--color-danger);
+        border-color: rgba(239, 68, 68, 0.4);
+      }
+
+      .history-status[hidden] {
+        display: none;
+      }
+
+      .inline-error {
+        color: var(--color-danger);
+        font-size: 0.95rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: rgba(15, 23, 42, 0.85);
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      }
+
+      thead {
+        background: rgba(15, 23, 42, 0.9);
+        text-align: left;
+      }
+
+      tbody tr:last-of-type td {
+        border-bottom: none;
+      }
+
+      tbody tr[data-active='true'] > td {
+        background: rgba(56, 189, 248, 0.08);
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+
+      .status-pill[data-status='verified'] {
+        background: rgba(34, 197, 94, 0.25);
+        color: #bbf7d0;
+      }
+
+      .status-pill[data-status='failed'] {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fecaca;
+      }
+
+      .status-pill[data-status='pending'] {
+        background: rgba(148, 163, 184, 0.2);
+        color: #e2e8f0;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .modal-content {
+        background: var(--color-surface);
+        border-radius: 16px;
+        border: 1px solid var(--color-border);
+        padding: 24px;
+        max-width: 520px;
+        width: 100%;
+      }
+
+      footer.global-footer {
+        padding: 24px clamp(16px, 3vw, 48px) 48px;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Feed Yönetimi</h1>
+        <p id="feed-description">
+          Air-gapped feed paketleri burada içe aktarılır, imzaları doğrulanır ve geçmiş sürümlere rollback yapılır.
+        </p>
+      </div>
+      <nav aria-labelledby="feed-description">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html" aria-current="page">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <div class="grid" role="region" aria-label="Feed yönetim paneli">
+        <section class="panel" aria-labelledby="import-heading">
+          <h2 id="import-heading">Feed İçe Aktar</h2>
+          <p class="muted">.tgz feed paketini seçin, cosign imzasını doğrulayıp aktif hale getirin.</p>
+          <label for="feed-package">
+            Feed paketi (.tgz)
+            <input id="feed-package" type="file" accept=".tgz" data-field="package" aria-describedby="package-feedback" />
+          </label>
+          <p
+            id="package-feedback"
+            class="inline-error"
+            data-feedback="package"
+            role="alert"
+            hidden
+          >
+            Dosya seçilmedi.
+          </p>
+          <label for="feed-signature">
+            İmza dosyası (.sig)
+            <input id="feed-signature" type="file" accept=".sig" data-field="signature" />
+          </label>
+          <label for="feed-notes">
+            Notlar
+            <textarea id="feed-notes" rows="3" data-field="notes" placeholder="Örn: OSV/NVD Temmuz 2024"></textarea>
+          </label>
+          <div class="progress-state" data-progress aria-live="polite" aria-busy="false">
+            <strong>İşlem durumu</strong>
+            <p data-progress-text>Beklemede.</p>
+          </div>
+          <div class="actions">
+            <button type="button" data-action="validate">İmzayı Doğrula</button>
+            <button type="button" data-action="activate">Aktifleştir</button>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="history-heading">
+          <h2 id="history-heading">İçe Aktarma Geçmişi</h2>
+          <p class="history-summary" aria-live="polite">
+            <span>Aktif sürüm: <strong data-active-version>—</strong></span>
+            <span>Minimum rollback eşiği: <strong data-active-floor>—</strong></span>
+          </p>
+          <table aria-describedby="feed-description" data-table="feed-history">
+            <thead>
+              <tr>
+                <th scope="col">Sürüm</th>
+                <th scope="col">Minimum rollback eşiği</th>
+                <th scope="col">İçe Aktaran</th>
+                <th scope="col">Tarih</th>
+                <th scope="col">Durum</th>
+                <th scope="col">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody data-history-body>
+              <tr>
+                <td colspan="6">Feed manifestleri yükleniyor...</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="history-status" data-history-status role="status" aria-live="polite" hidden></div>
+          <div class="history-feedback" data-history-feedback role="status" aria-live="polite" hidden>
+            <strong data-history-title></strong>
+            <p data-history-text></p>
+          </div>
+        </section>
+      </div>
+
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        hidden
+        data-modal="manifest"
+        tabindex="-1"
+      >
+        <div class="modal-content">
+          <h2 id="modal-title">Manifest Önizleme</h2>
+          <p class="muted" data-modal-description>
+            Feed paketine ait bileşen listesi ve imza hash değerleri doğrulama için görüntülenir.
+          </p>
+          <pre data-modal-body>component-a@1.2.3
+component-b@4.5.6
+sha256:3f4e...</pre>
+          <button type="button" data-action="close-modal">Kapat</button>
+        </div>
+      </div>
+    </main>
+    <footer class="global-footer">
+      © Alterra-Solutions. Telemetri kapalı, tüm hareketler denetim kaydına yazılır.
+    </footer>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+        const tenantId =
+          root.getAttribute('data-tenant-id') ?? '55555555-5555-4555-8555-555555555555';
+
+        const applyTheme = (theme) => {
+          if (theme === 'contrast') {
+            root.dataset.theme = 'contrast';
+            toggle?.setAttribute('aria-pressed', 'true');
+            if (label) {
+              label.textContent = 'Standart temaya dön';
+            }
+          } else {
+            root.dataset.theme = 'default';
+            toggle?.setAttribute('aria-pressed', 'false');
+            if (label) {
+              label.textContent = 'Yüksek kontrast modunu aç';
+            }
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema tercihi okunamadı', error);
+        }
+
+        const detectSystemTheme = () => {
+          if (typeof window.matchMedia !== 'function') {
+            return null;
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'contrast';
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'default';
+          }
+
+          return null;
+        };
+
+        const initialTheme =
+          savedTheme === 'contrast' || savedTheme === 'default'
+            ? savedTheme
+            : detectSystemTheme() ?? 'default';
+
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        const progressRegion = document.querySelector('[data-progress]');
+        const progressText = document.querySelector('[data-progress-text]');
+
+        const progressController = (() => {
+          const ensureElements = () =>
+            progressRegion instanceof HTMLElement && progressText instanceof HTMLElement;
+
+          const start = (state, text) => {
+            if (!ensureElements()) {
+              return;
+            }
+
+            progressRegion.setAttribute('aria-busy', 'true');
+            progressRegion.dataset.state = state;
+            progressText.textContent = text;
+          };
+
+          const finish = (state, text) => {
+            if (!ensureElements()) {
+              return;
+            }
+
+            progressRegion.setAttribute('aria-busy', 'false');
+            progressRegion.dataset.state = state;
+            progressText.textContent = text;
+          };
+
+          return { start, finish };
+        })();
+
+        const validateButton = document.querySelector('[data-action="validate"]');
+        const activateButton = document.querySelector('[data-action="activate"]');
+        const packageInput = document.querySelector('[data-field="package"]');
+        const signatureInput = document.querySelector('[data-field="signature"]');
+        const notesField = document.querySelector('[data-field="notes"]');
+        const packageError = document.querySelector('[data-feedback="package"]');
+        const actionButtons = [validateButton, activateButton].filter(
+          (button) => button instanceof HTMLButtonElement
+        );
+
+        const setActionButtonsDisabled = (disabled) => {
+          actionButtons.forEach((button) => {
+            if (!(button instanceof HTMLButtonElement)) {
+              return;
+            }
+
+            button.disabled = disabled;
+            button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+          });
+        };
+
+        const hidePackageError = () => {
+          if (packageError instanceof HTMLElement) {
+            packageError.setAttribute('hidden', '');
+          }
+
+          if (packageInput instanceof HTMLElement) {
+            packageInput.removeAttribute('aria-invalid');
+          }
+        };
+
+        const showPackageError = (message) => {
+          if (!(packageError instanceof HTMLElement) || !(packageInput instanceof HTMLElement)) {
+            return false;
+          }
+
+          packageError.textContent = message;
+          packageError.removeAttribute('hidden');
+          packageInput.setAttribute('aria-invalid', 'true');
+          if (typeof packageInput.focus === 'function') {
+            packageInput.focus();
+          }
+
+          return false;
+        };
+
+        const ensurePackageSelected = () => {
+          if (!(packageInput instanceof HTMLInputElement)) {
+            return true;
+          }
+
+          const hasFile = (packageInput.files?.length ?? 0) > 0;
+
+          if (hasFile) {
+            hidePackageError();
+            return true;
+          }
+
+          return showPackageError('Dosya seçilmedi. Lütfen feed paketini seçin.');
+        };
+
+        if (packageInput instanceof HTMLInputElement) {
+          packageInput.addEventListener('change', () => {
+            if ((packageInput.files?.length ?? 0) > 0) {
+              hidePackageError();
+            }
+          });
+        }
+
+        const uploadFeedPackage = async ({ intent, trigger }) => {
+          if (!(packageInput instanceof HTMLInputElement)) {
+            return;
+          }
+
+          if (!ensurePackageSelected()) {
+            if (trigger instanceof HTMLElement && typeof trigger.focus === 'function') {
+              trigger.focus();
+            }
+            return;
+          }
+
+          const packageFile = packageInput.files?.[0] ?? null;
+
+          if (!packageFile) {
+            return;
+          }
+
+          const signatureFile =
+            signatureInput instanceof HTMLInputElement ? signatureInput.files?.[0] ?? null : null;
+          const notesValue =
+            notesField instanceof HTMLTextAreaElement ? notesField.value.trim() : '';
+
+          const startText =
+            intent === 'activate'
+              ? 'Feed paketi yükleniyor ve doğrulanıyor...'
+              : 'İmza doğrulaması başlatıldı...';
+
+          progressController.start('running', startText);
+          setActionButtonsDisabled(true);
+
+          if (trigger instanceof HTMLButtonElement) {
+            trigger.setAttribute('aria-busy', 'true');
+          }
+
+          const formData = new FormData();
+          formData.set('tenant_id', tenantId);
+          formData.set('manifest', packageFile, packageFile.name);
+
+          if (signatureFile) {
+            formData.set('signature', signatureFile, signatureFile.name);
+          }
+
+          if (notesValue.length > 0) {
+            formData.set('notes', notesValue);
+          }
+
+          let successHandled = false;
+
+          try {
+            const response = await fetch('/v1/feeds/upload', {
+              method: 'POST',
+              body: formData,
+              headers: { Accept: 'application/json' }
+            });
+
+            if (!response?.ok) {
+              let errorMessage = `Yükleme başarısız oldu (HTTP ${response?.status ?? 'bilinmiyor'}).`;
+              try {
+                const errorPayload = await response.json();
+                const normalizedMessage =
+                  typeof errorPayload?.message === 'string'
+                    ? errorPayload.message
+                    : errorPayload?.error?.message ?? null;
+                if (normalizedMessage) {
+                  errorMessage = normalizedMessage;
+                }
+              } catch {
+                // ignore parsing errors
+              }
+
+              throw new Error(errorMessage);
+            }
+
+            let payload = null;
+            try {
+              payload = await response.json();
+            } catch {
+              payload = null;
+            }
+
+            const manifestId =
+              payload && typeof payload === 'object' && typeof payload.manifest_id === 'string'
+                ? payload.manifest_id
+                : null;
+            const versionLabel =
+              payload && typeof payload === 'object' && typeof payload.version === 'string'
+                ? payload.version
+                : packageFile.name;
+
+            if (manifestId) {
+              preferredHistoryManifestId = manifestId;
+            }
+
+            successHandled = true;
+            progressController.finish('success', `${versionLabel} sürümü başarıyla içe aktarıldı.`);
+            await fetchHistory();
+
+            if (trigger instanceof HTMLButtonElement && typeof trigger.focus === 'function') {
+              trigger.focus();
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Feed yüklemesi başarısız oldu.';
+            progressController.finish('error', message);
+          } finally {
+            setActionButtonsDisabled(false);
+            if (trigger instanceof HTMLButtonElement) {
+              trigger.removeAttribute('aria-busy');
+            }
+
+            if (successHandled && packageInput instanceof HTMLInputElement) {
+              packageInput.value = '';
+            }
+          }
+        };
+
+        if (validateButton instanceof HTMLButtonElement) {
+          validateButton.addEventListener('click', () => {
+            void uploadFeedPackage({ intent: 'validate', trigger: validateButton });
+          });
+        }
+
+        if (activateButton instanceof HTMLButtonElement) {
+          activateButton.addEventListener('click', () => {
+            void uploadFeedPackage({ intent: 'activate', trigger: activateButton });
+          });
+        }
+
+        const historyBody = document.querySelector('[data-history-body]');
+        const historyStatus = document.querySelector('[data-history-status]');
+        const historyFeedback = document.querySelector('[data-history-feedback]');
+        const historyTitle = historyFeedback?.querySelector('[data-history-title]');
+        const historyText = historyFeedback?.querySelector('[data-history-text]');
+        const activeVersionLabel = document.querySelector('[data-active-version]');
+        const activeFloorLabel = document.querySelector('[data-active-floor]');
+
+        if (historyTitle instanceof HTMLElement && !historyTitle.hasAttribute('tabindex')) {
+          historyTitle.setAttribute('tabindex', '-1');
+        }
+
+        const manifestTextCache = new Map();
+        const manifestRequestCache = new Map();
+        let activeHistoryRow = null;
+        let activeDetailButton = null;
+        let preferredHistoryManifestId = null;
+
+        const hideHistoryFeedback = () => {
+          if (!(historyFeedback instanceof HTMLElement)) {
+            return;
+          }
+
+          historyFeedback.setAttribute('hidden', '');
+          if (historyBody instanceof HTMLElement) {
+            historyBody.querySelectorAll('[data-action="details"]').forEach((element) => {
+              if (element instanceof HTMLButtonElement) {
+                element.setAttribute('aria-expanded', 'false');
+              }
+            });
+          }
+
+          activeHistoryRow = null;
+          activeDetailButton = null;
+        };
+
+        const updateHistoryStatus = (message, state) => {
+          if (!(historyStatus instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!message) {
+            historyStatus.textContent = '';
+            historyStatus.setAttribute('hidden', '');
+            historyStatus.removeAttribute('data-state');
+            return;
+          }
+
+          historyStatus.textContent = message;
+          historyStatus.dataset.state = state ?? 'info';
+          historyStatus.removeAttribute('hidden');
+        };
+
+        const historyDateFormatter = new Intl.DateTimeFormat('tr-TR', {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        });
+
+        const formatDateTime = (value) => {
+          if (!value) {
+            return '—';
+          }
+
+          const date = new Date(value);
+          if (Number.isNaN(date.getTime())) {
+            return '—';
+          }
+
+          return historyDateFormatter.format(date);
+        };
+
+        const renderEmptyRow = (message) => {
+          if (!(historyBody instanceof HTMLElement)) {
+            return;
+          }
+
+          const row = document.createElement('tr');
+          const cell = document.createElement('td');
+          cell.colSpan = 6;
+          cell.textContent = message;
+          row.append(cell);
+          historyBody.append(row);
+        };
+
+        const renderHistoryRows = (rows, activeVersion, preferredManifestId = null) => {
+          if (!(historyBody instanceof HTMLElement)) {
+            return;
+          }
+
+          historyBody.innerHTML = '';
+          hideHistoryFeedback();
+
+          if (!Array.isArray(rows) || rows.length === 0) {
+            renderEmptyRow('Henüz feed manifesti bulunmuyor.');
+            updateHistoryStatus(null);
+            return;
+          }
+
+          const normalizedRows = Array.isArray(rows) ? [...rows] : [];
+          const prioritizedRows =
+            preferredManifestId == null
+              ? normalizedRows
+              : [
+                  ...normalizedRows.filter((entry) => entry?.id === preferredManifestId),
+                  ...normalizedRows.filter((entry) => entry?.id !== preferredManifestId)
+                ];
+
+          prioritizedRows.forEach((entry) => {
+            if (!entry || typeof entry !== 'object') {
+              return;
+            }
+
+            const tr = document.createElement('tr');
+            if (typeof entry.id === 'string') {
+              tr.dataset.manifestId = entry.id;
+            }
+            const normalizedVersion =
+              typeof entry.version === 'string' ? entry.version.trim() : '';
+
+            if (normalizedVersion.length > 0) {
+              tr.dataset.version = entry.version;
+            }
+
+            if (entry.version === activeVersion) {
+              tr.dataset.active = 'true';
+            }
+
+            const manifest = entry.manifest && typeof entry.manifest === 'object' ? entry.manifest : {};
+            const importer =
+              typeof manifest.imported_by === 'string'
+                ? manifest.imported_by
+                : typeof manifest.importedBy === 'string'
+                ? manifest.importedBy
+                : '—';
+            const importedAt = formatDateTime(entry.imported_at);
+            const verifiedAt = entry.verified_at ?? null;
+            const hasSignature = entry.signature != null;
+            const statusLabel = verifiedAt
+              ? 'İmza doğrulandı'
+              : hasSignature
+              ? 'İmza doğrulaması beklemede'
+              : 'İmza doğrulanamadı';
+            const statusState = verifiedAt ? 'verified' : hasSignature ? 'pending' : 'failed';
+            const minimumDowngradeVersion =
+              typeof entry.minimum_downgrade_version === 'string'
+                ? entry.minimum_downgrade_version.trim()
+                : '';
+            const normalizedMinimumDowngrade =
+              minimumDowngradeVersion.length > 0 ? minimumDowngradeVersion : '—';
+
+            tr.dataset.importer = importer;
+            tr.dataset.importedAt = importedAt;
+            tr.dataset.statusLabel = statusLabel;
+            tr.dataset.minimumDowngrade = normalizedMinimumDowngrade;
+
+            const versionCell = document.createElement('td');
+            versionCell.dataset.field = 'version';
+            versionCell.textContent =
+              normalizedVersion.length > 0 ? entry.version : '—';
+
+            const minimumDowngradeCell = document.createElement('td');
+            minimumDowngradeCell.dataset.field = 'minimum-downgrade';
+            minimumDowngradeCell.textContent = normalizedMinimumDowngrade;
+
+            const importerCell = document.createElement('td');
+            importerCell.textContent = importer;
+
+            const dateCell = document.createElement('td');
+            dateCell.textContent = importedAt;
+
+            const statusCell = document.createElement('td');
+            const statusPill = document.createElement('span');
+            statusPill.className = 'status-pill';
+            statusPill.dataset.status = statusState;
+            statusPill.textContent = statusLabel;
+            statusCell.append(statusPill);
+
+            const actionsCell = document.createElement('td');
+
+            const activateHistoryButton = document.createElement('button');
+            activateHistoryButton.type = 'button';
+            activateHistoryButton.dataset.action = 'activate';
+            activateHistoryButton.dataset.context = 'history';
+            activateHistoryButton.textContent = 'Aktifleştir';
+            if (entry.version === activeVersion) {
+              activateHistoryButton.disabled = true;
+              activateHistoryButton.setAttribute('aria-disabled', 'true');
+            }
+            actionsCell.append(activateHistoryButton);
+
+            const rollbackButton = document.createElement('button');
+            rollbackButton.type = 'button';
+            rollbackButton.dataset.action = 'rollback';
+            rollbackButton.textContent = 'Rollback';
+            actionsCell.append(rollbackButton);
+
+            const detailButton = document.createElement('button');
+            detailButton.type = 'button';
+            detailButton.dataset.action = 'details';
+            detailButton.setAttribute('aria-expanded', 'false');
+            detailButton.textContent = 'Detay';
+            actionsCell.append(detailButton);
+
+            const manifestButton = document.createElement('button');
+            manifestButton.type = 'button';
+            manifestButton.dataset.action = 'view-manifest';
+            manifestButton.textContent = 'Manifest';
+            actionsCell.append(manifestButton);
+
+            tr.append(versionCell, minimumDowngradeCell, importerCell, dateCell, statusCell, actionsCell);
+            historyBody.append(tr);
+          });
+
+          updateHistoryStatus(null);
+        };
+
+        const handleHistoryDetailToggle = (row, button) => {
+          if (!(historyFeedback instanceof HTMLElement)) {
+            return;
+          }
+
+          const version = row.dataset.version ?? 'Bilinmeyen sürüm';
+          const importer = row.dataset.importer ?? '—';
+          const importedAt = row.dataset.importedAt ?? '—';
+          const statusLabel = row.dataset.statusLabel ?? 'Durum bilinmiyor';
+          const minimumDowngrade = row.dataset.minimumDowngrade ?? '—';
+
+          const isActive =
+            activeHistoryRow === row &&
+            activeDetailButton === button &&
+            !historyFeedback.hasAttribute('hidden');
+
+          if (isActive) {
+            hideHistoryFeedback();
+            return;
+          }
+
+          if (historyBody instanceof HTMLElement) {
+            historyBody.querySelectorAll('[data-action="details"]').forEach((element) => {
+              if (element instanceof HTMLButtonElement) {
+                element.setAttribute('aria-expanded', element === button ? 'true' : 'false');
+              }
+            });
+          }
+
+          activeHistoryRow = row;
+          activeDetailButton = button;
+
+          if (historyTitle instanceof HTMLElement) {
+            historyTitle.textContent = version;
+            historyTitle.focus();
+          }
+
+          if (historyText instanceof HTMLElement) {
+            historyText.textContent = [
+              `İçe aktaran: ${importer}`,
+              `Tarih: ${importedAt}`,
+              `Minimum rollback eşiği: ${minimumDowngrade}`,
+              `Durum: ${statusLabel}`
+            ]
+              .filter(Boolean)
+              .join(' — ');
+          }
+
+          historyFeedback.removeAttribute('hidden');
+        };
+
+        let historyFetchController = null;
+        const manifestPreviewEndpoint = (manifestId) =>
+          `/v1/feeds/manifest?tenant_id=${encodeURIComponent(tenantId)}&manifest_id=${encodeURIComponent(
+            manifestId
+          )}`;
+
+        const serializeManifestPayload = (payload) => {
+          if (typeof payload === 'string') {
+            return payload;
+          }
+
+          if (!payload || typeof payload !== 'object') {
+            return null;
+          }
+
+          const manifestCandidate =
+            typeof payload.manifest !== 'undefined'
+              ? payload.manifest
+              : typeof payload.data === 'object' && payload.data !== null
+              ? payload.data.manifest ?? payload.data.signed_manifest ?? payload.data
+              : null;
+
+          if (typeof manifestCandidate === 'string') {
+            return manifestCandidate;
+          }
+
+          if (manifestCandidate && typeof manifestCandidate === 'object') {
+            if (typeof manifestCandidate.signed_manifest === 'string') {
+              return manifestCandidate.signed_manifest;
+            }
+
+            try {
+              return JSON.stringify(manifestCandidate, null, 2);
+            } catch (error) {
+              console.warn('Manifest JSON stringify failed', error);
+              return null;
+            }
+          }
+
+          const signed =
+            typeof payload.signed_manifest === 'string'
+              ? payload.signed_manifest
+              : typeof payload.signature === 'string'
+              ? payload.signature
+              : null;
+
+          return typeof signed === 'string' ? signed : null;
+        };
+
+        const getManifestText = async (manifestId) => {
+          if (manifestTextCache.has(manifestId)) {
+            return manifestTextCache.get(manifestId);
+          }
+
+          if (manifestRequestCache.has(manifestId)) {
+            return manifestRequestCache.get(manifestId);
+          }
+
+          const request = (async () => {
+            try {
+              const response = await fetch(manifestPreviewEndpoint(manifestId), {
+                headers: { Accept: 'application/json' }
+              });
+
+              if (!response?.ok) {
+                throw new Error(`Manifest alınamadı: ${response?.status ?? 'bilinmeyen hata'}`);
+              }
+
+              const payload = await response.json();
+              const manifestText = serializeManifestPayload(payload) ?? 'Manifest verisi gösterilemedi.';
+              manifestTextCache.set(manifestId, manifestText);
+              return manifestText;
+            } catch (error) {
+              const message = error instanceof Error ? error.message : 'Manifest verisi alınamadı.';
+              throw new Error(message);
+            } finally {
+              manifestRequestCache.delete(manifestId);
+            }
+          })();
+
+          manifestRequestCache.set(manifestId, request);
+          return request;
+        };
+
+        const previewManifest = async (row, trigger) => {
+          if (!(trigger instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          const manifestId = row.dataset.manifestId;
+
+          if (!manifestId) {
+            lastFocusedElement = trigger;
+            openModal('Manifest kimliği bulunamadı.');
+            return;
+          }
+
+          trigger.disabled = true;
+          trigger.setAttribute('aria-busy', 'true');
+
+          try {
+            const content = await getManifestText(manifestId);
+            lastFocusedElement = trigger;
+            openModal(content);
+            document.dispatchEvent(
+              new CustomEvent('feeds:manifest-opened', {
+                detail: { manifestId, status: 'success' }
+              })
+            );
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Manifest verisi alınamadı.';
+            lastFocusedElement = trigger;
+            openModal(message);
+            document.dispatchEvent(
+              new CustomEvent('feeds:manifest-opened', {
+                detail: { manifestId, status: 'error', message }
+              })
+            );
+          } finally {
+            trigger.removeAttribute('aria-busy');
+            trigger.disabled = false;
+          }
+        };
+
+        const fetchHistory = async () => {
+          if (!(historyBody instanceof HTMLElement)) {
+            return;
+          }
+
+          if (historyFetchController) {
+            historyFetchController.abort();
+          }
+
+          const controller = new AbortController();
+          historyFetchController = controller;
+
+          updateHistoryStatus('Feed manifestleri yükleniyor...', 'loading');
+          historyBody.innerHTML = '';
+          hideHistoryFeedback();
+
+          try {
+            const response = await fetch(
+              `/v1/feeds?tenant_id=${encodeURIComponent(tenantId)}&page=1&page_size=25`,
+              {
+                headers: { Accept: 'application/json' },
+                signal: controller.signal
+              }
+            );
+
+            if (!response?.ok) {
+              throw new Error(`Beklenmeyen yanıt: ${response?.status ?? 'bilinmiyor'}`);
+            }
+
+            const payload = await response.json();
+            const rows = Array.isArray(payload?.data) ? payload.data : [];
+            const activeVersion =
+              typeof payload?.active_version === 'string' ? payload.active_version : null;
+            const activeFloorRaw =
+              typeof payload?.active_minimum_downgrade_version === 'string'
+                ? payload.active_minimum_downgrade_version.trim()
+                : '';
+            const activeFloor = activeFloorRaw.length > 0 ? activeFloorRaw : '—';
+
+            if (activeVersionLabel instanceof HTMLElement) {
+              activeVersionLabel.textContent = activeVersion ?? '—';
+            }
+
+            if (activeFloorLabel instanceof HTMLElement) {
+              activeFloorLabel.textContent = activeFloor;
+            }
+
+            renderHistoryRows(rows, activeVersion, preferredHistoryManifestId);
+            preferredHistoryManifestId = null;
+            updateHistoryStatus(null);
+            document.dispatchEvent(new CustomEvent('feeds:history-loaded'));
+          } catch (error) {
+            if (controller.signal.aborted) {
+              preferredHistoryManifestId = null;
+              return;
+            }
+
+            historyBody.innerHTML = '';
+            renderEmptyRow('Feed manifestleri alınamadı.');
+            const message = error instanceof Error ? error.message : 'Feed geçmişi alınamadı.';
+            updateHistoryStatus(`Feed geçmişi alınamadı: ${message}`, 'error');
+            preferredHistoryManifestId = null;
+          } finally {
+            if (historyFetchController === controller) {
+              historyFetchController = null;
+            }
+          }
+        };
+
+        const mutateFeed = async (action, row, trigger) => {
+          if (!(trigger instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          const manifestId = row.dataset.manifestId;
+          const rawVersion = typeof row.dataset.version === 'string' ? row.dataset.version : undefined;
+          const hasRealVersion = !!rawVersion && rawVersion.trim().length > 0;
+          const versionLabel = hasRealVersion ? rawVersion : 'Bilinmeyen sürüm';
+          if (!manifestId) {
+            console.warn('Manifest kimliği bulunamadı, işlem atlandı.');
+            return;
+          }
+
+          const isActivate = action === 'activate';
+          const startText = isActivate
+            ? `${versionLabel} sürümü aktifleştiriliyor...`
+            : `Rollback başlatılıyor: ${versionLabel}`;
+          const successText = isActivate
+            ? `${versionLabel} sürümü aktif hale getirildi.`
+            : `${versionLabel} sürümü başarıyla geri yüklendi.`;
+          const errorFallback = isActivate
+            ? `${versionLabel} sürümü aktifleştirilemedi.`
+            : `${versionLabel} sürümü geri yüklenemedi.`;
+
+          progressController.start(isActivate ? 'running' : 'warning', startText);
+          trigger.disabled = true;
+          preferredHistoryManifestId = manifestId;
+
+          try {
+            const payload = { tenant_id: tenantId, manifest_id: manifestId };
+            if (hasRealVersion) {
+              Object.assign(payload, { version: rawVersion });
+            }
+
+            const response = await fetch(`/v1/feeds/${isActivate ? 'activate' : 'rollback'}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response?.ok) {
+              let errorMessage = errorFallback;
+              try {
+                const body = await response.json();
+                const candidate = body?.error?.message ?? body?.message;
+                if (typeof candidate === 'string' && candidate.trim().length > 0) {
+                  errorMessage = candidate;
+                }
+              } catch {
+                // Yoksay
+              }
+
+              throw new Error(errorMessage);
+            }
+
+            await fetchHistory();
+            progressController.finish('success', successText);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : errorFallback;
+            progressController.finish('error', message);
+            preferredHistoryManifestId = null;
+          } finally {
+            trigger.disabled = false;
+          }
+        };
+
+        const manifestModal = document.querySelector('[data-modal="manifest"]');
+        const modalBody = manifestModal?.querySelector('[data-modal-body]');
+        const closeModalButton = manifestModal?.querySelector('[data-action="close-modal"]');
+        const header = document.querySelector('header.global-header');
+        const main = document.querySelector('main');
+        const footer = document.querySelector('footer.global-footer');
+        const backgroundElements = [header, main, footer].filter((element) => element instanceof HTMLElement);
+        const focusableSelectors =
+          'a[href], button:not([disabled]), textarea, input:not([disabled]), select, [tabindex]:not([tabindex="-1"])';
+        let lastFocusedElement = null;
+        let focusTrapAttached = false;
+
+        const handleFocusTrap = (event) => {
+          if (
+            event.key !== 'Tab' ||
+            !(manifestModal instanceof HTMLElement) ||
+            manifestModal.hasAttribute('hidden')
+          ) {
+            return;
+          }
+
+          const focusableElements = Array.from(
+            manifestModal.querySelectorAll(focusableSelectors)
+          ).filter((element) => element instanceof HTMLElement && !element.hasAttribute('disabled'));
+
+          if (focusableElements.length === 0) {
+            event.preventDefault();
+            manifestModal.focus();
+            return;
+          }
+
+          const first = focusableElements[0];
+          const last = focusableElements[focusableElements.length - 1];
+          const active = document.activeElement;
+
+          if (event.shiftKey) {
+            if (active === first) {
+              event.preventDefault();
+              last.focus();
+            }
+          } else if (active === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        };
+
+        const openModal = (content) => {
+          if (!(manifestModal instanceof HTMLElement)) {
+            return;
+          }
+
+          if (modalBody instanceof HTMLElement) {
+            modalBody.textContent = content;
+          }
+
+          if (!(lastFocusedElement instanceof HTMLElement)) {
+            lastFocusedElement =
+              document.activeElement instanceof HTMLElement ? document.activeElement : null;
+          }
+
+          manifestModal.removeAttribute('hidden');
+
+          backgroundElements.forEach((element) => {
+            element.setAttribute('aria-hidden', 'true');
+            element.setAttribute('inert', '');
+            element.inert = true;
+          });
+
+          const focusableElements = Array.from(
+            manifestModal.querySelectorAll(focusableSelectors)
+          ).filter((element) => element instanceof HTMLElement && !element.hasAttribute('disabled'));
+          const focusTarget =
+            focusableElements[0] instanceof HTMLElement ? focusableElements[0] : manifestModal;
+          focusTarget?.focus();
+
+          if (!focusTrapAttached) {
+            document.addEventListener('keydown', handleFocusTrap);
+            focusTrapAttached = true;
+          }
+        };
+
+        const closeModal = () => {
+          if (!(manifestModal instanceof HTMLElement)) {
+            return;
+          }
+
+          manifestModal.setAttribute('hidden', '');
+          backgroundElements.forEach((element) => {
+            element.removeAttribute('aria-hidden');
+            element.removeAttribute('inert');
+            element.inert = false;
+          });
+
+          if (focusTrapAttached) {
+            document.removeEventListener('keydown', handleFocusTrap);
+            focusTrapAttached = false;
+          }
+
+          if (closeModalButton instanceof HTMLElement) {
+            closeModalButton.blur();
+          }
+
+          if (lastFocusedElement instanceof HTMLElement) {
+            const focusTarget = lastFocusedElement;
+            focusTarget.focus();
+            lastFocusedElement = null;
+          }
+        };
+
+        if (historyBody instanceof HTMLElement) {
+          historyBody.addEventListener('click', (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLElement)) {
+              return;
+            }
+
+            const row = target.closest('tr');
+            if (!(row instanceof HTMLTableRowElement)) {
+              return;
+            }
+
+            if (target.dataset.action === 'details' && target instanceof HTMLButtonElement) {
+              handleHistoryDetailToggle(row, target);
+              return;
+            }
+
+            if (target.dataset.action === 'view-manifest' && target instanceof HTMLButtonElement) {
+              void previewManifest(row, target);
+              return;
+            }
+
+            if (target.dataset.action === 'rollback' && target instanceof HTMLButtonElement) {
+              void mutateFeed('rollback', row, target);
+              return;
+            }
+
+            if (
+              target.dataset.action === 'activate' &&
+              target.dataset.context === 'history' &&
+              target instanceof HTMLButtonElement
+            ) {
+              void mutateFeed('activate', row, target);
+              return;
+            }
+          });
+        }
+
+        if (closeModalButton instanceof HTMLElement) {
+          closeModalButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            closeModal();
+          });
+        }
+
+        document.addEventListener('keydown', (event) => {
+          if (
+            event.key === 'Escape' &&
+            manifestModal instanceof HTMLElement &&
+            !manifestModal.hasAttribute('hidden')
+          ) {
+            closeModal();
+          }
+        });
+
+        void fetchHistory();
+      })();
+    </script>
+  </body>
+</html>

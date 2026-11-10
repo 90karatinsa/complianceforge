@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Audit Log - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.95);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-critical: #ef4444;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-critical: #7f1d1d;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      header.global-header nav a[aria-current='page'] {
+        text-decoration: underline;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 56px;
+        display: grid;
+        gap: 28px;
+      }
+
+      section.panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(1.2rem, 3vw, 1.6rem);
+      }
+
+      form.filters {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      input,
+      select,
+      button,
+      a.export-link {
+        font: inherit;
+      }
+
+      input,
+      select {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        padding: 10px 12px;
+        background: var(--color-surface-alt);
+        color: inherit;
+      }
+
+      input:focus,
+      select:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .filter-actions {
+        display: flex;
+        align-items: flex-end;
+      }
+
+      .filter-actions button {
+        background: var(--color-accent);
+        color: var(--color-bg);
+        border: none;
+        border-radius: 999px;
+        padding: 10px 18px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .filter-actions button:focus-visible {
+        outline: 3px solid var(--color-text);
+        outline-offset: 2px;
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .panel-header .actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .panel-header button {
+        border-radius: 999px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+
+      .panel-header button[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .panel-header button:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .panel-header .export-link {
+        text-decoration: none;
+        border-radius: 999px;
+        border: 1px solid var(--color-accent);
+        color: var(--color-accent);
+        padding: 8px 14px;
+      }
+
+      .panel-header .export-link:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      table[data-table='audit-events'] {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--color-surface-alt);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+
+      table[data-table='audit-events'] caption {
+        text-align: left;
+        padding: 12px 16px;
+        font-weight: 600;
+      }
+
+      table[data-table='audit-events'] thead {
+        background: rgba(148, 163, 184, 0.1);
+      }
+
+      table[data-table='audit-events'] th,
+      table[data-table='audit-events'] td {
+        text-align: left;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--color-border);
+        vertical-align: top;
+      }
+
+      table[data-table='audit-events'] td .muted {
+        color: var(--color-muted);
+        font-size: 0.85rem;
+        margin-top: 4px;
+      }
+
+      table[data-table='audit-events'] tbody tr:last-of-type td {
+        border-bottom: none;
+      }
+
+      .muted {
+        color: var(--color-muted);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
+      @media (max-width: 768px) {
+        table[data-table='audit-events'] thead {
+          display: none;
+        }
+
+        table[data-table='audit-events'] tbody tr {
+          display: grid;
+          gap: 8px;
+          border-bottom: 1px solid var(--color-border);
+          padding: 12px 0;
+        }
+
+        table[data-table='audit-events'] td {
+          border: none;
+          padding: 0 4px;
+        }
+
+        table[data-table='audit-events'] td::before {
+          content: attr(data-label);
+          display: block;
+          font-weight: 600;
+          color: var(--color-muted);
+          margin-bottom: 2px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Audit Log</h1>
+        <p class="muted">Tenant içindeki kritik olayların zamana göre sıralı kaydı.</p>
+      </div>
+      <nav aria-label="Ana gezinme">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html" aria-current="page">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <section class="panel" aria-labelledby="filters-heading">
+        <h2 id="filters-heading">Filtreler</h2>
+        <form class="filters" data-filter-form>
+          <label for="audit-from">
+            Başlangıç zamanı
+            <input id="audit-from" type="datetime-local" name="from" />
+          </label>
+          <label for="audit-to">
+            Bitiş zamanı
+            <input id="audit-to" type="datetime-local" name="to" />
+          </label>
+          <label for="audit-type">
+            Olay tipi
+            <input
+              id="audit-type"
+              type="text"
+              name="event_type"
+              placeholder="ör. project.created"
+              autocomplete="off"
+            />
+          </label>
+          <label for="audit-actor">
+            Aktör
+            <input
+              id="audit-actor"
+              type="text"
+              name="actor"
+              placeholder="API anahtarı veya sistem"
+              autocomplete="off"
+            />
+          </label>
+          <label for="audit-project">
+            Proje ID
+            <input
+              id="audit-project"
+              type="text"
+              name="project_id"
+              placeholder="UUID"
+              autocomplete="off"
+            />
+          </label>
+          <div class="filter-actions">
+            <button type="submit">Filtreleri uygula</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="audit-table-heading">
+        <div class="panel-header">
+          <h2 id="audit-table-heading">Audit Log Kayıtları</h2>
+          <div class="actions">
+            <span data-page-indicator aria-live="polite">Sayfa 1</span>
+            <button type="button" data-pagination="prev" aria-disabled="true" disabled>
+              <span class="sr-only">Önceki sayfaya git</span>
+              ◀
+            </button>
+            <button type="button" data-pagination="next" aria-disabled="true" disabled>
+              <span class="sr-only">Sonraki sayfaya git</span>
+              ▶
+            </button>
+            <a class="export-link" data-export-link href="#" download="audit-events.jsonl">JSONL dışa aktar</a>
+          </div>
+        </div>
+        <p class="muted" aria-live="polite" data-audit-status>Audit kayıtları yükleniyor...</p>
+        <table data-table="audit-events">
+          <caption>Tenant için denetim olayları</caption>
+          <thead>
+            <tr>
+              <th scope="col">Zaman</th>
+              <th scope="col">Olay</th>
+              <th scope="col">Aktör</th>
+              <th scope="col">Proje / Tarama</th>
+              <th scope="col">Hash</th>
+            </tr>
+          </thead>
+          <tbody data-audit-body>
+            <tr>
+              <td colspan="5" class="muted">Audit kayıtları yükleniyor...</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+
+        const applyTheme = (theme) => {
+          if (theme === 'contrast') {
+            root.dataset.theme = 'contrast';
+            toggle?.setAttribute('aria-pressed', 'true');
+            if (label) {
+              label.textContent = 'Standart temaya dön';
+            }
+          } else {
+            root.dataset.theme = 'default';
+            toggle?.setAttribute('aria-pressed', 'false');
+            if (label) {
+              label.textContent = 'Yüksek kontrast modunu aç';
+            }
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema tercihi okunamadı', error);
+        }
+
+        const detectSystemTheme = () => {
+          if (typeof window.matchMedia !== 'function') {
+            return null;
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'contrast';
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'default';
+          }
+
+          return null;
+        };
+
+        const initialTheme =
+          savedTheme === 'contrast' || savedTheme === 'default'
+            ? savedTheme
+            : detectSystemTheme() ?? 'default';
+
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        const form = document.querySelector('[data-filter-form]');
+        const tableBody = document.querySelector('[data-audit-body]');
+        const statusRegion = document.querySelector('[data-audit-status]');
+        const nextButton = document.querySelector('[data-pagination="next"]');
+        const prevButton = document.querySelector('[data-pagination="prev"]');
+        const pageIndicator = document.querySelector('[data-page-indicator]');
+        const exportLink = document.querySelector('[data-export-link]');
+
+        if (!(tableBody instanceof HTMLElement) || !(statusRegion instanceof HTMLElement)) {
+          return;
+        }
+
+        const DEFAULT_LIMIT = 25;
+        let currentCursor = null;
+        let nextCursor = null;
+        const cursorHistory = [];
+        let activeController = null;
+        let requestId = 0;
+
+        const getInputValue = (name) => {
+          if (!(form instanceof HTMLFormElement)) {
+            return '';
+          }
+
+          const element = form.elements.namedItem(name);
+          if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement) {
+            return element.value.trim();
+          }
+
+          return '';
+        };
+
+        const toIsoString = (value) => {
+          if (!value) {
+            return null;
+          }
+
+          const date = new Date(value);
+          return Number.isNaN(date.getTime()) ? null : date.toISOString();
+        };
+
+        const formatTimestamp = (value) => {
+          const date = new Date(value);
+          if (Number.isNaN(date.getTime())) {
+            return '—';
+          }
+
+          return new Intl.DateTimeFormat('tr-TR', {
+            dateStyle: 'medium',
+            timeStyle: 'medium'
+          }).format(date);
+        };
+
+        const updatePaginationState = () => {
+          const previousCount = cursorHistory.length;
+          if (prevButton instanceof HTMLButtonElement) {
+            const disabled = previousCount === 0;
+            prevButton.disabled = disabled;
+            prevButton.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+          }
+
+          if (nextButton instanceof HTMLButtonElement) {
+            const disabled = !nextCursor;
+            nextButton.disabled = disabled;
+            nextButton.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+          }
+
+          if (pageIndicator instanceof HTMLElement) {
+            pageIndicator.textContent = `Sayfa ${previousCount + 1}`;
+          }
+        };
+
+        const updateExportLink = () => {
+          if (!(exportLink instanceof HTMLAnchorElement)) {
+            return;
+          }
+
+          const params = new URLSearchParams();
+          params.set('limit', '200');
+          const fromValue = toIsoString(getInputValue('from'));
+          const toValue = toIsoString(getInputValue('to'));
+          const eventType = getInputValue('event_type');
+          const actor = getInputValue('actor');
+          const projectId = getInputValue('project_id');
+
+          if (fromValue) params.set('from', fromValue);
+          if (toValue) params.set('to', toValue);
+          if (eventType) params.set('event_type', eventType);
+          if (actor) params.set('actor', actor);
+          if (projectId) params.set('project_id', projectId);
+
+          params.set('format', 'jsonl');
+
+          const url = new URL('/v1/audit/events', window.location.origin);
+          url.search = params.toString();
+
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          exportLink.href = url.toString();
+          exportLink.download = `audit-events-${timestamp}.jsonl`;
+        };
+
+        const renderEmpty = (message) => {
+          tableBody.innerHTML = '';
+          const row = document.createElement('tr');
+          const cell = document.createElement('td');
+          cell.colSpan = 5;
+          cell.className = 'muted';
+          cell.textContent = message;
+          row.appendChild(cell);
+          tableBody.appendChild(row);
+        };
+
+        const renderRows = (events) => {
+          tableBody.innerHTML = '';
+
+          if (!Array.isArray(events) || events.length === 0) {
+            renderEmpty('Kayıt bulunamadı.');
+            statusRegion.textContent = 'Kayıt bulunamadı.';
+            return;
+          }
+
+          events.forEach((event) => {
+            const row = document.createElement('tr');
+            row.dataset.auditRow = 'true';
+
+            const createdAt = typeof event?.created_at === 'string' ? event.created_at : '';
+            const eventType = typeof event?.event_type === 'string' ? event.event_type : 'Bilinmeyen';
+            const actorType = typeof event?.actor_type === 'string' ? event.actor_type : '—';
+            const actorIdentifier =
+              typeof event?.actor_identifier === 'string' && event.actor_identifier
+                ? event.actor_identifier
+                : null;
+            const projectId =
+              typeof event?.project_id === 'string' && event.project_id ? event.project_id : '—';
+            const scanId = typeof event?.scan_id === 'string' && event.scan_id ? event.scan_id : null;
+            const hash = typeof event?.event_hash === 'string' ? event.event_hash : '—';
+            const payload =
+              event && typeof event.event_payload === 'object' && event.event_payload !== null
+                ? JSON.stringify(event.event_payload)
+                : '';
+
+            const timeCell = document.createElement('td');
+            timeCell.dataset.label = 'Zaman';
+            timeCell.textContent = formatTimestamp(createdAt);
+            row.appendChild(timeCell);
+
+            const eventCell = document.createElement('td');
+            eventCell.dataset.label = 'Olay';
+            eventCell.textContent = eventType;
+            if (payload) {
+              const payloadPreview = document.createElement('div');
+              payloadPreview.className = 'muted';
+              payloadPreview.textContent = payload.length > 140 ? `${payload.slice(0, 137)}…` : payload;
+              eventCell.appendChild(payloadPreview);
+            }
+            row.appendChild(eventCell);
+
+            const actorCell = document.createElement('td');
+            actorCell.dataset.label = 'Aktör';
+            actorCell.textContent = actorIdentifier ? `${actorType} • ${actorIdentifier}` : actorType;
+            row.appendChild(actorCell);
+
+            const projectCell = document.createElement('td');
+            projectCell.dataset.label = 'Proje / Tarama';
+            projectCell.textContent = scanId ? `${projectId} / ${scanId}` : projectId;
+            row.appendChild(projectCell);
+
+            const hashCell = document.createElement('td');
+            hashCell.dataset.label = 'Hash';
+            hashCell.textContent = hash;
+            row.appendChild(hashCell);
+
+            tableBody.appendChild(row);
+          });
+
+          const totalLabel = events.length === 1 ? 'kayıt' : 'kayıt';
+          statusRegion.textContent = `${events.length} ${totalLabel} gösteriliyor.`;
+        };
+
+        const buildParams = (cursor = null) => {
+          const params = new URLSearchParams();
+          params.set('limit', String(DEFAULT_LIMIT));
+
+          const fromValue = toIsoString(getInputValue('from'));
+          const toValue = toIsoString(getInputValue('to'));
+          const eventType = getInputValue('event_type');
+          const actor = getInputValue('actor');
+          const projectId = getInputValue('project_id');
+
+          if (fromValue) params.set('from', fromValue);
+          if (toValue) params.set('to', toValue);
+          if (eventType) params.set('event_type', eventType);
+          if (actor) params.set('actor', actor);
+          if (projectId) params.set('project_id', projectId);
+          if (cursor) params.set('cursor', cursor);
+
+          return params;
+        };
+
+        const loadEvents = async (cursor = null) => {
+          if (activeController) {
+            activeController.abort();
+          }
+
+          const controller = new AbortController();
+          activeController = controller;
+          const currentRequest = ++requestId;
+
+          statusRegion.textContent = 'Audit kayıtları yükleniyor...';
+
+          const params = buildParams(cursor);
+          const url = new URL('/v1/audit/events', window.location.origin);
+          url.search = params.toString();
+
+          try {
+            const response = await fetch(url.toString(), { signal: controller.signal });
+
+            if (currentRequest !== requestId) {
+              return;
+            }
+
+            if (!response.ok) {
+              throw new Error('request_failed');
+            }
+
+            const payload = await response.json();
+            const events = Array.isArray(payload?.data) ? payload.data : [];
+            nextCursor = payload?.pagination?.next_cursor ?? null;
+            currentCursor = cursor;
+            renderRows(events);
+          } catch (error) {
+            if (controller.signal.aborted) {
+              return;
+            }
+
+            console.error('Audit log yüklenemedi', error);
+            nextCursor = null;
+            renderEmpty('Audit kayıtları yüklenemedi.');
+            statusRegion.textContent = 'Audit kayıtları yüklenemedi.';
+          } finally {
+            updatePaginationState();
+            updateExportLink();
+          }
+        };
+
+        form?.addEventListener('submit', (event) => {
+          event.preventDefault();
+          cursorHistory.length = 0;
+          currentCursor = null;
+          nextCursor = null;
+          updatePaginationState();
+          updateExportLink();
+          void loadEvents(null);
+        });
+
+        nextButton?.addEventListener('click', () => {
+          if (!nextCursor) {
+            return;
+          }
+
+          cursorHistory.push(currentCursor);
+          void loadEvents(nextCursor);
+        });
+
+        prevButton?.addEventListener('click', () => {
+          if (cursorHistory.length === 0) {
+            return;
+          }
+
+          const previous = cursorHistory.pop() ?? null;
+          void loadEvents(previous);
+        });
+
+        updatePaginationState();
+        updateExportLink();
+        void loadEvents(null);
+      })();
+    </script>
+  </body>
+</html>

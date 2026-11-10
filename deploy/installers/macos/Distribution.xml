@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: MIT -->
+<installer-gui-script minSpecVersion="2" xmlns="http://www.apple.com/installerbuilder">
+  <title>Atlas SCA</title>
+  <license file="Resources/license.txt" mime-type="text/plain"/>
+  <options customize="never" require-scripts="false" hostArchitectures="x86_64,arm64" />
+  <choices-outline>
+    <line choice="default"/>
+  </choices-outline>
+  <choice id="default" title="Atlas SCA" description="Air-gapped uyumluluk ajanı" start_selected="true" visible="true">
+    <pkg-ref id="com.alterra.atlassca.pkg"/>
+  </choice>
+  <pkg-ref id="com.alterra.atlassca.pkg" version="$(pkg-version)" onConclusion="None">#AtlasSCA.component.pkg</pkg-ref>
+</installer-gui-script>

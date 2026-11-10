@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: MIT -->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Product
+    Id="{C1F67028-8C5C-4E6B-84FC-7BC73F4EF473}"
+    Name="Atlas SCA"
+    Language="1033"
+    Version="$(var.ProductVersion)"
+    Manufacturer="Alterra-Solutions"
+    UpgradeCode="{4F6E46C4-CE23-47C7-AC0D-49D626C8B5EC}">
+    <Package
+      InstallerVersion="500"
+      Compressed="yes"
+      InstallScope="perMachine"
+      Platform="x64"
+      Description="Atlas SCA air-gapped uyumluluk ajanı" />
+    <MajorUpgrade DowngradeErrorMessage="Bu kurulum etkin sürümden eski. Lütfen güncel paketi kullanın." AllowDowngrades="no" />
+    <MediaTemplate EmbedCab="yes" />
+    <Property Id="ARPCONTACT">support@alterra-solutions.example</Property>
+    <Property Id="ARPHELPLINK">https://intranet.alterra-solutions/internal/atlas-sca</Property>
+    <Property Id="ARPSIZE" Value="102400" />
+    <Property Id="OFFLINE_GATE_EXPECTED" Value="$(var.OfflineGateExpectation)" Secure="yes" />
+    <Property Id="OFFLINE_CHECK" Secure="yes" />
+    <Property Id="EULA_ACCEPTED_ENV" Secure="yes">
+      <Environment Id="Env.AlterraEulaAccepted" Name="ALTERA_EULA_ACCEPTED" Action="set" Part="all" />
+    </Property>
+    <Property Id="EULA_ACCEPTED_MARKER" Secure="yes">
+      <util:FileSearch
+        Id="EulaAcceptedMarkerSearch"
+        Path="[CommonAppDataFolder]Atlas SCA"
+        Name="eula.accepted"
+        Result="exists" />
+    </Property>
+    <Condition Message="Atlas SCA kurulum paketi yalnızca air-gap doğrulaması tamamlandıktan sonra çalıştırılabilir. Lütfen msiexec çağrısına OFFLINE_CHECK=<beklenen token> parametresini ekleyin.">
+      (OFFLINE_CHECK <> "") AND (OFFLINE_CHECK = OFFLINE_GATE_EXPECTED)
+    </Condition>
+    <Condition Message="ComplianceForge lisans (MIT) kabul edilmeden kurulum devam edemez. Lütfen ALTERA_EULA_ACCEPTED=1 ortam değişkenini ayarlayın veya %ProgramData%\Atlas SCA\eula.accepted dosyasını oluşturun.">
+      (EULA_ACCEPTED_ENV = "1") OR EULA_ACCEPTED_MARKER
+    </Condition>
+    <UIRef Id="WixUI_InstallDir" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.EulaPath)" />
+    <Feature Id="MainFeature" Title="Atlas SCA" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="ALTERA_ROOT" Name="Alterra Solutions">
+          <Directory Id="APPDIR" Name="Atlas SCA" />
+        </Directory>
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <DirectoryRef Id="APPDIR">
+      <Component Id="AtlasSCAExecutable" Guid="{60D40E91-4631-44DE-9E4F-270D68DFCA83}">
+        <File
+          Id="AtlasSCALauncher"
+          Source="$(var.PayloadDir)\\bin\\atlas-sca-launcher.cmd"
+          KeyPath="yes" />
+      </Component>
+      <Component Id="AtlasSCAConfig" Guid="{C67CC98C-E0C8-4125-8F68-2DD71DBD7A56}">
+        <File
+          Id="AtlasSCAConfigFile"
+          Source="$(var.PayloadDir)\\config\\atlas-sca.conf"
+          KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents">
+      <ComponentRef Id="AtlasSCAExecutable" />
+      <ComponentRef Id="AtlasSCAConfig" />
+    </ComponentGroup>
+  </Fragment>
+</Wix>

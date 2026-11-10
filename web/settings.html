@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ayarlar &amp; Erişim - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.95);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-success: #22c55e;
+        --color-danger: #ef4444;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-success: #166534;
+        --color-danger: #7f1d1d;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      header.global-header nav a[aria-current='page'] {
+        text-decoration: underline;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 56px;
+        display: grid;
+        gap: 24px;
+      }
+
+      .panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--color-border);
+        padding: 12px 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .muted {
+        color: var(--color-muted);
+      }
+
+      .pill-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill-group label {
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+        padding: 6px 12px;
+        background: var(--color-surface-alt);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+      }
+
+      .pill-group input[type='checkbox'] {
+        accent-color: var(--color-accent);
+      }
+
+      input[type='text'],
+      select,
+      textarea {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        padding: 10px 12px;
+      }
+
+      button {
+        background: rgba(56, 189, 248, 0.15);
+        color: var(--color-accent);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button.danger {
+        background: rgba(239, 68, 68, 0.12);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: var(--color-danger);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+      }
+
+      .status-badge[data-variant='success'] {
+        color: var(--color-success);
+      }
+
+      .status-badge[data-variant='error'] {
+        color: var(--color-danger);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.8);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        z-index: 200;
+      }
+
+      .modal {
+        max-width: min(480px, 100%);
+        background: var(--color-surface);
+        border-radius: 20px;
+        border: 1px solid var(--color-border);
+        padding: 24px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .token-preview {
+        font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        background: var(--color-surface-alt);
+        border: 1px dashed var(--color-border);
+        border-radius: 14px;
+        padding: 16px;
+        word-break: break-all;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Ayarlar &amp; Erişim</h1>
+        <p class="sr-only" id="settings-description">
+          API anahtarlarını yönetmek, yeni anahtarlar üretmek ve kullanımı takip etmek için erişilebilir panel.
+        </p>
+      </div>
+      <nav aria-labelledby="settings-description">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html" aria-current="page">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <section class="panel" aria-labelledby="keys-heading">
+        <div class="toolbar">
+          <div>
+            <h2 id="keys-heading">API Anahtarları</h2>
+            <p class="muted">Maskelenmiş kimliklerle tüm anahtarların durumunu izleyin.</p>
+          </div>
+          <button type="button" data-refresh-keys>Yenile</button>
+        </div>
+        <p
+          class="status-badge"
+          role="status"
+          data-status
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          Anahtarlar yükleniyor…
+        </p>
+        <div class="muted" data-loading>Liste yükleniyor…</div>
+        <div class="muted" data-empty-state hidden>Henüz kayıtlı bir API anahtarı yok.</div>
+        <div class="table-container" data-table-container hidden>
+          <table aria-describedby="keys-heading">
+            <thead>
+              <tr>
+                <th scope="col">Adı</th>
+                <th scope="col">Roller</th>
+                <th scope="col">Oluşturma</th>
+                <th scope="col">Son kullanım</th>
+                <th scope="col">Token</th>
+                <th scope="col">İşlem</th>
+              </tr>
+            </thead>
+            <tbody data-key-table></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="create-heading">
+        <h2 id="create-heading">Yeni API Anahtarı Oluştur</h2>
+        <p class="muted">
+          Oluşturulan token yalnızca bir kez görüntülenir. Kopyaladıktan sonra güvenli bir yerde saklayın.
+        </p>
+        <form data-create-form novalidate>
+          <label for="key-name">
+            Anahtar adı
+            <input id="key-name" name="name" type="text" autocomplete="off" required maxlength="80" />
+          </label>
+          <fieldset>
+            <legend>Roller</legend>
+            <div class="pill-group">
+              <label><input type="checkbox" name="roles" value="Admin" checked /> Admin</label>
+              <label><input type="checkbox" name="roles" value="Security" /> Security</label>
+              <label><input type="checkbox" name="roles" value="Legal" /> Legal</label>
+              <label><input type="checkbox" name="roles" value="Developer" /> Developer</label>
+              <label><input type="checkbox" name="roles" value="Auditor" /> Auditor</label>
+            </div>
+          </fieldset>
+          <button type="submit">Anahtar Oluştur</button>
+          <p class="muted" role="status" data-form-status aria-live="polite" aria-atomic="true"></p>
+        </form>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" data-token-modal hidden>
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="token-modal-title">
+        <div>
+          <h2 id="token-modal-title">Yeni API anahtarı hazır</h2>
+          <p class="muted">Bu token yalnızca bir kez gösterilir. Kopyalayıp güvenli şekilde saklayın.</p>
+        </div>
+        <div class="token-preview" data-token-value tabindex="0"></div>
+        <div class="pill-group">
+          <button type="button" data-copy-token>Panoya kopyala</button>
+          <button type="button" data-close-modal>Devam et</button>
+        </div>
+        <p class="muted" data-modal-status role="status" aria-live="polite" aria-atomic="true"></p>
+      </div>
+    </div>
+
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const STORAGE_KEY = 'atlas.theme.preference';
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const themeLabel = document.querySelector('[data-theme-label]');
+        const tenantId = root.dataset.tenantId ?? '';
+        const statusBadge = document.querySelector('[data-status]');
+        const loadingIndicator = document.querySelector('[data-loading]');
+        const emptyState = document.querySelector('[data-empty-state]');
+        const tableContainer = document.querySelector('[data-table-container]');
+        const tableBody = document.querySelector('[data-key-table]');
+        const refreshButton = document.querySelector('[data-refresh-keys]');
+        const createForm = document.querySelector('[data-create-form]');
+        const formStatus = document.querySelector('[data-form-status]');
+        const modalBackdrop = document.querySelector('[data-token-modal]');
+        const modalTokenValue = modalBackdrop?.querySelector('[data-token-value]');
+        const modalStatus = modalBackdrop?.querySelector('[data-modal-status]');
+        const copyButton = modalBackdrop?.querySelector('[data-copy-token]');
+        const closeModalButton = modalBackdrop?.querySelector('[data-close-modal]');
+        let modalTimeout = null;
+        /** @type {HTMLElement | null} */
+        let lastFocused = null;
+        let currentPage = 1;
+        let isLoading = false;
+
+        const formatDateTime = new Intl.DateTimeFormat('tr-TR', {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        });
+
+        function applyTheme(theme) {
+          root.dataset.theme = theme;
+          if (themeLabel) {
+            themeLabel.textContent = theme === 'contrast' ? 'Varsayılan temaya dön' : 'Yüksek kontrast modunu aç';
+          }
+        }
+
+        function detectPreferredTheme() {
+          const saved = (() => {
+            try {
+              return localStorage.getItem(STORAGE_KEY);
+            } catch {
+              return null;
+            }
+          })();
+          if (saved === 'contrast' || saved === 'default') {
+            return saved;
+          }
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'default' : 'contrast';
+        }
+
+        applyTheme(detectPreferredTheme());
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        function updateStatus(message, variant = 'info') {
+          if (!(statusBadge instanceof HTMLElement)) {
+            return;
+          }
+          if (variant === 'success') {
+            statusBadge.dataset.variant = 'success';
+          } else if (variant === 'error') {
+            statusBadge.dataset.variant = 'error';
+          } else {
+            delete statusBadge.dataset.variant;
+          }
+          statusBadge.textContent = message;
+        }
+
+        function setLoading(state) {
+          isLoading = state;
+          if (loadingIndicator instanceof HTMLElement) {
+            loadingIndicator.hidden = !state;
+          }
+          if (refreshButton instanceof HTMLButtonElement) {
+            refreshButton.disabled = state;
+          }
+        }
+
+        function renderKeys(payload) {
+          if (!(tableBody instanceof HTMLElement) || !(tableContainer instanceof HTMLElement)) {
+            return;
+          }
+
+          const records = payload && Array.isArray(payload.data) ? payload.data : [];
+          tableBody.innerHTML = '';
+
+          if (records.length === 0) {
+            tableContainer.hidden = true;
+            if (emptyState instanceof HTMLElement) {
+              emptyState.hidden = false;
+            }
+            updateStatus('Hiç API anahtarı bulunamadı.', 'info');
+            return;
+          }
+
+          if (emptyState instanceof HTMLElement) {
+            emptyState.hidden = true;
+          }
+          tableContainer.hidden = false;
+
+          for (const record of records) {
+            const row = document.createElement('tr');
+            const name = typeof record.name === 'string' ? record.name : '—';
+            const roles = Array.isArray(record.roles) ? record.roles : [];
+            const createdAt = typeof record.created_at === 'string' ? record.created_at : null;
+            const lastUsed = typeof record.last_used_at === 'string' ? record.last_used_at : null;
+            const masked = typeof record.masked_token === 'string' ? record.masked_token : '••••';
+            const id = typeof record.id === 'string' ? record.id : '';
+
+            const roleLabel = roles.length > 0 ? roles.join(', ') : 'Developer';
+            const createdLabel = createdAt ? formatDateTime.format(new Date(createdAt)) : '—';
+            const lastUsedLabel = lastUsed ? formatDateTime.format(new Date(lastUsed)) : '—';
+
+            row.innerHTML = `
+              <td>${name}</td>
+              <td>${roleLabel}</td>
+              <td>${createdLabel}</td>
+              <td>${lastUsedLabel}</td>
+              <td>${masked}</td>
+              <td><button type="button" class="danger" data-remove-key="${id}">Kaldır</button></td>
+            `;
+            tableBody.appendChild(row);
+          }
+
+          const total = Number(payload?.pagination?.count ?? records.length);
+          updateStatus(`${total} API anahtarı listelendi.`, 'success');
+        }
+
+        async function loadKeys(page = 1) {
+          if (!tenantId || isLoading) {
+            return;
+          }
+          currentPage = page;
+          setLoading(true);
+          updateStatus('Anahtarlar yükleniyor…');
+
+          try {
+            const response = await fetch(`/v1/api-keys?tenant_id=${tenantId}&page=${page}&page_size=50`, {
+              headers: { Accept: 'application/json' }
+            });
+
+            if (!response.ok) {
+              throw new Error(`Listeleme başarısız: ${response.status}`);
+            }
+
+            const payload = await response.json();
+            renderKeys(payload);
+          } catch (error) {
+            console.error('API anahtarları alınamadı', error);
+            if (tableContainer instanceof HTMLElement) {
+              tableContainer.hidden = true;
+            }
+            if (emptyState instanceof HTMLElement) {
+              emptyState.hidden = true;
+            }
+            updateStatus('API anahtarları yüklenemedi.', 'error');
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        function closeModal() {
+          if (!(modalBackdrop instanceof HTMLElement)) {
+            return;
+          }
+          modalBackdrop.hidden = true;
+          if (modalStatus instanceof HTMLElement) {
+            modalStatus.textContent = '';
+          }
+          if (modalTokenValue instanceof HTMLElement) {
+            modalTokenValue.textContent = '';
+          }
+          if (modalTimeout) {
+            clearTimeout(modalTimeout);
+            modalTimeout = null;
+          }
+          if (lastFocused) {
+            lastFocused.focus();
+            lastFocused = null;
+          }
+        }
+
+        function openModal(token, name) {
+          if (!(modalBackdrop instanceof HTMLElement) || !(modalTokenValue instanceof HTMLElement)) {
+            return;
+          }
+          modalBackdrop.hidden = false;
+          modalTokenValue.textContent = `${name}: ${token}`;
+          const focusTarget = [copyButton, closeModalButton, modalTokenValue].find((el) => el instanceof HTMLElement);
+          lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+          if (focusTarget instanceof HTMLElement) {
+            focusTarget.focus();
+          }
+          if (modalStatus instanceof HTMLElement) {
+            modalStatus.textContent = '';
+          }
+          if (modalTimeout) {
+            clearTimeout(modalTimeout);
+          }
+          modalTimeout = setTimeout(closeModal, 60_000);
+        }
+
+        async function handleCreate(event) {
+          event.preventDefault();
+          if (!(createForm instanceof HTMLFormElement)) {
+            return;
+          }
+
+          const formData = new FormData(createForm);
+          const name = String(formData.get('name') ?? '').trim();
+          const roles = Array.from(createForm.querySelectorAll("input[name='roles']:checked"))
+            .map((input) => input.value)
+            .filter((value, index, array) => value && array.indexOf(value) === index);
+
+          if (!name) {
+            formStatus?.replaceChildren(document.createTextNode('Anahtar adı zorunludur.'));
+            return;
+          }
+
+          if (roles.length === 0) {
+            formStatus?.replaceChildren(document.createTextNode('En az bir rol seçilmelidir.'));
+            return;
+          }
+
+          if (!tenantId) {
+            formStatus?.replaceChildren(document.createTextNode('Tenant bilgisi eksik.'));
+            return;
+          }
+
+          try {
+            if (formStatus instanceof HTMLElement) {
+              formStatus.textContent = 'Anahtar oluşturuluyor…';
+            }
+
+            const response = await fetch('/v1/api-keys', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
+              body: JSON.stringify({ tenant_id: tenantId, name, roles })
+            });
+
+            if (!response.ok) {
+              const problem = await response.json().catch(() => ({}));
+              const message = typeof problem?.error?.message === 'string' ? problem.error.message : 'Anahtar oluşturulamadı.';
+              throw new Error(message);
+            }
+
+            const payload = await response.json();
+
+            createForm.reset();
+            formStatus?.replaceChildren(document.createTextNode('Anahtar oluşturuldu.'));
+            loadKeys(currentPage);
+            const token = payload?.data?.plaintext_token ?? '';
+            if (token) {
+              openModal(token, name);
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Anahtar oluşturulamadı.';
+            formStatus?.replaceChildren(document.createTextNode(message));
+          }
+        }
+
+        async function handleRemove(id, trigger) {
+          if (!tenantId) {
+            updateStatus('Tenant bilgisi eksik.', 'error');
+            return;
+          }
+
+          trigger.disabled = true;
+          updateStatus('Anahtar kaldırılıyor…');
+
+          try {
+            const response = await fetch(`/v1/api-keys/${id}`, {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify({ tenant_id: tenantId })
+            });
+
+            if (!response.ok) {
+              throw new Error(`Silme başarısız: ${response.status}`);
+            }
+
+            updateStatus('API anahtarı kaldırıldı.', 'success');
+            loadKeys(currentPage);
+          } catch (error) {
+            console.error('API anahtarı silinemedi', error);
+            updateStatus('API anahtarı silinemedi.', 'error');
+            trigger.disabled = false;
+          }
+        }
+
+        tableBody?.addEventListener('click', (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLButtonElement)) {
+            return;
+          }
+          const keyId = target.getAttribute('data-remove-key');
+          if (!keyId) {
+            return;
+          }
+          handleRemove(keyId, target);
+        });
+
+        refreshButton?.addEventListener('click', () => loadKeys(currentPage));
+        createForm?.addEventListener('submit', handleCreate);
+        closeModalButton?.addEventListener('click', closeModal);
+        modalBackdrop?.addEventListener('click', (event) => {
+          if (event.target === modalBackdrop) {
+            closeModal();
+          }
+        });
+        window.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape' && !(modalBackdrop?.hidden ?? true)) {
+            closeModal();
+          }
+        });
+
+        copyButton?.addEventListener('click', async () => {
+          const tokenText = modalTokenValue?.textContent ?? '';
+          const token = tokenText.split(': ').pop() ?? tokenText;
+          try {
+            if (navigator.clipboard && token) {
+              await navigator.clipboard.writeText(token);
+              modalStatus?.replaceChildren(document.createTextNode('Token panoya kopyalandı.'));
+            } else {
+              throw new Error('Panoya erişilemiyor');
+            }
+          } catch (error) {
+            console.warn('Clipboard API kullanılabilir değil', error);
+            modalStatus?.replaceChildren(document.createTextNode('Lütfen metni manuel olarak kopyalayın.'));
+          }
+        });
+
+        loadKeys();
+      })();
+    </script>
+  </body>
+</html>

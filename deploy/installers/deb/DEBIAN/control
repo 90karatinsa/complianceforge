@@ -1,0 +1,10 @@
+Package: atlas-sca
+Version: @VERSION@
+Section: admin
+Priority: optional
+Architecture: amd64
+Maintainer: Alterra-Solutions <support@alterra-solutions.example>
+Depends: adduser, libc6 (>= 2.31)
+Description: Atlas SCA air-gapped uyumluluk ajanı
+ Atlas SCA, lisans ve güvenlik politikalarını offline doğrulayan kurumsal bir SCA çözümüdür.
+ Kurulum, imzalı manifestlerin çevrimdışı doğrulanmasını ve ComplianceForge lisans (MIT) kabulünü gerektirir.

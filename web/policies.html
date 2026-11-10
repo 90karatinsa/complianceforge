@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Politikalar - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.94);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-success: #22c55e;
+        --color-danger: #ef4444;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-success: #166534;
+        --color-danger: #b91c1c;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 40px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 64px;
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        gap: 28px;
+      }
+
+      section {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: clamp(20px, 3vw, 32px);
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 2.4rem);
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: clamp(1.4rem, 3vw, 1.8rem);
+      }
+
+      p.muted,
+      span.muted {
+        color: var(--color-muted);
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      input,
+      textarea,
+      button,
+      select {
+        font: inherit;
+      }
+
+      input[type='search'] {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        padding: 10px 12px;
+        background: var(--color-surface-alt);
+        color: inherit;
+        min-width: 240px;
+      }
+
+      button.primary {
+        border-radius: 12px;
+        border: 1px solid transparent;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 10px 16px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      button.secondary {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        background: transparent;
+        color: inherit;
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--color-border);
+        text-align: left;
+      }
+
+      th {
+        font-weight: 700;
+      }
+
+      tbody tr:hover {
+        background: rgba(148, 163, 184, 0.1);
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        background: rgba(56, 189, 248, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+      }
+
+      dialog.modal {
+        border: none;
+        border-radius: 18px;
+        background: var(--color-surface);
+        color: inherit;
+        padding: clamp(20px, 3vw, 32px);
+        max-width: 520px;
+        width: 100%;
+      }
+
+      dialog::backdrop {
+        background: rgba(2, 6, 23, 0.7);
+      }
+
+      form.modal-form {
+        display: grid;
+        gap: 16px;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      input[type='text'],
+      textarea,
+      input[type='number'] {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        padding: 10px 12px;
+        background: var(--color-surface-alt);
+        color: inherit;
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
+      [data-alert] {
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-top: 12px;
+        border: 1px solid var(--color-border);
+      }
+
+      [data-alert][data-variant='error'] {
+        border-color: rgba(239, 68, 68, 0.6);
+        background: rgba(239, 68, 68, 0.08);
+      }
+
+      footer.global-footer {
+        text-align: center;
+        padding: 32px 16px 48px;
+        color: var(--color-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Politika Motoru</h1>
+        <p class="muted">OPA/Rego ve basit kuralları tek ekrandan yönetin.</p>
+      </div>
+      <nav aria-label="Birincil">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html" aria-current="page">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label>Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <section aria-labelledby="policy-list-heading">
+        <div class="toolbar">
+          <div>
+            <h2 id="policy-list-heading">Tanımlı Politikalar</h2>
+            <p class="muted">Policy-as-Code, tenant kapsamı içinde tekrar üretilebilir sonuçlar sağlar.</p>
+          </div>
+          <div class="toolbar" style="justify-content: flex-end; gap: 8px;">
+            <input type="search" placeholder="Politika ara" aria-label="Politika ara" data-search />
+            <button type="button" class="primary" data-create>Yeni politika</button>
+          </div>
+        </div>
+        <div data-alert hidden role="status" aria-live="assertive"></div>
+        <table aria-describedby="policy-list-heading">
+          <thead>
+            <tr>
+              <th scope="col">Ad</th>
+              <th scope="col">Açıklama</th>
+              <th scope="col">CVSS eşiği</th>
+              <th scope="col">İzin verilen</th>
+              <th scope="col">Engellenen</th>
+              <th scope="col">Son güncelleme</th>
+              <th scope="col">İşlemler</th>
+            </tr>
+          </thead>
+          <tbody data-policy-body></tbody>
+        </table>
+      </section>
+
+      <section aria-labelledby="opa-status-heading">
+        <h2 id="opa-status-heading">OPA Bundle durumu</h2>
+        <p class="muted">
+          Rego kuralları tenant bazlı olarak versiyonlanır. Bundle senkronizasyonu tamamlandığında burada görünür.
+        </p>
+        <div class="status-pill" data-opa-pill>
+          <span aria-hidden="true">ℹ️</span>
+          <span data-opa-status>Bundle durumu bilinmiyor</span>
+        </div>
+        <p>
+          <a href="https://www.openpolicyagent.org/docs/latest/policy-testing/" target="_blank" rel="noreferrer">
+            Rego testleri hakkında bilgi alın
+          </a>
+        </p>
+      </section>
+    </main>
+    <footer class="global-footer">© Alterra-Solutions. Politika değişiklikleri denetim izine yazılır.</footer>
+
+    <dialog class="modal" data-policy-modal aria-modal="true">
+      <form class="modal-form" data-modal-form>
+        <h2 data-modal-title>Yeni politika</h2>
+        <p class="muted" data-modal-caption>Allow/Deny listelerini ve CVSS eşiklerini tanımlayın.</p>
+        <input type="hidden" name="policy-id" data-modal-policy-id />
+        <label>
+          Politika adı
+          <input type="text" name="name" required data-field-name />
+        </label>
+        <label>
+          Açıklama
+          <textarea name="description" data-field-description></textarea>
+        </label>
+        <label>
+          CVSS eşik
+          <input type="number" name="cvss" min="0" max="10" step="0.1" data-field-cvss />
+        </label>
+        <label>
+          Allow list (satır başına bir kaynak)
+          <textarea name="allow" data-field-allow placeholder="pkg:npm/*"></textarea>
+        </label>
+        <label>
+          Deny list (satır başına bir kaynak)
+          <textarea name="deny" data-field-deny placeholder="pkg:maven/group/artifact"></textarea>
+        </label>
+        <div data-modal-error class="muted" role="alert" hidden></div>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button type="button" class="secondary" data-modal-cancel>Vazgeç</button>
+          <button type="submit" class="primary" data-modal-submit>Kaydet</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const tenantId = root.dataset.tenantId ?? '';
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+        const tableBody = document.querySelector('[data-policy-body]');
+        const searchInput = document.querySelector('[data-search]');
+        const alertRegion = document.querySelector('[data-alert]');
+        const opaStatus = document.querySelector('[data-opa-status]');
+        const opaPill = document.querySelector('[data-opa-pill]');
+        const modal = document.querySelector('[data-policy-modal]');
+        const modalForm = modal?.querySelector('[data-modal-form]');
+        const modalTitle = modal?.querySelector('[data-modal-title]');
+        const modalCaption = modal?.querySelector('[data-modal-caption]');
+        const modalIdField = modal?.querySelector('[data-modal-policy-id]');
+        const fieldName = modal?.querySelector('[data-field-name]');
+        const fieldDescription = modal?.querySelector('[data-field-description]');
+        const fieldCvss = modal?.querySelector('[data-field-cvss]');
+        const fieldAllow = modal?.querySelector('[data-field-allow]');
+        const fieldDeny = modal?.querySelector('[data-field-deny]');
+        const modalError = modal?.querySelector('[data-modal-error]');
+        const modalCancel = modal?.querySelector('[data-modal-cancel]');
+        const createButton = document.querySelector('[data-create]');
+
+        const policies = [];
+        let activePolicyId = null;
+        let anchorBeforeModal = null;
+
+        const numberFormatter = new Intl.NumberFormat('tr-TR');
+
+        const applyTheme = (theme) => {
+          const variant = theme === 'contrast' ? 'contrast' : 'default';
+          root.dataset.theme = variant;
+          toggle?.setAttribute('aria-pressed', variant === 'contrast' ? 'true' : 'false');
+          if (label) {
+            label.textContent = variant === 'contrast' ? 'Standart temaya dön' : 'Yüksek kontrast modunu aç';
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema okunamadı', error);
+        }
+        const prefersLight = () => window.matchMedia?.('(prefers-color-scheme: light)').matches ?? false;
+        applyTheme(savedTheme ?? (prefersLight() ? 'contrast' : 'default'));
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema kaydedilemedi', error);
+          }
+        });
+
+        const showAlert = (message, variant = 'info') => {
+          if (!(alertRegion instanceof HTMLElement)) {
+            return;
+          }
+          if (!message) {
+            alertRegion.hidden = true;
+            alertRegion.textContent = '';
+            return;
+          }
+          alertRegion.hidden = false;
+          alertRegion.dataset.variant = variant;
+          alertRegion.textContent = message;
+        };
+
+        const extractList = (value) =>
+          value
+            .split(/\r?\n/u)
+            .map((item) => item.trim())
+            .filter((item) => item.length > 0);
+
+        const normalizePolicy = (record) => {
+          if (!record || typeof record !== 'object') {
+            return null;
+          }
+          const rules = record.rules ?? {};
+          return {
+            id: record.id ?? crypto.randomUUID(),
+            name: record.name ?? 'Politika',
+            description: record.description ?? '',
+            updated_at: record.updated_at ?? null,
+            rules,
+            cvss_threshold: Number.isFinite(rules.cvss_threshold) ? rules.cvss_threshold : null,
+            allow: Array.isArray(rules.allow) ? rules.allow : [],
+            deny: Array.isArray(rules.deny) ? rules.deny : [],
+            opa_bundle: rules.opa_bundle ?? null
+          };
+        };
+
+        const formatDate = (value) => {
+          if (!value) {
+            return '—';
+          }
+          const date = new Date(value);
+          if (Number.isNaN(date.getTime())) {
+            return '—';
+          }
+          return new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+        };
+
+        const renderPolicies = () => {
+          if (!(tableBody instanceof HTMLElement)) {
+            return;
+          }
+          tableBody.innerHTML = '';
+          const keyword = searchInput instanceof HTMLInputElement ? searchInput.value.trim().toLowerCase() : '';
+          const filtered = policies.filter((policy) =>
+            keyword.length === 0 ? true : policy.name.toLowerCase().includes(keyword)
+          );
+
+          if (filtered.length === 0) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 7;
+            cell.textContent = 'Politika bulunamadı.';
+            row.appendChild(cell);
+            tableBody.appendChild(row);
+            return;
+          }
+
+          for (const policy of filtered) {
+            const row = document.createElement('tr');
+
+            const nameCell = document.createElement('th');
+            nameCell.scope = 'row';
+            nameCell.textContent = policy.name;
+            row.appendChild(nameCell);
+
+            const descCell = document.createElement('td');
+            descCell.textContent = policy.description || '—';
+            row.appendChild(descCell);
+
+            const cvssCell = document.createElement('td');
+            cvssCell.textContent =
+              policy.cvss_threshold != null ? numberFormatter.format(policy.cvss_threshold) : '—';
+            row.appendChild(cvssCell);
+
+            const allowCell = document.createElement('td');
+            allowCell.textContent = policy.allow.length > 0 ? policy.allow.join(', ') : '—';
+            row.appendChild(allowCell);
+
+            const denyCell = document.createElement('td');
+            denyCell.textContent = policy.deny.length > 0 ? policy.deny.join(', ') : '—';
+            row.appendChild(denyCell);
+
+            const updatedCell = document.createElement('td');
+            updatedCell.textContent = formatDate(policy.updated_at);
+            row.appendChild(updatedCell);
+
+            const actionsCell = document.createElement('td');
+            const editButton = document.createElement('button');
+            editButton.type = 'button';
+            editButton.className = 'secondary';
+            editButton.textContent = 'Düzenle';
+            editButton.addEventListener('click', () => openModal('edit', policy, editButton));
+            actionsCell.appendChild(editButton);
+            row.appendChild(actionsCell);
+
+            tableBody.appendChild(row);
+          }
+        };
+
+        const updateOpaStatus = () => {
+          if (!(opaStatus instanceof HTMLElement) || !(opaPill instanceof HTMLElement)) {
+            return;
+          }
+          const latestWithBundle = policies.find((policy) => policy.opa_bundle);
+          if (!latestWithBundle) {
+            opaStatus.textContent = 'Bundle durumu bilinmiyor';
+            opaPill.dataset.variant = 'info';
+            return;
+          }
+
+          const status = latestWithBundle.opa_bundle?.status ?? 'unknown';
+          if (status === 'ready') {
+            opaStatus.textContent = `Bundle senkronize (${latestWithBundle.opa_bundle.version ?? 'v1'})`;
+            opaPill.dataset.variant = 'success';
+          } else {
+            opaStatus.textContent = `Bundle güncelleniyor (${status})`;
+            opaPill.dataset.variant = 'warning';
+          }
+        };
+
+        const fetchPolicies = async () => {
+          try {
+            const response = await fetch(`/v1/policies?tenant_id=${tenantId}`, {
+              cache: 'no-store',
+              headers: { Accept: 'application/json' }
+            });
+            if (!response?.ok) {
+              throw new Error(`Beklenmeyen yanıt: ${response?.status ?? 'bilinmiyor'}`);
+            }
+            const payload = await response.json();
+            const items = Array.isArray(payload?.data) ? payload.data : [];
+            policies.splice(0, policies.length, ...items.map(normalizePolicy).filter(Boolean));
+            renderPolicies();
+            updateOpaStatus();
+          } catch (error) {
+            console.error('Politikalar alınamadı', error);
+            showAlert('Politikalar yüklenemedi. Lütfen daha sonra deneyin.', 'error');
+          }
+        };
+
+        const closeModal = () => {
+          if (!(modal instanceof HTMLDialogElement)) {
+            return;
+          }
+          if (typeof modal.close === 'function') {
+            modal.close();
+          } else {
+            modal.removeAttribute('open');
+          }
+          modalError?.setAttribute('hidden', '');
+          if (anchorBeforeModal instanceof HTMLElement) {
+            anchorBeforeModal.focus();
+          }
+        };
+
+        const openModal = (mode, policy, opener) => {
+          if (!(modal instanceof HTMLDialogElement) || !(modalForm instanceof HTMLFormElement)) {
+            return;
+          }
+          anchorBeforeModal = opener ?? null;
+          activePolicyId = mode === 'edit' ? policy.id : null;
+          if (modalTitle instanceof HTMLElement) {
+            modalTitle.textContent = mode === 'edit' ? 'Politikayı düzenle' : 'Yeni politika';
+          }
+          if (modalCaption instanceof HTMLElement) {
+            modalCaption.textContent =
+              mode === 'edit'
+                ? 'Var olan kuralları güncelleyin. Değişiklikler audit loguna yazılır.'
+                : 'Allow/Deny listelerini ve CVSS eşiklerini tanımlayın.';
+          }
+          if (fieldName instanceof HTMLInputElement) {
+            fieldName.value = policy?.name ?? '';
+          }
+          if (fieldDescription instanceof HTMLTextAreaElement) {
+            fieldDescription.value = policy?.description ?? '';
+          }
+          if (fieldCvss instanceof HTMLInputElement) {
+            fieldCvss.value = policy?.cvss_threshold != null ? String(policy.cvss_threshold) : '';
+          }
+          if (fieldAllow instanceof HTMLTextAreaElement) {
+            fieldAllow.value = policy?.allow?.join('\n') ?? '';
+          }
+          if (fieldDeny instanceof HTMLTextAreaElement) {
+            fieldDeny.value = policy?.deny?.join('\n') ?? '';
+          }
+          if (modalIdField instanceof HTMLInputElement) {
+            modalIdField.value = policy?.id ?? '';
+          }
+          modalError?.setAttribute('hidden', '');
+          if (typeof modal.showModal === 'function') {
+            modal.showModal();
+          } else {
+            modal.setAttribute('open', '');
+          }
+          fieldName?.focus();
+        };
+
+        modalCancel?.addEventListener('click', () => {
+          closeModal();
+        });
+
+        modal?.addEventListener('cancel', (event) => {
+          event.preventDefault();
+          closeModal();
+        });
+
+        modalForm?.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (!(modalForm instanceof HTMLFormElement)) {
+            return;
+          }
+          const formData = new FormData(modalForm);
+          const name = (formData.get('name') ?? '').toString().trim();
+          const description = (formData.get('description') ?? '').toString();
+          const cvssRaw = (formData.get('cvss') ?? '').toString();
+          const allowRaw = (formData.get('allow') ?? '').toString();
+          const denyRaw = (formData.get('deny') ?? '').toString();
+
+          if (!name) {
+            modalError?.removeAttribute('hidden');
+            if (modalError instanceof HTMLElement) {
+              modalError.textContent = 'Politika adı zorunludur.';
+            }
+            return;
+          }
+
+          const cvss = Number.parseFloat(cvssRaw);
+          const rules = {
+            cvss_threshold: Number.isFinite(cvss) ? cvss : null,
+            allow: extractList(allowRaw),
+            deny: extractList(denyRaw)
+          };
+
+          const payload = {
+            tenant_id: tenantId,
+            name,
+            description: description.length > 0 ? description : null,
+            rules
+          };
+
+          const url = activePolicyId ? `/v1/policies/${activePolicyId}` : '/v1/policies';
+          const method = activePolicyId ? 'PATCH' : 'POST';
+
+          try {
+            const response = await fetch(url, {
+              method,
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response?.ok) {
+              const errorPayload = await response.json().catch(() => ({}));
+              const message = errorPayload?.error?.message ?? 'Politika kaydedilemedi.';
+              throw new Error(message);
+            }
+
+            const result = await response.json();
+            const normalized = normalizePolicy(result?.data ?? payload);
+
+            if (activePolicyId) {
+              const index = policies.findIndex((item) => item.id === activePolicyId);
+              if (index >= 0 && normalized) {
+                policies[index] = { ...policies[index], ...normalized };
+              }
+            } else if (normalized) {
+              policies.unshift(normalized);
+            }
+
+            renderPolicies();
+            updateOpaStatus();
+            showAlert('Politika başarıyla kaydedildi.');
+            closeModal();
+          } catch (error) {
+            console.error('Politika kaydedilemedi', error);
+            if (modalError instanceof HTMLElement) {
+              modalError.textContent = error?.message ?? 'Politika kaydedilemedi.';
+              modalError.removeAttribute('hidden');
+            }
+          }
+        });
+
+        createButton?.addEventListener('click', (event) => {
+          const opener = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+          openModal('create', null, opener);
+        });
+
+        searchInput?.addEventListener('input', () => {
+          renderPolicies();
+        });
+
+        void fetchPolicies();
+      })();
+    </script>
+  </body>
+</html>

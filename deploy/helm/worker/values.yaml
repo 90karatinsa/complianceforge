@@ -1,0 +1,115 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/alterra/oss-licensing/worker
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+serviceAccount:
+  create: false
+  name: ""
+
+automountServiceAccountToken: false
+
+configMapName: oss-licensing-worker-config
+secretName: oss-licensing-secrets
+
+extraEnv:
+  - name: NODE_ENV
+    value: production
+  - name: FEED_CACHE_DIR
+    value: /var/lib/atlas/feeds
+  - name: EVIDENCE_EXPORT_DIR
+    value: /var/lib/atlas/evidence
+  - name: AIRGAP_MODE
+    value: "true"
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+podSecurityContext:
+  fsGroup: 2000
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+
+redisProbeCommand:
+  - node
+  - -e
+  - |
+      const target = new URL(process.env.REDIS_URL);
+      const net = require('node:net');
+      const socket = net.createConnection({ host: target.hostname, port: Number(target.port) || 6379 });
+      socket.on('connect', () => { socket.destroy(); process.exit(0); });
+      socket.on('error', () => { process.exit(1); });
+      setTimeout(() => { socket.destroy(); process.exit(1); }, 3000);
+
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 20
+  timeoutSeconds: 5
+
+readinessProbe:
+  periodSeconds: 20
+  timeoutSeconds: 5
+
+volumes:
+  - name: tmp
+    emptyDir:
+      medium: Memory
+  - name: feed-cache
+    persistentVolumeClaim:
+      claimName: atlas-feed-cache
+  - name: evidence-packs
+    persistentVolumeClaim:
+      claimName: atlas-evidence-packs
+  - name: cosign-keys
+    secret:
+      secretName: atlas-cosign-pub
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: feed-cache
+    mountPath: /var/lib/atlas/feeds
+  - name: evidence-packs
+    mountPath: /var/lib/atlas/evidence
+  - name: cosign-keys
+    mountPath: /var/lib/atlas/cosign
+    readOnly: true
+
+nodeSelector:
+  kubernetes.io/os: linux
+
+affinity: {}
+
+tolerations:
+  - key: "node.kubernetes.io/not-ready"
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 60
+  - key: "node.kubernetes.io/unreachable"
+    operator: Exists
+    effect: NoExecute
+    tolerationSeconds: 60

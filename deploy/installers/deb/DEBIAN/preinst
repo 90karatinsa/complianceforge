@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+if [ "$1" = "install" ] || [ "$1" = "upgrade" ]; then
+  if [ -z "$ALTERA_EULA_ACCEPTED" ]; then
+    if [ ! -f /etc/atlas-sca/eula.accepted ]; then
+      echo "Atlas SCA kurulumu ComplianceForge lisans (MIT) kabulünü gerektirir." >&2
+      echo "Lütfen offline imzalı onayı /etc/atlas-sca/eula.accepted olarak sağlayın veya ALTERA_EULA_ACCEPTED=1 ile kurulum yapın." >&2
+      exit 1
+    fi
+  fi
+fi
+exit 0

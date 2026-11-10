@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Atlas SCA Yönetim Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: #0f172a;
+        --color-surface-alt: rgba(30, 41, 59, 0.6);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-success: #22c55e;
+        --color-warn: #f97316;
+        --color-danger: #ef4444;
+        --color-focus: #f8fafc;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-success: #166534;
+        --color-warn: #92400e;
+        --color-danger: #7f1d1d;
+        --color-focus: #0f172a;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent), var(--color-bg);
+        color: var(--color-text);
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: 24px clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 64px;
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        gap: 32px;
+      }
+
+      section {
+        background: var(--color-surface);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 20px;
+        padding: clamp(20px, 3vw, 32px);
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 4vw, 2.6rem);
+      }
+
+      h2 {
+        margin: 0 0 18px;
+        font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+      }
+
+      p.muted,
+      span.muted {
+        color: var(--color-muted);
+      }
+
+      .cards {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .card {
+        background: var(--color-surface-alt);
+        border-radius: 16px;
+        padding: 18px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      .metric-value {
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+        font-weight: 700;
+      }
+
+      .trend-placeholder {
+        display: grid;
+        gap: 16px;
+      }
+
+      .trend-chart {
+        border-radius: 14px;
+        background: var(--color-surface-alt);
+        padding: 18px;
+        border: 1px dashed rgba(148, 163, 184, 0.3);
+      }
+
+      .trend-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .trend-controls button {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        padding: 8px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .trend-controls button[aria-expanded='true'] {
+        background: var(--color-accent);
+        color: var(--color-bg);
+      }
+
+      .status-warning {
+        color: var(--color-warn);
+        font-weight: 600;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        color: inherit;
+      }
+
+      thead {
+        text-align: left;
+        font-size: 0.9rem;
+        color: var(--color-muted);
+      }
+
+      th,
+      td {
+        padding: 12px 10px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(56, 189, 248, 0.18);
+        color: #bae6fd;
+        font-weight: 600;
+      }
+
+      .status-pill[data-status='risk'] {
+        background: rgba(239, 68, 68, 0.25);
+        color: #fecaca;
+      }
+
+      .status-pill[data-status='stable'] {
+        background: rgba(34, 197, 94, 0.2);
+        color: #bbf7d0;
+      }
+
+      .status-pill[data-status='investigate'] {
+        background: rgba(249, 115, 22, 0.25);
+        color: #fed7aa;
+      }
+
+      .status-pill[data-status='unknown'] {
+        background: rgba(148, 163, 184, 0.25);
+        color: #e2e8f0;
+      }
+
+      .alert {
+        border-radius: 16px;
+        padding: 16px 18px;
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        background: rgba(239, 68, 68, 0.15);
+        color: inherit;
+      }
+
+      .alert[hidden] {
+        display: none;
+      }
+
+      .trend-detail {
+        background: var(--color-surface-alt);
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        padding: 16px;
+      }
+
+      footer.global-footer {
+        padding: 32px clamp(16px, 3vw, 48px) 48px;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <p class="muted" aria-label="Panel açıklaması">
+          Atlas SCA kurumsal görünüm — üretim organizasyonu
+        </p>
+        <h1 id="dashboard-title">Durum Paneli</h1>
+      </div>
+      <nav aria-labelledby="dashboard-title">
+        <ul>
+          <li><a href="dashboard.html" aria-current="page">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <div class="alert" data-health-error role="status" aria-live="assertive" hidden>
+        Sağlık verileri yüklenemedi. Lütfen daha sonra yeniden deneyin.
+      </div>
+      <section aria-labelledby="overview-heading">
+        <h2 id="overview-heading">Üst Düzey Göstergeler</h2>
+        <p class="muted">
+          Kartlar CI/CD kapıları, hukuk ve güvenlik ekipleri için kritik durum sinyallerini toplar. Veriler 5 dakikada bir güncellenir.
+        </p>
+        <ul class="cards" role="list">
+          <li class="card" data-card="policy-failures">
+            <h3>Politika İhlalleri</h3>
+            <p class="metric-value" data-metric="policy-failures" aria-live="polite">--</p>
+            <p class="muted">Fail-build kapısından dönen son taramalar.</p>
+          </li>
+          <li class="card" data-card="legal-queue">
+            <h3>Hukuk Kuyruğu</h3>
+            <p class="metric-value" data-metric="legal-queue" aria-live="polite">--</p>
+            <p class="muted">Hukuk onayı bekleyen lisans bulguları.</p>
+          </li>
+          <li class="card" data-card="vex-coverage">
+            <h3>VEX Kapsaması</h3>
+            <p class="metric-value" data-metric="vex-coverage" aria-live="polite">--</p>
+            <p class="muted">İncelenmiş kritik CVE sayısının yüzdesi.</p>
+          </li>
+          <li class="card" data-card="notice-ready">
+            <h3>NOTICE Hazır</h3>
+            <p class="metric-value" data-metric="notice-ready" aria-live="polite">--</p>
+            <p class="muted">Yayınlanmaya hazır NOTICE paketleri.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="vex-heading">
+        <h2 id="vex-heading">VEX Etki Özeti</h2>
+        <p class="muted">VEX beyanları hangi CVE'lerin politika sonucunu değiştirdiğini gösterir.</p>
+        <table data-widget="vex-summary" aria-describedby="vex-heading">
+          <caption class="sr-only">VEX etkisi tablosu</caption>
+          <thead>
+            <tr>
+              <th scope="col">Ekosistem</th>
+              <th scope="col">İncelenen CVE</th>
+              <th scope="col">Not Affected</th>
+              <th scope="col">Politika Durumu</th>
+            </tr>
+          </thead>
+          <tbody data-vex-body></tbody>
+        </table>
+      </section>
+
+      <section aria-labelledby="feed-heading" data-widget="feed-status" aria-live="polite">
+        <h2 id="feed-heading">Feed Durumu</h2>
+        <p class="muted">
+          Air-gapped feed paketlerinin versiyonları, import geçmişi ve imza doğrulama sonuçları burada izlenir.
+        </p>
+        <dl>
+          <div>
+            <dt>Aktif Sürüm</dt>
+            <dd data-field="active-version">--</dd>
+          </div>
+          <div>
+            <dt>Son İçe Aktarma</dt>
+            <dd data-field="last-import">--</dd>
+          </div>
+          <div>
+            <dt>İmza Durumu</dt>
+            <dd data-field="signature-status">--</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="trends-heading">
+        <h2 id="trends-heading">Trend Göstergeleri</h2>
+        <div class="trend-controls" role="toolbar" aria-label="Trend ayrıntı kontrolleri">
+          <button type="button" data-trend-control data-target="policy-detail" aria-expanded="false">
+            Politika ihlali ayrıntıları
+          </button>
+          <button type="button" data-trend-control data-target="mttr-detail" aria-expanded="false">
+            MTTR ayrıntıları
+          </button>
+          <button type="button" data-trend-control data-target="vex-detail" aria-expanded="false">
+            VEX gürültü azaltımı ayrıntıları
+          </button>
+        </div>
+        <div class="trend-placeholder">
+          <figure class="trend-chart" data-trend="policy" role="img" aria-labelledby="policy-trend-caption">
+            <figcaption id="policy-trend-caption">Politika ihlali trendi (son 30 gün)</figcaption>
+            <p class="muted">Grafik CI feed'i senkronize edildiğinde güncellenir.</p>
+          </figure>
+          <figure class="trend-chart" data-trend="mttr" role="img" aria-labelledby="mttr-trend-caption">
+            <figcaption id="mttr-trend-caption">MTTR - Güvenlik bulguları</figcaption>
+            <p class="muted">Çözüm süreleri hedef 7 günü aşarsa uyarı üretir.</p>
+          </figure>
+          <figure class="trend-chart" data-trend="vex" role="img" aria-labelledby="vex-trend-caption">
+            <figcaption id="vex-trend-caption">VEX ile gürültü azaltımı</figcaption>
+            <p class="muted">Politika sonucu fail → pass dönüşümü burada izlenir.</p>
+          </figure>
+        </div>
+        <div id="policy-detail" class="trend-detail" hidden data-trend-detail="policy">
+          <h3>Politika ihlali ayrıntıları</h3>
+          <p>
+            Son 7 günde 5 build fail oldu; üçünde lisans istisnası, ikisinde kritik CVE tetiklendi. SLO hedefi %2 fail oranıdır.
+          </p>
+        </div>
+        <div id="mttr-detail" class="trend-detail" hidden data-trend-detail="mttr">
+          <h3>MTTR ayrıntıları</h3>
+          <p>
+            Ortalama çözüm süresi 5.2 gün; %95 persentil 11 gün olarak ölçüldü. Otomatik takip Jira/ServiceNow entegrasyonlarından alınır.
+          </p>
+        </div>
+        <div id="vex-detail" class="trend-detail" hidden data-trend-detail="vex">
+          <h3>VEX gürültü azaltımı ayrıntıları</h3>
+          <p>
+            VEX beyanları kritik CVE'lerin %68'ini Not Affected olarak işaretledi, fail → pass dönüşümlerinde %42 iyileşme sağlandı.
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer class="global-footer">
+      © Alterra-Solutions. Telemetri kapalı, tüm hareketler denetim kaydına yazılır.
+    </footer>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const tenantId = root.dataset.tenantId ?? '';
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+
+        const applyTheme = (theme) => {
+          if (theme === 'contrast') {
+            root.dataset.theme = 'contrast';
+            toggle?.setAttribute('aria-pressed', 'true');
+            if (label) {
+              label.textContent = 'Standart temaya dön';
+            }
+          } else {
+            root.dataset.theme = 'default';
+            toggle?.setAttribute('aria-pressed', 'false');
+            if (label) {
+              label.textContent = 'Yüksek kontrast modunu aç';
+            }
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema tercihi okunamadı', error);
+        }
+
+        const detectSystemTheme = () => {
+          if (typeof window.matchMedia !== 'function') {
+            return null;
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'contrast';
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'default';
+          }
+
+          return null;
+        };
+
+        const initialTheme =
+          savedTheme === 'contrast' || savedTheme === 'default'
+            ? savedTheme
+            : detectSystemTheme() ?? 'default';
+
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        const trendButtons = Array.from(document.querySelectorAll('[data-trend-control]'));
+        const buttonTargets = trendButtons
+          .map((button) => {
+            const targetId = button.getAttribute('data-target');
+            const target = targetId ? document.getElementById(targetId) : null;
+            return { button, target };
+          })
+          .filter((entry) => entry.target instanceof HTMLElement);
+
+        const collapseAllTrends = () => {
+          buttonTargets.forEach(({ button, target }) => {
+            button.setAttribute('aria-expanded', 'false');
+            target.hidden = true;
+          });
+        };
+
+        let activeTrend = null;
+
+        buttonTargets.forEach(({ button, target }) => {
+          button.addEventListener('click', () => {
+            const isActive = activeTrend === button;
+            collapseAllTrends();
+            if (isActive) {
+              activeTrend = null;
+              return;
+            }
+
+            button.setAttribute('aria-expanded', 'true');
+            target.hidden = false;
+            activeTrend = button;
+          });
+        });
+
+        document.addEventListener('keydown', (event) => {
+          if (event.key !== 'Escape' || !(activeTrend instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          event.preventDefault();
+          const button = activeTrend;
+          collapseAllTrends();
+          activeTrend = null;
+          button.focus();
+        });
+
+        const metrics = new Map(
+          Array.from(document.querySelectorAll('[data-metric]'))
+            .map((element) => [element.getAttribute('data-metric'), element])
+            .filter((entry) => typeof entry[0] === 'string' && entry[0]?.length > 0)
+        );
+        const feedRegion = document.querySelector('[data-widget="feed-status"]');
+        const feedFields = new Map(
+          feedRegion instanceof HTMLElement
+            ? Array.from(feedRegion.querySelectorAll('[data-field]'))
+                .map((element) => [element.getAttribute('data-field'), element])
+                .filter((entry) => typeof entry[0] === 'string' && entry[0]?.length > 0)
+            : []
+        );
+        const vexBody = document.querySelector('[data-vex-body]');
+        const errorBanner = document.querySelector('[data-health-error]');
+
+        const numberFormatter = new Intl.NumberFormat('tr-TR');
+        const dateFormatter = new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium', timeStyle: 'short' });
+        let summaryCache = { data: null, fetchedAt: 0 };
+
+        const statusCopy = {
+          stable: { icon: '✅', label: 'Stabil' },
+          risk: { icon: '⚠️', label: 'İzleme' },
+          investigate: { icon: '🕑', label: 'İnceleme' },
+          unknown: { icon: 'ℹ️', label: 'Bilinmiyor' }
+        };
+
+        const FALLBACK_VEX_ROWS = [
+          { ecosystem: 'Node.js', total: '--', notAffected: '--', status: 'unknown' },
+          { ecosystem: 'Java', total: '--', notAffected: '--', status: 'unknown' },
+          { ecosystem: 'OCI', total: '--', notAffected: '--', status: 'unknown' }
+        ];
+
+        const createStatusPill = (status) => {
+          const variant = statusCopy[status] ?? statusCopy.unknown;
+          const pill = document.createElement('span');
+          pill.className = 'status-pill';
+          pill.dataset.status = statusCopy[status] ? status : 'unknown';
+
+          const icon = document.createElement('span');
+          icon.setAttribute('aria-hidden', 'true');
+          icon.textContent = variant.icon;
+
+          const label = document.createElement('span');
+          label.textContent = variant.label;
+
+          const srOnly = document.createElement('span');
+          srOnly.className = 'sr-only';
+          srOnly.textContent = `Durum: ${variant.label}`;
+
+          pill.append(icon, label, srOnly);
+          return pill;
+        };
+
+        const renderVexRows = (rows) => {
+          if (!(vexBody instanceof HTMLElement)) {
+            return;
+          }
+
+          vexBody.innerHTML = '';
+          const records = Array.isArray(rows) && rows.length > 0 ? rows : FALLBACK_VEX_ROWS;
+          records.forEach((entry) => {
+            const tr = document.createElement('tr');
+
+            const ecosystemCell = document.createElement('th');
+            ecosystemCell.scope = 'row';
+            ecosystemCell.textContent = entry.ecosystem ?? 'Genel';
+            tr.appendChild(ecosystemCell);
+
+            const totalCell = document.createElement('td');
+            totalCell.setAttribute('data-field', 'total');
+            totalCell.textContent =
+              typeof entry.total === 'number' && Number.isFinite(entry.total)
+                ? numberFormatter.format(entry.total)
+                : String(entry.total ?? '--');
+            tr.appendChild(totalCell);
+
+            const notAffectedCell = document.createElement('td');
+            notAffectedCell.setAttribute('data-field', 'not-affected');
+            notAffectedCell.textContent =
+              typeof entry.notAffected === 'number' && Number.isFinite(entry.notAffected)
+                ? numberFormatter.format(entry.notAffected)
+                : typeof entry.not_affected === 'number' && Number.isFinite(entry.not_affected)
+                  ? numberFormatter.format(entry.not_affected)
+                  : String(entry.notAffected ?? entry.not_affected ?? '--');
+            tr.appendChild(notAffectedCell);
+
+            const statusCell = document.createElement('td');
+            const pill = createStatusPill(entry.status ?? 'unknown');
+            statusCell.appendChild(pill);
+            tr.appendChild(statusCell);
+
+            vexBody.appendChild(tr);
+          });
+        };
+
+        const applySummaryMetrics = (summary) => {
+          if (!summary || typeof summary !== 'object') {
+            return;
+          }
+
+          const policyFail = Number.isFinite(summary?.policy?.fail) ? summary.policy.fail : null;
+          if (metrics.has('policy-failures')) {
+            metrics.get('policy-failures').textContent =
+              policyFail != null ? numberFormatter.format(policyFail) : metrics.get('policy-failures').textContent;
+          }
+
+          const legalPending = Number.isFinite(summary?.license_violations) ? summary.license_violations : null;
+          if (metrics.has('legal-queue') && legalPending != null) {
+            metrics.get('legal-queue').textContent = numberFormatter.format(legalPending);
+          }
+
+          const vexRatio = Number.isFinite(summary?.vex_noise_reduction?.ratio)
+            ? Math.round(summary.vex_noise_reduction.ratio * 100)
+            : null;
+          if (metrics.has('vex-coverage') && vexRatio != null) {
+            metrics.get('vex-coverage').textContent = `${vexRatio}%`;
+          }
+
+          const noticeReadyEstimate = Number.isFinite(summary?.total_scans) && Number.isFinite(summary?.policy?.fail)
+            ? Math.max(summary.total_scans - summary.policy.fail, 0)
+            : null;
+          if (metrics.has('notice-ready') && noticeReadyEstimate != null) {
+            metrics.get('notice-ready').textContent = numberFormatter.format(noticeReadyEstimate);
+          }
+        };
+
+        const resetHealthUi = () => {
+          metrics.forEach((element) => {
+            element.textContent = '--';
+          });
+          feedFields.forEach((element) => {
+            element.textContent = '--';
+          });
+          renderVexRows();
+        };
+
+        const formatDateValue = (value) => {
+          if (!value) {
+            return null;
+          }
+          const date = new Date(value);
+          const time = date.getTime();
+          if (!Number.isFinite(time)) {
+            return null;
+          }
+          return dateFormatter.format(date);
+        };
+
+        const baseTitle = document.title;
+        const statusLabels = new Map([
+          ['healthy', 'Sağlıklı'],
+          ['degraded', 'Kısmi Hata'],
+          ['unhealthy', 'Sorunlu'],
+          ['maintenance', 'Bakım Modu']
+        ]);
+        const formatTitle = (suffix) => {
+          document.title = suffix ? `${baseTitle} – ${suffix}` : baseTitle;
+        };
+
+        const resolveStatusTitle = (status) => {
+          if (typeof status !== 'string' || status.length === 0) {
+            return 'Durum bilinmiyor';
+          }
+
+          const normalized = status.toLowerCase();
+          return statusLabels.get(normalized) ?? status;
+        };
+
+        const applyHealthPayload = (payload) => {
+          const queueWaiting = Number.isFinite(payload?.queue?.waiting)
+            ? payload.queue.waiting
+            : 0;
+          const queueDelayed = Number.isFinite(payload?.queue?.delayed)
+            ? payload.queue.delayed
+            : 0;
+          const noticeReadyCount = Number.isFinite(payload?.notice?.ready)
+            ? payload.notice.ready
+            : null;
+          const breakdown = Array.isArray(payload?.vex?.breakdown)
+            ? payload.vex.breakdown
+            : [];
+
+          const vexRows = breakdown.map((entry) => ({
+            ecosystem: entry.ecosystem ?? 'Genel',
+            total: Number.isFinite(entry.total) ? entry.total : Number(entry.total) || 0,
+            notAffected: Number.isFinite(entry.not_affected)
+              ? entry.not_affected
+              : Number(entry.not_affected) || 0,
+            status: entry.status ?? 'investigate'
+          }));
+
+          if (metrics.has('policy-failures')) {
+            metrics.get('policy-failures').textContent = numberFormatter.format(queueWaiting);
+          }
+          if (metrics.has('legal-queue')) {
+            metrics.get('legal-queue').textContent = numberFormatter.format(queueDelayed);
+          }
+
+          const totalVex = vexRows.reduce((acc, entry) => acc + (Number.isFinite(entry.total) ? entry.total : 0), 0);
+          const notAffected = vexRows.reduce(
+            (acc, entry) => acc + (Number.isFinite(entry.notAffected) ? entry.notAffected : 0),
+            0
+          );
+
+          const fallbackTotal = Number.isFinite(payload?.vex?.total) ? payload.vex.total : 0;
+          const fallbackNotAffected = Number.isFinite(payload?.vex?.not_affected)
+            ? payload.vex.not_affected
+            : 0;
+          const coverageBase = totalVex > 0 ? totalVex : fallbackTotal;
+          const coverageNotAffected = notAffected > 0 ? notAffected : fallbackNotAffected;
+          const coverageValue = coverageBase > 0 ? Math.round((coverageNotAffected / coverageBase) * 100) : 0;
+          if (metrics.has('vex-coverage')) {
+            metrics.get('vex-coverage').textContent = `${coverageValue}%`;
+          }
+
+          if (metrics.has('notice-ready')) {
+            metrics.get('notice-ready').textContent =
+              noticeReadyCount != null ? numberFormatter.format(noticeReadyCount) : '--';
+          }
+
+          const activeVersion = payload?.feeds?.active_version ?? '—';
+          const lastImportValue = formatDateValue(payload?.feeds?.last_imported_at);
+          const lastImportText = lastImportValue ?? '—';
+          const rawSignatureStatus =
+            typeof payload?.feeds?.signature_status === 'string'
+              ? payload.feeds.signature_status.trim()
+              : '';
+          const signatureStatus = rawSignatureStatus.length > 0 ? rawSignatureStatus : 'Bilinmiyor';
+          const signatureFailure = signatureStatus === 'İmza doğrulanamadı';
+
+          if (feedFields.has('active-version')) {
+            feedFields.get('active-version').textContent = activeVersion;
+          }
+          if (feedFields.has('last-import')) {
+            feedFields.get('last-import').textContent = lastImportText;
+          }
+          if (feedFields.has('signature-status')) {
+            const signatureField = feedFields.get('signature-status');
+            signatureField.textContent = signatureStatus;
+            signatureField.classList.toggle('status-warning', signatureFailure);
+          }
+
+          renderVexRows(vexRows.length > 0 ? vexRows : undefined);
+          formatTitle(resolveStatusTitle(payload?.status));
+        };
+
+        const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+        const summaryEndpoint = tenantId
+          ? `/v1/reports/summary?tenant_id=${encodeURIComponent(tenantId)}`
+          : '/v1/reports/summary';
+
+        const fetchSummary = async () => {
+          const now = Date.now();
+          if (summaryCache.data && now - summaryCache.fetchedAt < REFRESH_INTERVAL_MS) {
+            applySummaryMetrics(summaryCache.data);
+            return summaryCache.data;
+          }
+
+          try {
+            const response = await fetch(summaryEndpoint, {
+              cache: 'no-store',
+              headers: { Accept: 'application/json' }
+            });
+            if (!response?.ok) {
+              throw new Error(`Beklenmeyen yanıt: ${response?.status ?? 'bilinmiyor'}`);
+            }
+            const payload = await response.json();
+            const summary = payload?.data ?? null;
+            summaryCache = { data: summary, fetchedAt: now };
+            if (summary) {
+              applySummaryMetrics(summary);
+            }
+            return summary;
+          } catch (error) {
+            console.warn('Rapor özeti alınamadı', error);
+            summaryCache = { data: null, fetchedAt: 0 };
+            return null;
+          }
+        };
+        let refreshHandle = null;
+        let activeController = null;
+
+        const clearRefreshTimer = () => {
+          if (refreshHandle !== null) {
+            window.clearTimeout(refreshHandle);
+            refreshHandle = null;
+          }
+        };
+
+        const stopPolling = () => {
+          clearRefreshTimer();
+          if (activeController) {
+            activeController.abort();
+            activeController = null;
+          }
+        };
+
+        const scheduleRefresh = () => {
+          clearRefreshTimer();
+          refreshHandle = window.setTimeout(() => {
+            void fetchHealth(true);
+          }, REFRESH_INTERVAL_MS);
+        };
+
+        const isDocumentVisible = () => document.visibilityState !== 'hidden';
+
+        const fetchHealth = async (isScheduled = false) => {
+          if (errorBanner instanceof HTMLElement) {
+            errorBanner.hidden = true;
+          }
+
+          if (activeController) {
+            activeController.abort();
+          }
+
+          const controller = new AbortController();
+          activeController = controller;
+          let shouldSchedule = true;
+
+          try {
+            const response = await fetch('/v1/health', {
+              cache: 'no-store',
+              headers: { Accept: 'application/json' },
+              signal: controller.signal
+            });
+            const isDegraded = response?.status === 503;
+            if (!response || (!response.ok && !isDegraded)) {
+              throw new Error(`Beklenmeyen yanıt: ${response?.status ?? 'bilinmiyor'}`);
+            }
+
+            let payload = {};
+
+            try {
+              payload = await response.json();
+            } catch (error) {
+              console.warn('Health yanıtı JSON parse edilemedi', error);
+            }
+
+            if (
+              isDegraded &&
+              payload &&
+              typeof payload === 'object' &&
+              !('status' in payload)
+            ) {
+              payload = { ...payload, status: 'degraded' };
+            }
+
+            applyHealthPayload(payload ?? {});
+            await fetchSummary();
+          } catch (error) {
+            if (controller.signal.aborted) {
+              shouldSchedule = false;
+              return;
+            }
+
+            console.error('Health verisi alınamadı', error);
+            resetHealthUi();
+            if (errorBanner instanceof HTMLElement) {
+              errorBanner.hidden = false;
+              errorBanner.textContent = 'Health API yanıt vermiyor. Lütfen daha sonra tekrar deneyin.';
+            }
+            formatTitle('Health API hatası');
+            if (!controller.signal.aborted) {
+              await fetchSummary().catch(() => {});
+            }
+          } finally {
+            if (activeController === controller) {
+              activeController = null;
+            }
+
+            if (shouldSchedule && isDocumentVisible()) {
+              scheduleRefresh();
+            }
+          }
+        };
+
+        resetHealthUi();
+        void fetchSummary();
+        void fetchHealth();
+
+        document.addEventListener('visibilitychange', () => {
+          if (isDocumentVisible()) {
+            void fetchHealth();
+          } else {
+            stopPolling();
+          }
+        });
+
+        window.addEventListener('pagehide', () => {
+          stopPolling();
+        });
+      })();
+    </script>
+  </body>
+</html>

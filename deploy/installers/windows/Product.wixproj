@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: MIT -->
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProductVersion Condition="'$(ProductVersion)' == ''">0.1.0</ProductVersion>
+    <ProjectGuid>{7BB07884-4733-45F6-AB77-F5C1E994AF44}</ProjectGuid>
+    <OutputName>AtlasSCA</OutputName>
+    <OutputType>Package</OutputType>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <DefineConstants>ProductVersion=$(ProductVersion);EulaPath=$(ProjectDir)License.rtf;PayloadDir=$(ProjectDir)payload;OfflineGateExpectation=055356bab4da9887f07289591f0f94f7edc632e09cef70cc9d3a0761b644b356</DefineConstants>
+    <WixTargetsPath Condition="'$(WixTargetsPath)' == ''">$(WixToolPath)\Wix.targets</WixTargetsPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Product.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="License.rtf" />
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" />
+</Project>

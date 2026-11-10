@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html
+  lang="tr"
+  data-theme="default"
+  data-tenant-id="55555555-5555-4555-8555-555555555555"
+  data-project-id="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+  data-scan-id="bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
+>
+  <head>
+    <meta charset="utf-8" />
+    <title>NOTICE Builder - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.95);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-success: #22c55e;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-success: #166534;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 56px;
+        display: grid;
+        gap: 28px;
+      }
+
+      .layout {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+      }
+
+      .panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(1.2rem, 3vw, 1.6rem);
+      }
+
+      label {
+        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      fieldset.signoff {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 14px;
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+        margin: 8px 0 0;
+      }
+
+      select,
+      textarea,
+      input[type='text'] {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        padding: 10px 12px;
+      }
+
+      select:focus,
+      textarea:focus,
+      input:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .preview {
+        background: var(--color-surface-alt);
+        border-radius: 16px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        padding: 18px;
+        white-space: pre-wrap;
+        line-height: 1.5;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        background: rgba(56, 189, 248, 0.15);
+        color: var(--color-accent);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .status {
+        margin: 8px 0 0;
+        font-size: 0.9rem;
+      }
+
+      .download {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .download a {
+        color: var(--color-accent);
+        text-decoration: underline;
+        font-weight: 600;
+      }
+
+      button[data-action='lock'] {
+        background: rgba(34, 197, 94, 0.2);
+        color: var(--color-success);
+        border-color: rgba(34, 197, 94, 0.4);
+      }
+
+      .diff-panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 14px;
+      }
+
+      .diff-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .diff-card {
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        padding: 12px;
+        background: var(--color-surface-alt);
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+      }
+
+      .status-badge[data-state='locked'] {
+        background: rgba(34, 197, 94, 0.25);
+        color: #bbf7d0;
+      }
+
+      .status-badge[data-state='draft'] {
+        background: rgba(56, 189, 248, 0.22);
+        color: #bae6fd;
+      }
+
+      footer.global-footer {
+        padding: 24px clamp(16px, 3vw, 48px) 48px;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>NOTICE Builder</h1>
+        <p id="notice-description">
+          Hukuk onaylı şablonlar, deduplikasyon ve proje sürümüne özel çıktılar bu ekrandan yönetilir.
+        </p>
+      </div>
+      <nav aria-labelledby="notice-description">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html" aria-current="page">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <div class="layout" role="region" aria-label="NOTICE oluşturma paneli">
+        <section class="panel" aria-labelledby="template-heading">
+          <h2 id="template-heading">Şablon ve Ayarlar</h2>
+          <label for="notice-template">
+            Şablon seç
+            <select id="notice-template" name="template" data-template>
+              <option value="default">Kurumsal Varsayılan</option>
+              <option value="oss">OSS Dağıtım</option>
+              <option value="embedded">Gömülü Cihaz</option>
+            </select>
+          </label>
+          <label for="project-version">
+            Proje sürümü
+            <input
+              id="project-version"
+              type="text"
+              name="version"
+              data-field="version"
+              placeholder="v1.4.0"
+              autocomplete="off"
+            />
+          </label>
+          <label>
+            <input type="checkbox" data-toggle="dedupe" checked /> Lisans ve NOTICE metinlerini dedupla
+          </label>
+          <label>
+            <input type="checkbox" data-toggle="override" /> Hukuk ek açıklamalarını dahil et
+          </label>
+          <fieldset class="signoff" aria-describedby="signoff-hint">
+            <legend>Hukuk Onayı</legend>
+            <p id="signoff-hint" class="muted">
+              Taslağı kilitlemek için imzalayan bilgilerini girin. Önizleme için isteğe bağlıdır.
+            </p>
+            <label for="signoff-name">
+              İmzalayan Adı
+              <input id="signoff-name" type="text" data-signoff="name" autocomplete="off" />
+            </label>
+            <label for="signoff-email">
+              İmzalayan E-posta
+              <input id="signoff-email" type="email" data-signoff="email" autocomplete="off" />
+            </label>
+            <label for="signoff-passcode">
+              Onay Kodu / İmza
+              <input id="signoff-passcode" type="text" data-signoff="signature" autocomplete="off" />
+            </label>
+          </fieldset>
+          <div class="actions">
+            <button type="button" data-action="preview">Önizlemeyi Güncelle</button>
+            <button type="button" data-action="lock" aria-pressed="false">Hukuk Onayıyla Kilitle</button>
+          </div>
+          <p class="status" data-build-status role="status" aria-live="polite"></p>
+          <p class="sr-only" aria-live="polite" data-lock-feedback>
+            Taslak düzenlenebilir durumda.
+          </p>
+        </section>
+
+        <section class="panel" aria-labelledby="preview-heading">
+          <h2 id="preview-heading">Önizleme</h2>
+          <div class="preview" data-preview>
+            NOTICE — Atlas SCA
+
+            Bu taslak, seçilen sürüm için lisans yükümlülüklerinin özetini içerir.
+            Hukuk onayıyla kilitlendiğinde Evidence Pack'e eklenir.
+          </div>
+          <div class="download" data-download-container hidden>
+            <a data-download-link href="#" download="notice.txt">NOTICE çıktısını indir</a>
+            <span class="muted" data-download-meta></span>
+          </div>
+          <label for="notice-notes">
+            Ek metin
+            <textarea id="notice-notes" name="notes" rows="6" data-field="notes" placeholder="Dağıtım spesifik notları ekleyin"></textarea>
+          </label>
+        </section>
+      </div>
+
+      <section class="diff-panel" aria-labelledby="diff-heading">
+        <h2 id="diff-heading">NOTICE Fark Önizlemesi</h2>
+        <p class="muted" aria-live="polite" data-diff-intro>
+          Hukuk tarafından onaylanan son NOTICE ile mevcut taslak arasındaki farklılıkları inceleyin.
+        </p>
+        <div class="diff-grid" data-diff-region aria-live="polite">
+          <article class="diff-card" data-diff="approved">
+            <h3>
+              Onaylı Sürüm
+              <span class="status-badge" data-state="locked" data-lock-approved-badge>
+                Kilitleme tarihi: 12.06.2024
+              </span>
+            </h3>
+            <p
+              class="muted"
+              data-diff-version="approved"
+              data-approved-label="Onaylı sürüm: v1.3.0"
+              data-approved-feed="feed-2024.06.15"
+            >
+              Onaylı sürüm: v1.3.0 — feed-2024.06.15
+            </p>
+            <pre>Apache-2.0
+MIT
+GPL-3.0 (kaynak teklif edildi)</pre>
+          </article>
+          <article class="diff-card" data-diff="proposed">
+            <h3>
+              Yeni Taslak
+              <span class="status-badge" data-state="draft" data-lock-proposed-badge>Taslak — kilitlenmedi</span>
+            </h3>
+            <p class="muted" data-diff-version="proposed" data-proposed-feed="feed-2024.06.30">
+              Version: v1.4.0 — feed-2024.06.30
+            </p>
+            <pre>Apache-2.0
+MIT
+GPL-3.0 (kaynak teklif edildi)
+EPL-2.0 (NOTICE eklendi)</pre>
+          </article>
+        </div>
+      </section>
+    </main>
+    <footer class="global-footer">
+      © Alterra-Solutions. Telemetri kapalı, tüm hareketler denetim kaydına yazılır.
+    </footer>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+        const tenantId = root.getAttribute('data-tenant-id') ?? '55555555-5555-4555-8555-555555555555';
+        const projectId = root.getAttribute('data-project-id') ?? 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+        const scanId = root.getAttribute('data-scan-id') ?? '';
+
+        const applyTheme = (theme) => {
+          if (theme === 'contrast') {
+            root.dataset.theme = 'contrast';
+            toggle?.setAttribute('aria-pressed', 'true');
+            if (label) {
+              label.textContent = 'Standart temaya dön';
+            }
+          } else {
+            root.dataset.theme = 'default';
+            toggle?.setAttribute('aria-pressed', 'false');
+            if (label) {
+              label.textContent = 'Yüksek kontrast modunu aç';
+            }
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema tercihi okunamadı', error);
+        }
+
+        const detectSystemTheme = () => {
+          if (typeof window.matchMedia !== 'function') {
+            return null;
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'contrast';
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'default';
+          }
+
+          return null;
+        };
+
+        const initialTheme =
+          savedTheme === 'contrast' || savedTheme === 'default'
+            ? savedTheme
+            : detectSystemTheme() ?? 'default';
+
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        const templateSelect = document.querySelector('[data-template]');
+        const dedupeToggle = document.querySelector('[data-toggle="dedupe"]');
+        const overrideToggle = document.querySelector('[data-toggle="override"]');
+        const notesField = document.querySelector('[data-field="notes"]');
+        const versionField = document.querySelector('[data-field="version"]');
+        const previewRegion = document.querySelector('[data-preview]');
+        const diffRegion = document.querySelector('[data-diff-region]');
+        const diffIntro = document.querySelector('[data-diff-intro]');
+        const proposedPre = diffRegion?.querySelector('[data-diff="proposed"] pre');
+        const approvedVersionCaption = diffRegion?.querySelector('[data-diff-version="approved"]');
+        const proposedVersionCaption = diffRegion?.querySelector('[data-diff-version="proposed"]');
+        const approvedBadge = document.querySelector('[data-lock-approved-badge]');
+        const proposedBadge = document.querySelector('[data-lock-proposed-badge]');
+        const lockButton = document.querySelector('[data-action="lock"]');
+        const lockFeedback = document.querySelector('[data-lock-feedback]');
+        const previewButton = document.querySelector('[data-action="preview"]');
+        const signoffNameField = document.querySelector('[data-signoff="name"]');
+        const signoffEmailField = document.querySelector('[data-signoff="email"]');
+        const signoffSignatureField = document.querySelector('[data-signoff="signature"]');
+        const buildStatus = document.querySelector('[data-build-status]');
+        const downloadContainer = document.querySelector('[data-download-container]');
+        const downloadLink = document.querySelector('[data-download-link]');
+        const downloadMeta = document.querySelector('[data-download-meta]');
+
+        if (
+          approvedVersionCaption instanceof HTMLElement &&
+          !approvedVersionCaption.dataset.template
+        ) {
+          const label = approvedVersionCaption.dataset.approvedLabel ?? 'Onaylı sürüm';
+          const feed = approvedVersionCaption.dataset.approvedFeed ?? '';
+          approvedVersionCaption.dataset.template = `${label} — ${feed}`.trim();
+        }
+
+        if (
+          proposedVersionCaption instanceof HTMLElement &&
+          !proposedVersionCaption.dataset.template
+        ) {
+          const feed = proposedVersionCaption.dataset.proposedFeed ?? '';
+          proposedVersionCaption.dataset.template = `Version: %VERSION% — ${feed}`.trim();
+        }
+
+        if (proposedBadge instanceof HTMLElement && !proposedBadge.dataset.initialText) {
+          proposedBadge.dataset.initialText = proposedBadge.textContent?.trim() ?? '';
+        }
+
+        if (approvedBadge instanceof HTMLElement && !approvedBadge.dataset.initialText) {
+          approvedBadge.dataset.initialText = approvedBadge.textContent?.trim() ?? '';
+        }
+
+        if (lockButton instanceof HTMLButtonElement && !lockButton.dataset.initialLabel) {
+          lockButton.dataset.initialLabel = lockButton.textContent ?? '';
+        }
+
+        const templateTexts = {
+          default:
+            'NOTICE — Atlas SCA\n\nBu taslak, seçilen sürüm için lisans yükümlülüklerinin özetini içerir.\nHukuk onayıyla kilitlendiğinde Evidence Pack\'e eklenir.',
+          oss:
+            'NOTICE — OSS Dağıtımı\n\nAtlas SCA\'nın açık kaynak dağıtımı için zorunlu lisans yükümlülükleri ve kaynak erişim bağlantıları listelenmiştir.',
+          embedded:
+            'NOTICE — Gömülü Cihaz\n\nBu NOTICE, firmware görüntülerine gömülü üçüncü taraf kütüphanelerin lisans bildirimlerini içerir.'
+        };
+
+        const templateLabels = {
+          default: 'Standart',
+          oss: 'OSS',
+          embedded: 'Gömülü'
+        };
+
+        const updatePreview = () => {
+          const templateKey =
+            templateSelect instanceof HTMLSelectElement ? templateSelect.value : 'default';
+          const base = templateTexts[templateKey] ?? templateTexts.default;
+          const detailLines = [];
+
+          const versionValue =
+            versionField instanceof HTMLInputElement ? versionField.value.trim() : '';
+          const versionDisplay = versionValue.length > 0 ? versionValue : 'Belirtilmedi';
+
+          detailLines.push(`Hedef sürüm: ${versionDisplay}`);
+
+          if (dedupeToggle instanceof HTMLInputElement && dedupeToggle.checked) {
+            detailLines.push('Deduplama etkin: yinelenen NOTICE girdileri birleştirildi.');
+          } else {
+            detailLines.push('Deduplama kapalı: tüm NOTICE girdileri ayrı listelendi.');
+          }
+
+          if (overrideToggle instanceof HTMLInputElement && overrideToggle.checked) {
+            detailLines.push('Hukuk ek açıklamaları taslağa dahil edildi.');
+          } else {
+            detailLines.push('Hukuk ek açıklamaları hariç tutuldu.');
+          }
+
+          const notesValue =
+            notesField instanceof HTMLTextAreaElement ? notesField.value.trim() : '';
+          if (notesValue.length > 0) {
+            detailLines.push(`Ek not: ${notesValue}`);
+          }
+
+          const previewText = `${base}\n\n${detailLines.join('\n')}`;
+          if (previewRegion) {
+            previewRegion.textContent = previewText;
+          }
+
+          if (proposedPre instanceof HTMLElement) {
+            const diffText = `${base}\n${detailLines.map((line) => `- ${line}`).join('\n')}`;
+            proposedPre.textContent = diffText;
+          }
+
+          if (diffIntro) {
+            const label = templateLabels[templateKey] ?? templateLabels.default;
+            diffIntro.textContent = `${label} şablonu seçildi; hedef sürüm ${versionDisplay}, dedupla ve açıklama ayarları önizlemeye yansıtıldı.`;
+          }
+
+          if (approvedVersionCaption instanceof HTMLElement) {
+            const template = approvedVersionCaption.dataset.template ?? approvedVersionCaption.textContent ?? '';
+            approvedVersionCaption.textContent = `${template} (Hedef: ${versionDisplay})`;
+          }
+
+          if (proposedVersionCaption instanceof HTMLElement) {
+            const template = proposedVersionCaption.dataset.template ?? '';
+            if (template.includes('%VERSION%')) {
+              proposedVersionCaption.textContent = template.replace('%VERSION%', versionDisplay);
+            } else {
+              proposedVersionCaption.textContent = `Version: ${versionDisplay}`;
+            }
+          }
+        };
+
+        const interactiveControls = [
+          templateSelect,
+          versionField,
+          dedupeToggle,
+          overrideToggle,
+          notesField,
+          previewButton,
+          signoffNameField,
+          signoffEmailField,
+          signoffSignatureField
+        ].filter((element) => element instanceof HTMLElement);
+
+        const setControlsDisabled = (disabled) => {
+          interactiveControls.forEach((control) => {
+            if ('disabled' in control) {
+              control.disabled = disabled;
+            } else {
+              control.toggleAttribute('aria-disabled', disabled);
+            }
+          });
+        };
+
+        const setProposedBadge = (state) => {
+          if (!(proposedBadge instanceof HTMLElement)) {
+            return;
+          }
+          proposedBadge.dataset.state = state;
+          const base = proposedBadge.dataset.initialText ?? 'Taslak — kilitlenmedi';
+          proposedBadge.textContent = state === 'locked' ? 'Kilitlendi — hukuk onaylı' : base;
+        };
+
+        const setApprovedBadgeTimestamp = (text) => {
+          if (!(approvedBadge instanceof HTMLElement)) {
+            return;
+          }
+          if (!text) {
+            const fallback = approvedBadge.dataset.initialText ?? '';
+            approvedBadge.textContent = fallback;
+            return;
+          }
+
+          approvedBadge.textContent = text;
+        };
+        let lockActive = false;
+        let downloadUrl = null;
+
+        const setBuildStatus = (message, state = 'info') => {
+          if (!(buildStatus instanceof HTMLElement)) {
+            return;
+          }
+
+          buildStatus.textContent = message;
+          if (message) {
+            buildStatus.dataset.state = state;
+          } else {
+            buildStatus.removeAttribute('data-state');
+          }
+        };
+
+        const clearDownloadLink = () => {
+          if (downloadUrl) {
+            if (
+              typeof URL !== 'undefined' &&
+              typeof URL.revokeObjectURL === 'function' &&
+              downloadUrl.startsWith('blob:')
+            ) {
+              URL.revokeObjectURL(downloadUrl);
+            }
+
+            downloadUrl = null;
+          }
+
+          if (downloadContainer instanceof HTMLElement) {
+            downloadContainer.setAttribute('hidden', '');
+          }
+
+          if (downloadLink instanceof HTMLAnchorElement) {
+            downloadLink.removeAttribute('href');
+          }
+
+          if (downloadMeta instanceof HTMLElement) {
+            downloadMeta.textContent = '';
+          }
+        };
+
+        const updateDownloadLink = (documentText, versionId, finalized) => {
+          if (!documentText) {
+            clearDownloadLink();
+            return;
+          }
+
+          if (
+            downloadUrl &&
+            typeof URL !== 'undefined' &&
+            typeof URL.revokeObjectURL === 'function' &&
+            downloadUrl.startsWith('blob:')
+          ) {
+            URL.revokeObjectURL(downloadUrl);
+          }
+
+          const canUseObjectUrl = typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function';
+
+          if (canUseObjectUrl) {
+            const blob = new Blob([documentText], { type: 'text/plain;charset=utf-8' });
+            downloadUrl = URL.createObjectURL(blob);
+          } else {
+            downloadUrl = `data:text/plain;charset=utf-8,${encodeURIComponent(documentText)}`;
+          }
+
+          if (downloadLink instanceof HTMLAnchorElement) {
+            downloadLink.href = downloadUrl;
+            downloadLink.download = finalized && versionId
+              ? `notice-${versionId}.txt`
+              : 'notice-preview.txt';
+          }
+
+          if (downloadMeta instanceof HTMLElement) {
+            if (versionId) {
+              downloadMeta.textContent = `Sürüm ID: ${versionId}`;
+            } else if (finalized) {
+              downloadMeta.textContent = 'Taslak kilitlendi.';
+            } else {
+              downloadMeta.textContent = 'Önizleme taslağı oluşturuldu.';
+            }
+          }
+
+          if (downloadContainer instanceof HTMLElement) {
+            downloadContainer.removeAttribute('hidden');
+          }
+        };
+
+        const updateLockState = (nextState, options = {}) => {
+          lockActive = nextState;
+          setControlsDisabled(lockActive);
+          setProposedBadge(lockActive ? 'locked' : 'draft');
+
+          if (lockButton instanceof HTMLButtonElement) {
+            lockButton.setAttribute('aria-pressed', lockActive ? 'true' : 'false');
+            const defaultLabel = lockButton.dataset.initialLabel ?? 'Hukuk Onayıyla Kilitle';
+            lockButton.textContent = lockActive ? 'Kilidi Aç' : defaultLabel;
+          }
+
+          if (lockFeedback instanceof HTMLElement) {
+            const versionValue =
+              versionField instanceof HTMLInputElement ? versionField.value.trim() : '';
+            const versionDisplay = versionValue.length > 0 ? versionValue : 'Belirtilmedi';
+            lockFeedback.textContent = lockActive
+              ? `Taslak ${versionDisplay} sürümü için kilitlendi. Düzenlemek için kilidi açın.`
+              : 'Taslak düzenlenebilir durumda.';
+          }
+
+          if (lockActive) {
+            const now = new Date();
+            const formatted = new Intl.DateTimeFormat('tr-TR', {
+              dateStyle: 'short',
+              timeStyle: 'short'
+            }).format(now);
+            const versionId = options.versionId ? ` — ID: ${options.versionId}` : '';
+            setApprovedBadgeTimestamp(`Kilitleme tarihi: ${formatted}${versionId}`);
+          } else {
+            setApprovedBadgeTimestamp(null);
+          }
+        };
+
+        const requestNoticeBuild = async ({ finalize, trigger }) => {
+          updatePreview();
+
+          if (!projectId || projectId.trim().length === 0) {
+            setBuildStatus('Proje bilgisi bulunamadı.', 'error');
+            return;
+          }
+
+          const templateKey =
+            templateSelect instanceof HTMLSelectElement ? templateSelect.value : 'default';
+          const versionValue =
+            versionField instanceof HTMLInputElement ? versionField.value.trim() : '';
+          const dedupeEnabled =
+            dedupeToggle instanceof HTMLInputElement ? Boolean(dedupeToggle.checked) : false;
+          const overrideEnabled =
+            overrideToggle instanceof HTMLInputElement ? Boolean(overrideToggle.checked) : false;
+          const notesValue =
+            notesField instanceof HTMLTextAreaElement ? notesField.value.trim() : '';
+
+          const payload = {
+            tenant_id: tenantId,
+            project_id: projectId,
+            template: templateKey,
+            finalize: Boolean(finalize)
+          };
+
+          if (scanId && scanId.trim().length > 0) {
+            payload.scan_id = scanId.trim();
+          }
+
+          if (notesValue.length > 0) {
+            payload.additional_text = notesValue;
+          }
+
+          if (finalize) {
+            if (signoffNameField instanceof HTMLElement) {
+              signoffNameField.removeAttribute('aria-invalid');
+            }
+            if (signoffSignatureField instanceof HTMLElement) {
+              signoffSignatureField.removeAttribute('aria-invalid');
+            }
+
+            const signerName =
+              signoffNameField instanceof HTMLInputElement ? signoffNameField.value.trim() : '';
+            const signatureValue =
+              signoffSignatureField instanceof HTMLInputElement
+                ? signoffSignatureField.value.trim()
+                : '';
+            const signerEmail =
+              signoffEmailField instanceof HTMLInputElement
+                ? signoffEmailField.value.trim()
+                : '';
+
+            if (!signerName || !signatureValue) {
+              if (signoffNameField instanceof HTMLElement && !signerName) {
+                signoffNameField.setAttribute('aria-invalid', 'true');
+              }
+              if (signoffSignatureField instanceof HTMLElement && !signatureValue) {
+                signoffSignatureField.setAttribute('aria-invalid', 'true');
+              }
+              setBuildStatus('Taslağı kilitlemek için imzalayan adı ve imza gereklidir.', 'error');
+              return;
+            }
+
+            payload.signoff = {
+              signer_name: signerName,
+              signer_email: signerEmail || undefined,
+              signature: signatureValue,
+              payload: {
+                version: versionValue || null,
+                dedupe: dedupeEnabled,
+                include_overrides: overrideEnabled
+              }
+            };
+          }
+
+          setBuildStatus(
+            finalize ? 'NOTICE kilitleniyor...' : 'NOTICE taslağı oluşturuluyor...',
+            'loading'
+          );
+
+          if (previewRegion instanceof HTMLElement) {
+            previewRegion.setAttribute('aria-busy', 'true');
+          }
+
+          const releaseTrigger = () => {
+            if (trigger instanceof HTMLButtonElement) {
+              trigger.removeAttribute('aria-busy');
+              trigger.disabled = false;
+            }
+          };
+
+          if (trigger instanceof HTMLButtonElement) {
+            trigger.setAttribute('aria-busy', 'true');
+            trigger.disabled = true;
+          }
+
+          try {
+            const response = await fetch('/v1/notice/build', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+
+            if (!response?.ok) {
+              let message = `NOTICE taslağı oluşturulamadı (HTTP ${response?.status ?? 'bilinmiyor'}).`;
+              try {
+                const errorPayload = await response.json();
+                const normalized =
+                  (errorPayload && typeof errorPayload === 'object'
+                    ? errorPayload.message ?? errorPayload?.error?.message
+                    : null) ?? null;
+                if (typeof normalized === 'string' && normalized.trim().length > 0) {
+                  message = normalized;
+                }
+              } catch {
+                // ignore parse failures
+              }
+
+              throw new Error(message);
+            }
+
+            const result = await response.json();
+            const data = result?.data ?? {};
+            const documentText =
+              typeof data?.document === 'string' && data.document.length > 0
+                ? data.document
+                : 'NOTICE içeriği oluşturuldu fakat boş döndü.';
+            const versionId = typeof data?.version_id === 'string' ? data.version_id : null;
+            const finalized = Boolean(data?.finalized);
+
+            if (previewRegion instanceof HTMLElement) {
+              previewRegion.textContent = documentText;
+            }
+
+            if (proposedPre instanceof HTMLElement) {
+              proposedPre.textContent = documentText;
+            }
+
+            if (proposedVersionCaption instanceof HTMLElement) {
+              const template = proposedVersionCaption.dataset.template ?? '';
+              const versionDisplay = versionValue.length > 0 ? versionValue : 'Belirtilmedi';
+              const baseText = template.includes('%VERSION%')
+                ? template.replace('%VERSION%', versionDisplay)
+                : `Version: ${versionDisplay}`;
+              proposedVersionCaption.textContent = versionId
+                ? `${baseText} — ID: ${versionId}`
+                : baseText;
+            }
+
+            updateDownloadLink(documentText, versionId, finalized);
+
+            if (previewRegion instanceof HTMLElement) {
+              previewRegion.removeAttribute('aria-busy');
+            }
+
+            if (finalized) {
+              updateLockState(true, { versionId });
+              setBuildStatus('NOTICE kilitlendi ve imzalandı.', 'success');
+            } else {
+              updateLockState(false);
+              setBuildStatus('NOTICE taslağı güncellendi.', 'success');
+            }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'NOTICE taslağı oluşturulamadı.';
+            if (previewRegion instanceof HTMLElement) {
+              previewRegion.removeAttribute('aria-busy');
+            }
+            setBuildStatus(message, 'error');
+            if (finalize) {
+              updateLockState(false);
+              clearDownloadLink();
+            }
+          } finally {
+            releaseTrigger();
+          }
+        };
+
+        if (templateSelect instanceof HTMLSelectElement) {
+          templateSelect.addEventListener('change', updatePreview);
+        }
+
+        if (versionField instanceof HTMLInputElement) {
+          versionField.addEventListener('input', updatePreview);
+        }
+
+        if (dedupeToggle instanceof HTMLInputElement) {
+          dedupeToggle.addEventListener('change', updatePreview);
+        }
+
+        if (overrideToggle instanceof HTMLInputElement) {
+          overrideToggle.addEventListener('change', updatePreview);
+        }
+
+        if (notesField instanceof HTMLTextAreaElement) {
+          notesField.addEventListener('input', updatePreview);
+        }
+
+        if (previewButton instanceof HTMLButtonElement) {
+          previewButton.addEventListener('click', () => {
+            void requestNoticeBuild({ finalize: false, trigger: previewButton });
+          });
+        }
+
+        if (lockButton instanceof HTMLButtonElement) {
+          lockButton.addEventListener('click', () => {
+            if (lockActive) {
+              updateLockState(false);
+              setBuildStatus('Taslak düzenlenebilir durumda.', 'info');
+              clearDownloadLink();
+              return;
+            }
+
+            void requestNoticeBuild({ finalize: true, trigger: lockButton });
+          });
+        }
+
+        updatePreview();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: oss-licensing-api
+description: API deployment for the OSS licensing compliance service
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

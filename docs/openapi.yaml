@@ -1,0 +1,1146 @@
+# SPDX-License-Identifier: MIT
+openapi: 3.1.0
+info:
+  title: Otomatik OSS Uyumluluk API
+  version: 0.1.0
+  description: |
+    OSS lisans ve güvenlik uyumluluk taramalarını yöneten REST API.
+servers:
+  - url: /v1
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Key
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            request_id:
+              type: string
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - version
+        - uptime_s
+        - dependencies
+        - queue
+      properties:
+        status:
+          type: string
+          description: Overall service health status (healthy, degraded, or down).
+          enum: [healthy, degraded, down]
+        version:
+          type: string
+        uptime_s:
+          type: number
+        last_scan_at:
+          type: string
+          format: date-time
+          nullable: true
+        dependencies:
+          type: object
+          additionalProperties:
+            type: string
+        queue:
+          type: object
+          required: [waiting, active, delayed]
+          properties:
+            waiting:
+              type: integer
+            active:
+              type: integer
+            delayed:
+              type: integer
+    Project:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        repo_url:
+          type: string
+          format: uri
+          nullable: true
+        oci_ref:
+          type: string
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ScanLinks:
+      type: object
+      required: [self, sbom, vulns, licenses]
+      properties:
+        self:
+          type: string
+          format: uri
+        sbom:
+          type: string
+          format: uri
+        vulns:
+          type: string
+          format: uri
+        licenses:
+          type: string
+          format: uri
+    Scan:
+      type: object
+      required:
+        - id
+        - project_id
+        - status
+        - findings
+        - started_at
+        - created_at
+        - links
+      properties:
+        id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        artifact_id:
+          type: string
+          format: uuid
+          nullable: true
+        policy_id:
+          type: string
+          format: uuid
+          nullable: true
+        policy_result:
+          type: string
+          enum: [pass, warn, fail]
+          nullable: true
+        status:
+          type: string
+          enum: [pending, queued, running, succeeded, failed, complete]
+        findings:
+          type: object
+          additionalProperties: true
+        duration_ms:
+          type: number
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        links:
+          $ref: '#/components/schemas/ScanLinks'
+    ArtifactInput:
+      type: object
+      required:
+        - type
+        - ref
+      properties:
+        type:
+          type: string
+          enum: [git, archive, oci]
+        ref:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+    LicenseFinding:
+      type: object
+      required:
+        - id
+        - sbom_id
+        - component_purl
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        scan_id:
+          type: string
+          format: uuid
+          nullable: true
+        sbom_id:
+          type: string
+          format: uuid
+        component_purl:
+          type: string
+        detected_spdx_id:
+          type: string
+          nullable: true
+        evidence:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+    UsageMetrics:
+      type: object
+      required: [req_count, scans_started, scans_succeeded]
+      additionalProperties:
+        type: number
+      properties:
+        req_count:
+          type: number
+          minimum: 0
+        scans_started:
+          type: number
+          minimum: 0
+        scans_succeeded:
+          type: number
+          minimum: 0
+    UsagePeriod:
+      type: object
+      required: [period_start, period_end, metrics]
+      properties:
+        period_start:
+          type: string
+          format: date-time
+        period_end:
+          type: string
+          format: date-time
+        metrics:
+          $ref: '#/components/schemas/UsageMetrics'
+    UsageResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [tenant_id, totals, periods]
+          properties:
+            tenant_id:
+              type: string
+              format: uuid
+            totals:
+              $ref: '#/components/schemas/UsageMetrics'
+            periods:
+              type: array
+              items:
+                $ref: '#/components/schemas/UsagePeriod'
+    Vulnerability:
+      type: object
+      required:
+        - id
+        - scan_id
+        - component_purl
+        - source
+        - detected_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        scan_id:
+          type: string
+          format: uuid
+        component_purl:
+          type: string
+        source:
+          type: string
+          enum: [osv, nvd, vendor]
+        cve_id:
+          type: string
+          nullable: true
+        severity:
+          type: string
+          enum: [critical, high, medium, low, none, unknown]
+          nullable: true
+        cvss:
+          type: number
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        fixed_version:
+          type: string
+          nullable: true
+        detected_at:
+          type: string
+          format: date-time
+    Policy:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - name
+        - rules
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        rules:
+          $ref: '#/components/schemas/PolicyRules'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Webhook:
+      type: object
+      required:
+        - id
+        - tenant_id
+        - url
+        - events
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+          description: Webhook hedef URL’si HTTPS şemasını kullanmalıdır.
+        secret:
+          type: string
+          nullable: true
+        events:
+          type: array
+          items:
+            type: string
+            enum: [scan.completed, scan.failed]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    PolicyRules:
+      type: object
+      required: [allowed_spdx, denied_spdx, cvss_threshold, allowlists]
+      properties:
+        allowed_spdx:
+          type: array
+          items:
+            type: string
+        denied_spdx:
+          type: array
+          items:
+            type: string
+        cvss_threshold:
+          type: number
+          nullable: true
+        allowlists:
+          type: object
+          required: [licenses, vulnerabilities]
+          properties:
+            licenses:
+              type: array
+              items:
+                type: string
+            vulnerabilities:
+              type: array
+              items:
+                type: string
+    ReportsSummary:
+      type: object
+      required:
+        - total_scans
+        - policy
+        - license_violations
+        - average_duration_ms
+        - vulnerabilities
+      properties:
+        total_scans:
+          type: integer
+        policy:
+          type: object
+          required: [pass, warn, fail]
+          properties:
+            pass:
+              type: integer
+            warn:
+              type: integer
+            fail:
+              type: integer
+        license_violations:
+          type: integer
+        average_duration_ms:
+          type: number
+          nullable: true
+        vulnerabilities:
+          type: object
+          required: [critical, high, medium, low]
+          properties:
+            critical:
+              type: integer
+            high:
+              type: integer
+            medium:
+              type: integer
+            low:
+              type: integer
+    ChangeEvent:
+      type: object
+      required:
+        - id
+        - scan_id
+        - project_id
+        - project_name
+        - status
+        - occurred_at
+        - type
+        - links
+      properties:
+        id:
+          type: string
+          format: uuid
+        scan_id:
+          type: string
+          format: uuid
+        project_id:
+          type: string
+          format: uuid
+        project_name:
+          type: string
+        status:
+          type: string
+        policy_result:
+          type: string
+          enum: [pass, warn, fail]
+          nullable: true
+        occurred_at:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum: [scan.completed, scan.failed]
+        links:
+          type: object
+          required: [scan, sbom]
+          properties:
+            scan:
+              type: string
+              format: uri
+            sbom:
+              type: string
+              format: uri
+paths:
+  /health:
+    get:
+      summary: Sistem sağlık durumu
+      security: []
+      responses:
+        '200':
+          description: Sağlık bilgileri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Bağımlılıklardan biri problemli
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /projects:
+    get:
+      summary: Projeleri listele
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 20
+      responses:
+        '200':
+          description: Proje listesi
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+                  pagination:
+                    type: object
+                    required: [page, page_size, count]
+                    properties:
+                      page:
+                        type: integer
+                        minimum: 1
+                      page_size:
+                        type: integer
+                        minimum: 1
+                        maximum: 200
+                      count:
+                        type: integer
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Yeni proje oluştur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenant_id, name]
+              properties:
+                tenant_id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                description:
+                  type: string
+                repo_url:
+                  type: string
+                  format: uri
+                oci_ref:
+                  type: string
+                metadata:
+                  type: object
+                  additionalProperties: true
+      responses:
+        '201':
+          description: Proje oluşturuldu
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Project'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /me/usage:
+    get:
+      summary: Tenant kullanım metriklerini getir
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 90
+            default: 30
+      responses:
+        '200':
+          description: Kullanım özeti
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageResponse'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /projects/{id}:
+    get:
+      summary: Proje detayı
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tenant_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Proje bulundu
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Project'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /artifacts:
+    post:
+      summary: Artefakt kaydet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/ArtifactInput'
+                - type: object
+                  required: [project_id]
+                  properties:
+                    project_id:
+                      type: string
+                      format: uuid
+      responses:
+        '201':
+          description: Artefakt oluşturuldu
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /scans:
+    get:
+      summary: Taramaları listele
+      parameters:
+        - name: project_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: policy_result
+          in: query
+          schema:
+            type: string
+            enum: [pass, warn, fail]
+        - name: created_from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: created_to
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 20
+      responses:
+        '200':
+          description: Tarama listesi
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Scan'
+                  pagination:
+                    type: object
+                    required: [page, page_size, count]
+                    properties:
+                      page:
+                        type: integer
+                        minimum: 1
+                      page_size:
+                        type: integer
+                        minimum: 1
+                        maximum: 200
+                      count:
+                        type: integer
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Yeni tarama başlat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [project_id]
+              properties:
+                project_id:
+                  type: string
+                  format: uuid
+                artifact_id:
+                  type: string
+                  format: uuid
+                artifact:
+                  $ref: '#/components/schemas/ArtifactInput'
+                policy_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Tarama kuyruğa alındı
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Scan'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /scans/{id}:
+    get:
+      summary: Tarama detayını getir
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Tarama bulundu
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Scan'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /sboms/{scan_id}:
+    get:
+      summary: Tarama SBOM'unu indir
+      parameters:
+        - name: scan_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: CycloneDX SBOM
+          content:
+            application/vnd.cyclonedx+json:
+              schema:
+                type: object
+                additionalProperties: true
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /licenses:
+    get:
+      summary: Lisans bulgularını listele
+      parameters:
+        - name: scan_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: spdx_id
+          in: query
+          schema:
+            type: string
+        - name: component_purl
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 20
+      responses:
+        '200':
+          description: Lisans bulguları
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LicenseFinding'
+                  pagination:
+                    type: object
+                    required: [page, page_size, count]
+                    properties:
+                      page:
+                        type: integer
+                        minimum: 1
+                      page_size:
+                        type: integer
+                        minimum: 1
+                        maximum: 200
+                      count:
+                        type: integer
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /vulns:
+    get:
+      summary: Zafiyet bulgularını listele
+      parameters:
+        - name: scan_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: severity
+          in: query
+          schema:
+            type: string
+        - name: component_purl
+          in: query
+          schema:
+            type: string
+        - name: cvss_min
+          in: query
+          schema:
+            type: number
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 20
+      responses:
+        '200':
+          description: Zafiyet bulguları
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Vulnerability'
+                  pagination:
+                    type: object
+                    required: [page, page_size, count]
+                    properties:
+                      page:
+                        type: integer
+                        minimum: 1
+                      page_size:
+                        type: integer
+                        minimum: 1
+                        maximum: 200
+                      count:
+                        type: integer
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /policies:
+    post:
+      summary: Politika oluştur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenant_id, name, rules]
+              properties:
+                tenant_id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                description:
+                  type: string
+                rules:
+                  $ref: '#/components/schemas/PolicyRules'
+      responses:
+        '201':
+          description: Politika kaydedildi
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Policy'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /policies/{id}:
+    get:
+      summary: Politika detayı
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Politika bulundu
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Policy'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /webhooks:
+    post:
+      summary: Webhook abonesi oluştur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenant_id, url, events]
+              properties:
+                tenant_id:
+                  type: string
+                  format: uuid
+                url:
+                  type: string
+                  format: uri
+                  description: Webhook hedef URL’si HTTPS şemasını kullanmalıdır.
+                secret:
+                  type: string
+                events:
+                  type: array
+                  items:
+                    type: string
+                    enum: [scan.completed, scan.failed]
+      responses:
+        '201':
+          description: Webhook kaydedildi
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Webhook'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /reports/summary:
+    get:
+      summary: Risk ve uyumluluk özeti
+      parameters:
+        - name: project_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Özet metrikler
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ReportsSummary'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /changes:
+    get:
+      summary: Tarama durum değişiklikleri
+      parameters:
+        - name: since
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [scan.completed, scan.failed]
+      responses:
+        '200':
+          description: Tarama olayları
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChangeEvent'
+        default:
+          description: Hata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

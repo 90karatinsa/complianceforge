@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  ci:
+    name: Test and self-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check and lint (scan CLI)
+        run: |
+          npx tsc -p cli/tsconfig.json
+          npx eslint cli tests/cli-rapor.test.ts
+
+      - name: Tests
+        run: npm test
+
+      - name: Self-scan (offline, licenses only)
+        run: npm run scan -- . --offline --deny-copyleft

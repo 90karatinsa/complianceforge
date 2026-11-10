@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Politika İstisnaları - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.94);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-danger: #ef4444;
+        --color-success: #22c55e;
+        --color-warning: #f59e0b;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-danger: #b91c1c;
+        --color-success: #166534;
+        --color-warning: #92400e;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 40px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 64px;
+        display: grid;
+        gap: 28px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      section {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: clamp(20px, 3vw, 32px);
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 2.4rem);
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: clamp(1.4rem, 3vw, 1.8rem);
+      }
+
+      p.muted {
+        color: var(--color-muted);
+      }
+
+      form.filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: flex-end;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      select {
+        font: inherit;
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        padding: 10px 12px;
+        background: var(--color-surface-alt);
+        color: inherit;
+      }
+
+      button.primary,
+      button.secondary {
+        font: inherit;
+        border-radius: 12px;
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+
+      button.primary {
+        border: 1px solid transparent;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        font-weight: 600;
+      }
+
+      button.secondary {
+        border: 1px solid var(--color-border);
+        background: transparent;
+        color: inherit;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+
+      th,
+      td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--color-border);
+        text-align: left;
+      }
+
+      th {
+        font-weight: 700;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: rgba(148, 163, 184, 0.1);
+      }
+
+      .badge[data-variant='approved'] {
+        border-color: rgba(34, 197, 94, 0.4);
+        background: rgba(34, 197, 94, 0.15);
+      }
+
+      .badge[data-variant='revoked'],
+      .badge[data-variant='expired'] {
+        border-color: rgba(239, 68, 68, 0.4);
+        background: rgba(239, 68, 68, 0.15);
+      }
+
+      .badge[data-variant='pending'] {
+        border-color: rgba(245, 158, 11, 0.4);
+        background: rgba(245, 158, 11, 0.15);
+      }
+
+      [data-alert] {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        padding: 12px 16px;
+        margin-top: 12px;
+      }
+
+      [data-alert][data-variant='error'] {
+        border-color: rgba(239, 68, 68, 0.6);
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      dialog.modal {
+        border: none;
+        border-radius: 18px;
+        background: var(--color-surface);
+        color: inherit;
+        padding: clamp(20px, 3vw, 32px);
+        max-width: 420px;
+      }
+
+      dialog::backdrop {
+        background: rgba(2, 6, 23, 0.7);
+      }
+
+      form.modal-form {
+        display: grid;
+        gap: 16px;
+      }
+
+      textarea,
+      input[type='text'] {
+        font: inherit;
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        padding: 10px 12px;
+        background: var(--color-surface-alt);
+        color: inherit;
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      footer.global-footer {
+        text-align: center;
+        color: var(--color-muted);
+        padding: 32px 16px 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Politika İstisnaları</h1>
+        <p class="muted">Onay, süre yönetimi ve audit log bağlantıları tek ekranda.</p>
+      </div>
+      <nav aria-label="Birincil">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html" aria-current="page">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label>Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <section aria-labelledby="filters-heading">
+        <h2 id="filters-heading">Filtreler</h2>
+        <form class="filters" data-filter-form>
+          <label>
+            Durum
+            <select name="status" data-filter-status>
+              <option value="">Tümü</option>
+              <option value="pending">Beklemede</option>
+              <option value="approved">Onaylı</option>
+              <option value="revoked">İptal edildi</option>
+              <option value="expired">Süresi doldu</option>
+            </select>
+          </label>
+          <label>
+            Kapsam
+            <select name="scope" data-filter-scope>
+              <option value="">Hepsi</option>
+              <option value="package">Paket</option>
+              <option value="project">Proje</option>
+              <option value="organization">Organizasyon</option>
+            </select>
+          </label>
+          <button type="submit" class="primary">Uygula</button>
+          <button type="button" class="secondary" data-reset>Temizle</button>
+        </form>
+        <div data-alert hidden role="status" aria-live="assertive"></div>
+        <p class="muted">
+          İstisna kararları audit logunda <a href="audit-log.html">politikalar</a> etiketiyle saklanır. İlgili kayıtlar Evidence Pack'e eklenir.
+        </p>
+        <table aria-describedby="filters-heading">
+          <thead>
+            <tr>
+              <th scope="col">İstisna</th>
+              <th scope="col">Kapsam</th>
+              <th scope="col">Durum</th>
+              <th scope="col">Süre</th>
+              <th scope="col">İşlemler</th>
+            </tr>
+          </thead>
+          <tbody data-exception-body></tbody>
+        </table>
+      </section>
+    </main>
+    <footer class="global-footer">© Alterra-Solutions. Tüm kararlar elektronik imza izi ile kaydedilir.</footer>
+
+    <dialog class="modal" data-action-modal aria-modal="true">
+      <form class="modal-form" data-modal-form>
+        <h2 data-modal-title>İstisna eylemi</h2>
+        <p class="muted" data-modal-caption>Karar gerekçesini paylaşın. Mesaj audit loguna yazılır.</p>
+        <input type="hidden" data-modal-id />
+        <label>
+          Gerekçe / not
+          <textarea data-modal-notes placeholder="İş gerekçesini yazın" required></textarea>
+        </label>
+        <div data-modal-error hidden role="alert"></div>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button type="button" class="secondary" data-modal-cancel>Vazgeç</button>
+          <button type="submit" class="primary" data-modal-submit>Onayla</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const tenantId = root.dataset.tenantId ?? '';
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+        const form = document.querySelector('[data-filter-form]');
+        const statusSelect = form?.querySelector('[data-filter-status]');
+        const scopeSelect = form?.querySelector('[data-filter-scope]');
+        const resetButton = form?.querySelector('[data-reset]');
+        const tableBody = document.querySelector('[data-exception-body]');
+        const alertRegion = document.querySelector('[data-alert]');
+        const modal = document.querySelector('[data-action-modal]');
+        const modalForm = modal?.querySelector('[data-modal-form]');
+        const modalTitle = modal?.querySelector('[data-modal-title]');
+        const modalCaption = modal?.querySelector('[data-modal-caption]');
+        const modalIdField = modal?.querySelector('[data-modal-id]');
+        const modalNotes = modal?.querySelector('[data-modal-notes]');
+        const modalSubmit = modal?.querySelector('[data-modal-submit]');
+        const modalCancel = modal?.querySelector('[data-modal-cancel]');
+        const modalError = modal?.querySelector('[data-modal-error]');
+
+        const exceptions = [];
+        let actionMode = 'approve';
+        let openerButton = null;
+
+        const applyTheme = (theme) => {
+          const variant = theme === 'contrast' ? 'contrast' : 'default';
+          root.dataset.theme = variant;
+          toggle?.setAttribute('aria-pressed', variant === 'contrast' ? 'true' : 'false');
+          if (label) {
+            label.textContent = variant === 'contrast' ? 'Standart temaya dön' : 'Yüksek kontrast modunu aç';
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema okunamadı', error);
+        }
+        const prefersLight = () => window.matchMedia?.('(prefers-color-scheme: light)').matches ?? false;
+        applyTheme(savedTheme ?? (prefersLight() ? 'contrast' : 'default'));
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema kaydedilemedi', error);
+          }
+        });
+
+        const showAlert = (message, variant = 'info') => {
+          if (!(alertRegion instanceof HTMLElement)) {
+            return;
+          }
+          if (!message) {
+            alertRegion.hidden = true;
+            alertRegion.textContent = '';
+            return;
+          }
+          alertRegion.hidden = false;
+          alertRegion.dataset.variant = variant;
+          alertRegion.textContent = message;
+        };
+
+        const normalizeException = (record) => {
+          if (!record || typeof record !== 'object') {
+            return null;
+          }
+          return {
+            id: record.id ?? crypto.randomUUID(),
+            component_purl: record.component_purl ?? '—',
+            scope: record.scope ?? 'project',
+            status: record.status ?? 'pending',
+            expires_at: record.expires_at ?? null,
+            metadata: record.metadata ?? {},
+            project_id: record.project_id ?? null,
+            rationale: record.rationale ?? '',
+            approved_by: record.approved_by ?? null
+          };
+        };
+
+        const countdown = (expiresAt) => {
+          if (!expiresAt) {
+            return 'Belirsiz';
+          }
+          const target = new Date(expiresAt);
+          if (Number.isNaN(target.getTime())) {
+            return 'Belirsiz';
+          }
+          const diffMs = target.getTime() - Date.now();
+          if (diffMs <= 0) {
+            return 'Süresi doldu';
+          }
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+          const diffHours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+          if (diffDays > 0) {
+            return `${diffDays}g ${diffHours}s`; // g= gün, s= saat
+          }
+          const diffMinutes = Math.floor((diffMs / (1000 * 60)) % 60);
+          return `${diffHours}s ${diffMinutes}d`;
+        };
+
+        const renderExceptions = () => {
+          if (!(tableBody instanceof HTMLElement)) {
+            return;
+          }
+          tableBody.innerHTML = '';
+          if (exceptions.length === 0) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 5;
+            cell.textContent = 'İstisna kaydı bulunamadı.';
+            row.appendChild(cell);
+            tableBody.appendChild(row);
+            return;
+          }
+
+          for (const exception of exceptions) {
+            const row = document.createElement('tr');
+
+            const nameCell = document.createElement('th');
+            nameCell.scope = 'row';
+            nameCell.textContent =
+              exception.scope === 'project'
+                ? exception.project_id ?? '—'
+                : exception.scope === 'package'
+                  ? exception.component_purl
+                  : 'Tüm organizasyon';
+            row.appendChild(nameCell);
+
+            const scopeCell = document.createElement('td');
+            scopeCell.textContent = exception.scope;
+            row.appendChild(scopeCell);
+
+            const statusCell = document.createElement('td');
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.dataset.variant = exception.status ?? 'pending';
+            badge.textContent = exception.status ?? 'pending';
+            statusCell.appendChild(badge);
+            row.appendChild(statusCell);
+
+            const expiresCell = document.createElement('td');
+            expiresCell.textContent = countdown(exception.expires_at);
+            row.appendChild(expiresCell);
+
+            const actionsCell = document.createElement('td');
+            const approveButton = document.createElement('button');
+            approveButton.type = 'button';
+            approveButton.className = 'primary';
+            approveButton.textContent = 'Onayla';
+            approveButton.disabled = exception.status !== 'pending';
+            approveButton.addEventListener('click', () => openModal('approve', exception, approveButton));
+
+            const revokeButton = document.createElement('button');
+            revokeButton.type = 'button';
+            revokeButton.className = 'secondary';
+            revokeButton.textContent = exception.status === 'revoked' ? 'Yeniden aç' : 'İptal et';
+            revokeButton.disabled = exception.status === 'revoked' && !exception.approved_by;
+            revokeButton.addEventListener('click', () => openModal('revoke', exception, revokeButton));
+
+            actionsCell.append(approveButton, revokeButton);
+            row.appendChild(actionsCell);
+            tableBody.appendChild(row);
+          }
+        };
+
+        const buildQuery = () => {
+          const params = new URLSearchParams({ tenant_id: tenantId });
+          const statusValue = statusSelect instanceof HTMLSelectElement ? statusSelect.value : '';
+          if (statusValue) {
+            params.set('status', statusValue);
+          }
+          const scopeValue = scopeSelect instanceof HTMLSelectElement ? scopeSelect.value : '';
+          if (scopeValue) {
+            params.set('scope', scopeValue);
+          }
+          return params;
+        };
+
+        const fetchExceptions = async () => {
+          const params = buildQuery();
+          try {
+            const response = await fetch(`/v1/exceptions?${params.toString()}`, {
+              cache: 'no-store',
+              headers: { Accept: 'application/json' }
+            });
+            if (!response?.ok) {
+              throw new Error(`Beklenmeyen yanıt: ${response?.status ?? 'bilinmiyor'}`);
+            }
+            const payload = await response.json();
+            const items = Array.isArray(payload?.data) ? payload.data : [];
+            exceptions.splice(0, exceptions.length, ...items.map(normalizeException).filter(Boolean));
+            renderExceptions();
+            showAlert('İstisnalar güncellendi.');
+          } catch (error) {
+            console.error('İstisnalar alınamadı', error);
+            showAlert('İstisnalar yüklenemedi. Lütfen daha sonra deneyin.', 'error');
+          }
+        };
+
+        const openModal = (mode, exception, opener) => {
+          if (!(modal instanceof HTMLDialogElement)) {
+            return;
+          }
+          actionMode = mode;
+          openerButton = opener ?? null;
+          if (modalTitle instanceof HTMLElement) {
+            modalTitle.textContent =
+              mode === 'approve' ? 'İstisnayı onayla' : exception.status === 'revoked' ? 'İstisnayı yeniden aç' : 'İstisnayı iptal et';
+          }
+          if (modalCaption instanceof HTMLElement) {
+            modalCaption.textContent =
+              mode === 'approve'
+                ? 'Onay gerekçesini paylaşın. İstisna süresi dolmadan otomatik uyarı gönderilir.'
+                : 'İptal gerekçesi audit loguna yazılır ve politika yeniden değerlendirilir.';
+          }
+          if (modalSubmit instanceof HTMLButtonElement) {
+            modalSubmit.textContent = mode === 'approve' ? 'Onayla' : 'Kaydet';
+          }
+          if (modalIdField instanceof HTMLInputElement) {
+            modalIdField.value = exception.id;
+          }
+          if (modalNotes instanceof HTMLTextAreaElement) {
+            modalNotes.value = '';
+          }
+          modalError?.setAttribute('hidden', '');
+          if (typeof modal.showModal === 'function') {
+            modal.showModal();
+          } else {
+            modal.setAttribute('open', '');
+          }
+          modalNotes?.focus();
+        };
+
+        const closeModal = () => {
+          if (!(modal instanceof HTMLDialogElement)) {
+            return;
+          }
+          if (typeof modal.close === 'function') {
+            modal.close();
+          } else {
+            modal.removeAttribute('open');
+          }
+          if (openerButton instanceof HTMLElement) {
+            openerButton.focus();
+          }
+        };
+
+        modalCancel?.addEventListener('click', () => {
+          closeModal();
+        });
+
+        modal?.addEventListener('cancel', (event) => {
+          event.preventDefault();
+          closeModal();
+        });
+
+        modalForm?.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          if (!(modal instanceof HTMLDialogElement) || !(modalNotes instanceof HTMLTextAreaElement)) {
+            return;
+          }
+          const id = modalIdField instanceof HTMLInputElement ? modalIdField.value : null;
+          const notes = modalNotes.value.trim();
+          if (!id || notes.length === 0) {
+            modalError?.removeAttribute('hidden');
+            if (modalError instanceof HTMLElement) {
+              modalError.textContent = 'Gerekçe zorunludur.';
+            }
+            return;
+          }
+
+          const payload = {
+            tenant_id: tenantId,
+            status: actionMode === 'approve' ? 'approved' : 'revoked',
+            approval_notes: notes
+          };
+
+          try {
+            const response = await fetch(`/v1/exceptions/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            if (!response?.ok) {
+              const errorPayload = await response.json().catch(() => ({}));
+              const message = errorPayload?.error?.message ?? 'İşlem başarısız oldu';
+              throw new Error(message);
+            }
+            const result = await response.json();
+            const normalized = normalizeException(result?.data ?? {});
+            const index = exceptions.findIndex((item) => item.id === id);
+            if (index >= 0 && normalized) {
+              exceptions[index] = normalized;
+            }
+            renderExceptions();
+            closeModal();
+            showAlert('İstisna kaydı güncellendi.');
+          } catch (error) {
+            console.error('İstisna güncellenemedi', error);
+            if (modalError instanceof HTMLElement) {
+              modalError.textContent = error?.message ?? 'İşlem başarısız oldu';
+              modalError.removeAttribute('hidden');
+            }
+          }
+        });
+
+        form?.addEventListener('submit', (event) => {
+          event.preventDefault();
+          void fetchExceptions();
+        });
+
+        resetButton?.addEventListener('click', () => {
+          if (statusSelect instanceof HTMLSelectElement) {
+            statusSelect.value = '';
+          }
+          if (scopeSelect instanceof HTMLSelectElement) {
+            scopeSelect.value = '';
+          }
+          void fetchExceptions();
+        });
+
+        void fetchExceptions();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "Varsayılan Lisans Politikası",
+  "description": "Alterra-Solutions demo tenant için başlangıç politikası.",
+  "allowed_spdx": ["MIT", "Apache-2.0", "BSD-3-Clause"],
+  "denied_spdx": ["GPL-3.0-only", "GPL-3.0-or-later", "AGPL-3.0-only", "AGPL-3.0-or-later"],
+  "cvss_threshold": 7,
+  "allowlist_purls": ["pkg:npm/@alterra/demo-critical@1.0.0"]
+}

@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Taramalar - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.95);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-success: #22c55e;
+        --color-warning: #f59e0b;
+        --color-danger: #ef4444;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-success: #166534;
+        --color-warning: #92400e;
+        --color-danger: #7f1d1d;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 48px;
+        display: grid;
+        gap: 24px;
+      }
+
+      section.panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 18px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(1.2rem, 3vw, 1.6rem);
+      }
+
+      .status-filters {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .status-filters button {
+        background: var(--color-surface-alt);
+        color: inherit;
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+
+      .status-filters button:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .status-filters button[aria-pressed='true'] {
+        background: var(--color-accent);
+        color: var(--color-bg);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--color-surface);
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+      }
+
+      thead {
+        background: rgba(15, 23, 42, 0.85);
+        text-align: left;
+      }
+
+      :root[data-theme='contrast'] thead {
+        background: rgba(15, 23, 42, 0.12);
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      }
+
+      tbody tr:last-of-type td {
+        border-bottom: none;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .status-badge[data-status='completed'] {
+        background: rgba(34, 197, 94, 0.2);
+        color: #bbf7d0;
+      }
+
+      .status-badge[data-status='running'] {
+        background: rgba(249, 158, 11, 0.2);
+        color: #fcd34d;
+      }
+
+      .status-badge[data-status='failed'] {
+        background: rgba(239, 68, 68, 0.25);
+        color: #fecaca;
+      }
+
+      .actions {
+        display: inline-flex;
+        gap: 12px;
+      }
+
+      .actions a {
+        color: var(--color-accent);
+        text-decoration: none;
+      }
+
+      .feed-version {
+        font-variant-numeric: tabular-nums;
+      }
+
+      nav[aria-label='Sayfalama'] {
+        margin-top: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--color-muted);
+      }
+
+      nav[aria-label='Sayfalama'] button {
+        background: none;
+        border: 1px solid transparent;
+        color: var(--color-accent);
+        text-decoration: none;
+        font: inherit;
+        padding: 6px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+      }
+
+      nav[aria-label='Sayfalama'] button:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      nav[aria-label='Sayfalama'] button[aria-disabled='true'] {
+        color: var(--color-muted);
+        cursor: not-allowed;
+      }
+
+      nav[aria-label='Sayfalama'] span[aria-current] {
+        font-weight: 700;
+      }
+
+      .refresh-controls {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .refresh-controls button {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 12px;
+        padding: 6px 14px;
+        cursor: pointer;
+      }
+
+      .refresh-controls button:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .table-status {
+        margin: 0;
+        color: var(--color-muted);
+      }
+
+      .table-status[data-state='error'] {
+        color: var(--color-danger);
+      }
+
+      .queue-meta {
+        display: block;
+        margin-top: 4px;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+      }
+
+      footer.global-footer {
+        padding: 24px clamp(16px, 3vw, 48px) 48px;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Tarama Geçmişi</h1>
+        <p id="scan-subtitle">CI/CD pipeline'larında yürütülen son 20 tarama.</p>
+      </div>
+      <nav aria-labelledby="scan-subtitle">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html" aria-current="page">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <section class="panel" aria-labelledby="filters-heading">
+        <h2 id="filters-heading">Durum Filtreleri</h2>
+        <div class="status-filters" role="toolbar" aria-label="Durum filtreleri">
+          <button type="button" data-filter="all" aria-pressed="true">Tümü</button>
+          <button type="button" data-filter="completed">Tamamlanan</button>
+          <button type="button" data-filter="running">Çalışan</button>
+          <button type="button" data-filter="failed">Hatalı</button>
+        </div>
+        <p class="sr-only" aria-live="polite" data-filter-status>
+          Tüm taramalar gösteriliyor (3 kayıt).
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="table-heading">
+        <h2 id="table-heading">Son Taramalar</h2>
+        <div class="refresh-controls">
+          <button type="button" data-refresh-toggle aria-pressed="true">Otomatik yenilemeyi durdur</button>
+          <span class="sr-only" data-refresh-status aria-live="polite">Otomatik yenileme açık.</span>
+        </div>
+        <table aria-describedby="scan-subtitle scan-table-caption" data-table="scan-list">
+          <caption id="scan-table-caption" class="sr-only">
+            Son taramaların proje, başlatan, durum, kullanılan feed sürümü ve aksiyon bağlantılarını gösterir.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Proje</th>
+              <th scope="col">Başlatan</th>
+              <th scope="col">Durum</th>
+              <th scope="col">Feed</th>
+              <th scope="col">Başlangıç</th>
+              <th scope="col">Eylemler</th>
+            </tr>
+          </thead>
+          <tbody data-scan-body>
+            <tr data-empty-row>
+              <td colspan="6">Taramalar yükleniyor...</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="table-status" data-scan-status hidden aria-live="polite"></p>
+        <nav aria-label="Sayfalama">
+          <button type="button" data-page="prev" aria-disabled="true">
+            <span aria-hidden="true">Önceki</span>
+            <span class="sr-only">Önceki sayfa</span>
+          </button>
+          <span aria-current="page" data-page-indicator>
+            <span aria-hidden="true">1 / 1</span>
+            <span class="sr-only">Sayfa 1 / 1</span>
+          </span>
+          <button type="button" data-page="next" aria-disabled="true">
+            <span aria-hidden="true">Sonraki</span>
+            <span class="sr-only">Sonraki sayfa</span>
+          </button>
+        </nav>
+      </section>
+    </main>
+    <footer class="global-footer">
+      © Alterra-Solutions. Telemetri kapalı, tüm hareketler denetim kaydına yazılır.
+    </footer>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+
+        const applyTheme = (theme) => {
+          if (theme === 'contrast') {
+            root.dataset.theme = 'contrast';
+            toggle?.setAttribute('aria-pressed', 'true');
+            if (label) {
+              label.textContent = 'Standart temaya dön';
+            }
+          } else {
+            root.dataset.theme = 'default';
+            toggle?.setAttribute('aria-pressed', 'false');
+            if (label) {
+              label.textContent = 'Yüksek kontrast modunu aç';
+            }
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema tercihi okunamadı', error);
+        }
+
+        const detectSystemTheme = () => {
+          if (typeof window.matchMedia !== 'function') {
+            return null;
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'contrast';
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'default';
+          }
+
+          return null;
+        };
+
+        const initialTheme =
+          savedTheme === 'contrast' || savedTheme === 'default'
+            ? savedTheme
+            : detectSystemTheme() ?? 'default';
+
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        const tenantId = document.documentElement.dataset.tenantId ?? '';
+        const filterButtons = Array.from(document.querySelectorAll('[data-filter]'));
+        const filterSummary = document.querySelector('[data-filter-status]');
+        const scansBody = document.querySelector('[data-scan-body]');
+        const tableStatus = document.querySelector('[data-scan-status]');
+        const refreshToggle = document.querySelector('[data-refresh-toggle]');
+        const refreshStatus = document.querySelector('[data-refresh-status]');
+        const pagination = document.querySelector('nav[aria-label="Sayfalama"]');
+        const prevButton = pagination?.querySelector('button[data-page="prev"]') ?? null;
+        const nextButton = pagination?.querySelector('button[data-page="next"]') ?? null;
+        const pageIndicator = pagination?.querySelector('[data-page-indicator]') ?? null;
+        const labelLookup = new Map(
+          filterButtons.map((button) => [button.dataset.filter ?? '', button.textContent?.trim() ?? ''])
+        );
+        let filterFocusIndex = 0;
+        let activeFilter = 'all';
+        const state = {
+          scans: [],
+          loading: false,
+          page: 1,
+          pageSize: 20,
+          total: 0
+        };
+        const refreshIntervalMs = 30000;
+        let autoRefreshEnabled = true;
+        let refreshTimerId = null;
+        let activeRequestController = null;
+
+        const dispatchLoaded = () => {
+          document.dispatchEvent(
+            new CustomEvent('scans:data-loaded', {
+              detail: { count: state.scans.length, page: state.page, total: state.total }
+            })
+          );
+        };
+
+        const clearRefreshTimer = () => {
+          if (refreshTimerId !== null) {
+            window.clearTimeout(refreshTimerId);
+            refreshTimerId = null;
+          }
+        };
+
+        const updateRefreshToggle = () => {
+          if (refreshToggle instanceof HTMLButtonElement) {
+            refreshToggle.setAttribute('aria-pressed', autoRefreshEnabled ? 'true' : 'false');
+            refreshToggle.textContent = autoRefreshEnabled
+              ? 'Otomatik yenilemeyi durdur'
+              : 'Otomatik yenilemeyi başlat';
+          }
+
+          if (refreshStatus instanceof HTMLElement) {
+            refreshStatus.textContent = autoRefreshEnabled
+              ? 'Otomatik yenileme açık.'
+              : 'Otomatik yenileme duraklatıldı.';
+          }
+        };
+
+        const scheduleRefresh = () => {
+          clearRefreshTimer();
+
+          if (!autoRefreshEnabled || document.hidden) {
+            return;
+          }
+
+          refreshTimerId = window.setTimeout(() => {
+            if (!autoRefreshEnabled || document.hidden) {
+              return;
+            }
+
+            void loadScans(state.page);
+          }, refreshIntervalMs);
+        };
+
+        const toRecord = (value) => (value && typeof value === 'object' ? value : {});
+
+        const readString = (value, fallback = '') =>
+          typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+
+        const readNumber = (value) => {
+          const parsed = typeof value === 'number' ? value : Number(value);
+          return Number.isFinite(parsed) ? parsed : null;
+        };
+
+        const formatDateTime = (value) => {
+          if (!value) {
+            return 'Bilinmiyor';
+          }
+
+          const date = value instanceof Date ? value : new Date(value);
+
+          if (Number.isNaN(date.getTime())) {
+            return 'Bilinmiyor';
+          }
+
+          return new Intl.DateTimeFormat('tr-TR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }).format(date);
+        };
+
+        const getProjectName = (scan) => {
+          const findings = toRecord(scan?.findings);
+          const project = toRecord(findings.project ?? findings.project_metadata ?? {});
+          const fromDirect = readString(findings.project_name);
+          if (fromDirect) {
+            return fromDirect;
+          }
+          const fromMetadata = readString(project.name);
+          if (fromMetadata) {
+            return fromMetadata;
+          }
+          return readString(scan?.project_id, 'Bilinmeyen proje');
+        };
+
+        const getInitiator = (scan) => {
+          const findings = toRecord(scan?.findings);
+          const initiator =
+            readString(findings.started_by) || readString(findings.triggered_by) || readString(findings.initiator);
+          if (initiator) {
+            return initiator;
+          }
+          const metadata = toRecord(findings.pipeline ?? {});
+          const label = readString(metadata.runner) || readString(metadata.source);
+          return label || 'Bilinmiyor';
+        };
+
+        const getFeedVersion = (scan) => {
+          const findings = toRecord(scan?.findings);
+          const manifest = toRecord(findings.manifest ?? {});
+          const feedInfo = toRecord(findings.feed ?? {});
+          return (
+            readString(findings.feed_version) ||
+            readString(findings.active_feed_version) ||
+            readString(manifest.feed_version) ||
+            readString(feedInfo.active_version) ||
+            'feed-bilinmiyor'
+          );
+        };
+
+        const getQueuePosition = (scan) => {
+          const findings = toRecord(scan?.findings);
+          const queue = toRecord(findings.queue ?? {});
+          const position = readNumber(queue.position ?? findings.queue_position);
+          return position;
+        };
+
+        const getStatusKey = (scan) => {
+          const status = readString(scan?.status, '');
+          if (status === 'completed') {
+            const policy = readString(scan?.policy_result, 'pass');
+            return policy === 'fail' ? 'failed' : 'completed';
+          }
+          if (status === 'failed') {
+            return 'failed';
+          }
+          if (status === 'running' || status === 'queued') {
+            return 'running';
+          }
+          if (status === 'pending') {
+            return 'running';
+          }
+          return status || 'completed';
+        };
+
+        const getStatusLabel = (scan, key) => {
+          switch (key) {
+            case 'failed':
+              return 'Fail';
+            case 'running':
+              return scan?.status === 'queued' ? 'Kuyrukta' : 'Çalışıyor';
+            default:
+              return readString(scan?.policy_result) === 'conditional' ? 'Conditional' : 'Pass';
+          }
+        };
+
+        const clearTableBody = () => {
+          if (!(scansBody instanceof HTMLElement)) {
+            return;
+          }
+
+          while (scansBody.firstChild) {
+            scansBody.removeChild(scansBody.firstChild);
+          }
+        };
+
+        const renderEmptyRow = (message) => {
+          if (!(scansBody instanceof HTMLElement)) {
+            return;
+          }
+
+          const row = document.createElement('tr');
+          row.setAttribute('data-empty-row', '');
+          const cell = document.createElement('td');
+          cell.colSpan = 6;
+          cell.textContent = message;
+          row.append(cell);
+          scansBody.append(row);
+        };
+
+        const createActionLink = (href, action, projectLabel) => {
+          const link = document.createElement('a');
+          link.href = href;
+          link.dataset.action = action;
+          link.textContent = action === 'view-report' ? 'Rapor' : 'Evidence Pack';
+          link.setAttribute('aria-label', `${projectLabel} taramasının ${link.textContent} bağlantısı`);
+          return link;
+        };
+
+        const getScanRows = () =>
+          Array.from(document.querySelectorAll('tbody[data-scan-body] tr[data-scan-row]'));
+
+        const updateFilterSummary = (visibleCount) => {
+          if (!filterSummary) {
+            return;
+          }
+
+          const label = labelLookup.get(activeFilter) ?? 'Tümü';
+          const prefix = activeFilter === 'all' ? 'Tüm taramalar gösteriliyor' : `${label} taramalar gösteriliyor`;
+          filterSummary.textContent = `${prefix} (${visibleCount} kayıt).`;
+        };
+
+        const showStatus = (message, stateName) => {
+          if (!(tableStatus instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!message) {
+            tableStatus.textContent = '';
+            tableStatus.setAttribute('hidden', '');
+            tableStatus.removeAttribute('data-state');
+            return;
+          }
+
+          tableStatus.textContent = message;
+          tableStatus.dataset.state = stateName ?? '';
+          tableStatus.removeAttribute('hidden');
+        };
+
+        const updatePagination = () => {
+          const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+          const hasPrev = state.page > 1;
+          const hasNext = state.page < totalPages;
+
+          if (prevButton instanceof HTMLButtonElement) {
+            prevButton.setAttribute('aria-disabled', hasPrev ? 'false' : 'true');
+          }
+
+          if (nextButton instanceof HTMLButtonElement) {
+            nextButton.setAttribute('aria-disabled', hasNext ? 'false' : 'true');
+          }
+
+          if (pageIndicator instanceof HTMLElement) {
+            const human = `${state.page} / ${totalPages}`;
+            pageIndicator.innerHTML = `
+              <span aria-hidden="true">${human}</span>
+              <span class="sr-only">Sayfa ${state.page} / ${totalPages}</span>
+            `;
+          }
+        };
+
+        const renderScans = () => {
+          if (!(scansBody instanceof HTMLElement)) {
+            return;
+          }
+
+          clearTableBody();
+
+          if (state.scans.length === 0) {
+            renderEmptyRow(state.loading ? 'Taramalar yükleniyor...' : 'Tarama bulunamadı.');
+            return;
+          }
+
+          state.scans.forEach((scan) => {
+            const row = document.createElement('tr');
+            row.setAttribute('data-scan-row', '');
+            row.tabIndex = 0;
+            const filterKey = getStatusKey(scan);
+            row.dataset.status = filterKey;
+            if (typeof scan?.id === 'string') {
+              row.dataset.scanId = scan.id;
+            }
+
+            const projectCell = document.createElement('td');
+            const projectName = getProjectName(scan);
+            projectCell.textContent = projectName;
+
+            const initiatorCell = document.createElement('td');
+            initiatorCell.textContent = getInitiator(scan);
+
+            const statusCell = document.createElement('td');
+            const badge = document.createElement('span');
+            badge.className = 'status-badge';
+            badge.dataset.status = filterKey;
+            badge.textContent = getStatusLabel(scan, filterKey);
+            statusCell.append(badge);
+
+            const queuePosition = getQueuePosition(scan);
+            if (queuePosition !== null && (filterKey === 'running' || filterKey === 'failed')) {
+              const queueMeta = document.createElement('span');
+              queueMeta.className = 'queue-meta';
+              queueMeta.textContent = `Kuyruk pozisyonu: ${queuePosition}`;
+              statusCell.append(queueMeta);
+            }
+
+            const feedCell = document.createElement('td');
+            feedCell.className = 'feed-version';
+            feedCell.dataset.feedVersion = 'true';
+            const feedVersion = getFeedVersion(scan);
+            const feedId = `feed-${scan?.id ?? Math.random().toString(16).slice(2)}`;
+            feedCell.id = feedId;
+            feedCell.textContent = feedVersion;
+
+            const startCell = document.createElement('td');
+            startCell.textContent = formatDateTime(scan?.started_at ?? scan?.created_at);
+
+            const actionsCell = document.createElement('td');
+            actionsCell.className = 'actions';
+            actionsCell.setAttribute('aria-describedby', feedId);
+
+            const reportHref = readString(scan?.links?.self) || `/v1/scans/${scan?.id ?? ''}`;
+            const evidenceHref = `/v1/scans/${scan?.id ?? ''}/evidence-pack`;
+
+            const reportLink = createActionLink(reportHref, 'view-report', projectName);
+            reportLink.setAttribute('aria-describedby', feedId);
+
+            const evidenceLink = createActionLink(evidenceHref, 'download-evidence', projectName);
+            evidenceLink.setAttribute('aria-describedby', feedId);
+
+            actionsCell.append(reportLink, evidenceLink);
+
+            row.append(projectCell, initiatorCell, statusCell, feedCell, startCell, actionsCell);
+            scansBody.append(row);
+          });
+        };
+
+        const updateFilterTabIndexes = () => {
+          filterButtons.forEach((button, index) => {
+            button.setAttribute('tabindex', index === filterFocusIndex ? '0' : '-1');
+          });
+        };
+
+        const applyFilter = (filter, { preserveFocus = false } = {}) => {
+          activeFilter = filter;
+          filterButtons.forEach((button, index) => {
+            const isActive = button.dataset.filter === filter || (filter === 'all' && button.dataset.filter === 'all');
+            button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            if (isActive && !preserveFocus) {
+              filterFocusIndex = index;
+            }
+          });
+
+          if (!preserveFocus) {
+            updateFilterTabIndexes();
+          }
+
+          let visibleCount = 0;
+          getScanRows().forEach((row) => {
+            const status = row.getAttribute('data-status');
+            const shouldShow = filter === 'all' || status === filter;
+            row.toggleAttribute('hidden', !shouldShow);
+            row.tabIndex = shouldShow ? 0 : -1;
+            if (shouldShow) {
+              visibleCount += 1;
+            }
+          });
+
+          updateFilterSummary(visibleCount);
+        };
+
+        const focusFilterAt = (index, { applySelection = false } = {}) => {
+          if (filterButtons.length === 0) {
+            return;
+          }
+
+          const total = filterButtons.length;
+          const normalizedIndex = ((index % total) + total) % total;
+          filterFocusIndex = normalizedIndex;
+          updateFilterTabIndexes();
+          const target = filterButtons[filterFocusIndex];
+          target.focus();
+
+          if (applySelection) {
+            applyFilter(target.dataset.filter ?? 'all', { preserveFocus: true });
+          }
+        };
+
+        updateFilterTabIndexes();
+
+        filterButtons.forEach((button, index) => {
+          button.addEventListener('click', () => {
+            focusFilterAt(index, { applySelection: true });
+          });
+
+          button.addEventListener('keydown', (event) => {
+            switch (event.key) {
+              case 'ArrowRight':
+              case 'ArrowDown': {
+                event.preventDefault();
+                focusFilterAt(index + 1, { applySelection: true });
+                break;
+              }
+              case 'ArrowLeft':
+              case 'ArrowUp': {
+                event.preventDefault();
+                focusFilterAt(index - 1, { applySelection: true });
+                break;
+              }
+              case 'Home': {
+                event.preventDefault();
+                focusFilterAt(0, { applySelection: true });
+                break;
+              }
+              case 'End': {
+                event.preventDefault();
+                focusFilterAt(filterButtons.length - 1, { applySelection: true });
+                break;
+              }
+              case ' ': {
+                event.preventDefault();
+                applyFilter(button.dataset.filter ?? 'all', { preserveFocus: true });
+                break;
+              }
+              case 'Enter': {
+                event.preventDefault();
+                applyFilter(button.dataset.filter ?? 'all', { preserveFocus: true });
+                break;
+              }
+              default:
+                break;
+            }
+          });
+        });
+
+        refreshToggle?.addEventListener('click', () => {
+          autoRefreshEnabled = !autoRefreshEnabled;
+          updateRefreshToggle();
+
+          if (autoRefreshEnabled) {
+            scheduleRefresh();
+          } else {
+            clearRefreshTimer();
+          }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            clearRefreshTimer();
+            return;
+          }
+
+          if (autoRefreshEnabled) {
+            scheduleRefresh();
+          }
+        });
+
+        const handlePagination = (direction) => {
+          const totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+          const nextPage = Math.min(Math.max(1, state.page + direction), totalPages);
+          if (nextPage === state.page) {
+            return;
+          }
+
+          void loadScans(nextPage);
+        };
+
+        prevButton?.addEventListener('click', () => handlePagination(-1));
+        nextButton?.addEventListener('click', () => handlePagination(1));
+
+        const loadScans = async (page = 1) => {
+          clearRefreshTimer();
+
+          if (activeRequestController) {
+            activeRequestController.abort();
+          }
+
+          const controller = new AbortController();
+          activeRequestController = controller;
+
+          state.loading = true;
+          state.page = page;
+          showStatus('Taramalar yükleniyor...', 'loading');
+          renderScans();
+          updatePagination();
+
+          const params = new URLSearchParams({
+            page: String(page),
+            page_size: String(state.pageSize)
+          });
+
+          if (tenantId) {
+            params.set('tenant_id', tenantId);
+          }
+
+          try {
+            const response = await fetch(`/v1/scans?${params.toString()}`, {
+              headers: { Accept: 'application/json' },
+              signal: controller.signal
+            });
+
+            if (!response.ok) {
+              throw new Error(`Request failed with status ${response.status}`);
+            }
+
+            const payload = await response.json();
+            const data = Array.isArray(payload?.data) ? payload.data : [];
+            state.scans = data;
+            state.page = Number(payload?.pagination?.page ?? page) || page;
+            state.pageSize = Number(payload?.pagination?.page_size ?? state.pageSize) || state.pageSize;
+            state.total = Number(payload?.pagination?.total ?? data.length) || data.length;
+            showStatus('');
+          } catch (error) {
+            if (controller.signal.aborted) {
+              return;
+            }
+
+            console.error('Tarama listesi yüklenemedi', error);
+            state.scans = [];
+            showStatus('Taramalar yüklenirken hata oluştu. Lütfen daha sonra tekrar deneyin.', 'error');
+          } finally {
+            if (activeRequestController === controller) {
+              activeRequestController = null;
+            }
+
+            if (controller.signal.aborted) {
+              return;
+            }
+
+            state.loading = false;
+            renderScans();
+            applyFilter(activeFilter, { preserveFocus: true });
+            updatePagination();
+            dispatchLoaded();
+            scheduleRefresh();
+          }
+        };
+
+        updateRefreshToggle();
+        applyFilter('all', { preserveFocus: true });
+        void loadScans(1);
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Raporlar - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.94);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-danger: #f87171;
+        --color-success: #22c55e;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-danger: #b91c1c;
+        --color-success: #15803d;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent), var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 40px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 64px;
+        display: grid;
+        gap: 28px;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      section {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: clamp(20px, 3vw, 32px);
+        box-shadow: 0 30px 60px rgba(15, 23, 42, 0.45);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(2rem, 4vw, 2.5rem);
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: clamp(1.4rem, 3vw, 1.8rem);
+      }
+
+      p.muted,
+      span.muted {
+        color: var(--color-muted);
+      }
+
+      form.filters {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      input,
+      select,
+      button,
+      a.button-link {
+        font: inherit;
+      }
+
+      input[type='date'],
+      select,
+      input[type='search'] {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        padding: 10px 12px;
+        background: var(--color-surface-alt);
+        color: inherit;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      button.primary,
+      a.button-link {
+        border-radius: 12px;
+        border: 1px solid transparent;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 10px 16px;
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      button.secondary {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        background: transparent;
+        color: inherit;
+        padding: 10px 16px;
+        cursor: pointer;
+      }
+
+      button:disabled,
+      a.button-link[aria-disabled='true'] {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      ul.metric-cards {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      ul.metric-cards li {
+        background: var(--color-surface-alt);
+        border-radius: 16px;
+        border: 1px solid var(--color-border);
+        padding: 16px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .metric-value {
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: 700;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--color-border);
+        text-align: left;
+      }
+
+      th {
+        font-weight: 700;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+      }
+
+      .status-pill[data-variant='warning'] {
+        background: rgba(248, 113, 113, 0.12);
+        border-color: rgba(248, 113, 113, 0.3);
+      }
+
+      .refresh-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      footer.global-footer {
+        text-align: center;
+        padding: 32px 16px 48px;
+        color: var(--color-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Atlas Raporları</h1>
+        <p class="muted">Politika ve VEX etkilerini tek bakışta izleyin.</p>
+      </div>
+      <nav aria-label="Birincil">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html" aria-current="page">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <div class="actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+          <span aria-hidden="true">🌓</span>
+          <span data-theme-label>Yüksek kontrast modunu aç</span>
+        </button>
+      </div>
+    </header>
+    <main id="main-content">
+      <section aria-labelledby="filters-heading">
+        <div class="actions" style="justify-content: space-between; align-items: flex-start; gap: 24px;">
+          <div>
+            <h2 id="filters-heading">Filtreler</h2>
+            <p class="muted">Projeye ve tarih aralığına göre raporları filtreleyin. Tüm veriler append-only audit loguyla ilişkilidir.</p>
+          </div>
+          <div class="refresh-toggle">
+            <input id="auto-refresh" type="checkbox" data-auto-refresh aria-controls="summary-status" />
+            <label for="auto-refresh">Otomatik yenilemeyi aç</label>
+          </div>
+        </div>
+        <form class="filters" data-filter-form>
+          <label>
+            Proje
+            <select name="project" data-filter-project>
+              <option value="">Tüm projeler</option>
+            </select>
+          </label>
+          <label>
+            Başlangıç tarihi
+            <input type="date" name="from" data-filter-from aria-describedby="date-help" />
+          </label>
+          <label>
+            Bitiş tarihi
+            <input type="date" name="to" data-filter-to aria-describedby="date-help" />
+          </label>
+          <div class="sr-only" id="date-help">Tarihleri ISO formatında seçin.</div>
+          <div class="actions">
+            <button type="submit" class="primary">Raporu getir</button>
+            <button type="button" class="secondary" data-reset>Filtreleri sıfırla</button>
+            <a href="#" class="button-link" data-export aria-disabled="true">CSV indir</a>
+          </div>
+        </form>
+        <div role="status" aria-live="polite" data-status hidden></div>
+      </section>
+
+      <section aria-labelledby="metrics-heading">
+        <h2 id="metrics-heading">Özet göstergeler</h2>
+        <ul class="metric-cards" role="list">
+          <li>
+            <span class="muted">Toplam tarama</span>
+            <span class="metric-value" data-metric="total-scans">--</span>
+          </li>
+          <li>
+            <span class="muted">Politika sonucu</span>
+            <span class="metric-value" data-metric="policy-breakdown">--</span>
+            <span class="muted" data-metric="policy-detail">--</span>
+          </li>
+          <li>
+            <span class="muted">Lisans ihlalleri</span>
+            <span class="metric-value" data-metric="license-violations">--</span>
+          </li>
+          <li>
+            <span class="muted">Ortalama tarama süresi</span>
+            <span class="metric-value" data-metric="avg-duration">--</span>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="vulnerability-heading">
+        <h2 id="vulnerability-heading">Zafiyet dağılımı</h2>
+        <p class="muted">Kritik → düşük seviyedeki açık sayıları politika kararlarıyla birlikte değerlendirilir.</p>
+        <table aria-describedby="vulnerability-heading">
+          <thead>
+            <tr>
+              <th scope="col">Seviye</th>
+              <th scope="col">Bulgu sayısı</th>
+            </tr>
+          </thead>
+          <tbody data-vuln-body>
+            <tr>
+              <th scope="row">Kritik</th>
+              <td data-vuln="critical">--</td>
+            </tr>
+            <tr>
+              <th scope="row">Yüksek</th>
+              <td data-vuln="high">--</td>
+            </tr>
+            <tr>
+              <th scope="row">Orta</th>
+              <td data-vuln="medium">--</td>
+            </tr>
+            <tr>
+              <th scope="row">Düşük</th>
+              <td data-vuln="low">--</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section aria-labelledby="vex-heading">
+        <h2 id="vex-heading">VEX gürültü azaltımı</h2>
+        <div class="status-pill" data-vex-pill data-variant="info">
+          <span aria-hidden="true">ℹ️</span>
+          <span data-vex-label>Veri bekleniyor</span>
+          <span class="sr-only" data-vex-sr>Henüz veri yok</span>
+        </div>
+        <table aria-describedby="vex-heading">
+          <thead>
+            <tr>
+              <th scope="col">Toplam VEX</th>
+              <th scope="col">Downgrade edilen</th>
+              <th scope="col">Azaltım oranı</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-vex="total">--</td>
+              <td data-vex="downgraded">--</td>
+              <td data-vex="ratio">--</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+    <footer class="global-footer">© Alterra-Solutions. CSV indirme işlemleri audit logunda kaydedilir.</footer>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const tenantId = root.dataset.tenantId ?? '';
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+        const form = document.querySelector('[data-filter-form]');
+        const projectSelect = form?.querySelector('[data-filter-project]');
+        const fromInput = form?.querySelector('[data-filter-from]');
+        const toInput = form?.querySelector('[data-filter-to]');
+        const resetButton = form?.querySelector('[data-reset]');
+        const statusRegion = document.querySelector('[data-status]');
+        const exportLink = document.querySelector('[data-export]');
+        const metricMap = new Map(
+          Array.from(document.querySelectorAll('[data-metric]')).map((element) => [
+            element.getAttribute('data-metric'),
+            element
+          ])
+        );
+        const vulnMap = new Map(
+          Array.from(document.querySelectorAll('[data-vuln]')).map((element) => [
+            element.getAttribute('data-vuln'),
+            element
+          ])
+        );
+        const vexMap = new Map(
+          Array.from(document.querySelectorAll('[data-vex]')).map((element) => [
+            element.getAttribute('data-vex'),
+            element
+          ])
+        );
+        const vexPill = document.querySelector('[data-vex-pill]');
+        const vexLabel = document.querySelector('[data-vex-label]');
+        const vexSr = document.querySelector('[data-vex-sr]');
+        const autoRefreshToggle = document.querySelector('[data-auto-refresh]');
+
+        const numberFormatter = new Intl.NumberFormat('tr-TR');
+
+        const applyTheme = (theme) => {
+          const variant = theme === 'contrast' ? 'contrast' : 'default';
+          root.dataset.theme = variant;
+          toggle?.setAttribute('aria-pressed', variant === 'contrast' ? 'true' : 'false');
+          if (label) {
+            label.textContent = variant === 'contrast' ? 'Standart temaya dön' : 'Yüksek kontrast modunu aç';
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema okunamadı', error);
+        }
+
+        const prefersLight = () => window.matchMedia?.('(prefers-color-scheme: light)').matches ?? false;
+        const initialTheme = savedTheme ?? (prefersLight() ? 'contrast' : 'default');
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema kaydedilemedi', error);
+          }
+        });
+
+        const setStatus = (message, isError = false) => {
+          if (!(statusRegion instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!message) {
+            statusRegion.hidden = true;
+            statusRegion.textContent = '';
+            return;
+          }
+
+          statusRegion.hidden = false;
+          statusRegion.textContent = message;
+          statusRegion.setAttribute('data-status-type', isError ? 'error' : 'info');
+        };
+
+        const resetSummary = () => {
+          metricMap.forEach((element) => {
+            if (element instanceof HTMLElement) {
+              element.textContent = '--';
+            }
+          });
+          vulnMap.forEach((element) => {
+            if (element instanceof HTMLElement) {
+              element.textContent = '--';
+            }
+          });
+          vexMap.forEach((element) => {
+            if (element instanceof HTMLElement) {
+              element.textContent = '--';
+            }
+          });
+          if (vexPill instanceof HTMLElement) {
+            vexPill.dataset.variant = 'info';
+          }
+          if (vexLabel instanceof HTMLElement) {
+            vexLabel.textContent = 'Veri bekleniyor';
+          }
+          if (vexSr instanceof HTMLElement) {
+            vexSr.textContent = 'Henüz veri yok';
+          }
+        };
+
+        const buildQuery = () => {
+          const params = new URLSearchParams();
+          if (tenantId) {
+            params.set('tenant_id', tenantId);
+          }
+          const projectId = projectSelect instanceof HTMLSelectElement ? projectSelect.value.trim() : '';
+          if (projectId) {
+            params.set('project_id', projectId);
+          }
+          const fromValue = fromInput instanceof HTMLInputElement ? fromInput.value : '';
+          if (fromValue) {
+            params.set('from', new Date(fromValue).toISOString());
+          }
+          const toValue = toInput instanceof HTMLInputElement ? toInput.value : '';
+          if (toValue) {
+            const endDate = new Date(toValue);
+            if (!Number.isNaN(endDate.getTime())) {
+              endDate.setHours(23, 59, 59, 999);
+              params.set('to', endDate.toISOString());
+            }
+          }
+          return params;
+        };
+
+        const updateExportLink = () => {
+          if (!(exportLink instanceof HTMLAnchorElement)) {
+            return;
+          }
+          const query = buildQuery();
+          const url = `/v1/reports/export${query.toString() ? `?${query.toString()}` : ''}`;
+          exportLink.href = url;
+          exportLink.setAttribute('aria-disabled', 'false');
+        };
+
+        const formatPolicySummary = (policy) => {
+          if (!policy) {
+            return '--';
+          }
+          const fail = Number.isFinite(policy.fail) ? policy.fail : 0;
+          const warn = Number.isFinite(policy.warn) ? policy.warn : 0;
+          const pass = Number.isFinite(policy.pass) ? policy.pass : 0;
+          return `${numberFormatter.format(pass)} / ${numberFormatter.format(warn)} / ${numberFormatter.format(fail)}`;
+        };
+
+        const controllerState = { controller: null, timer: null };
+        const REFRESH_INTERVAL_MS = 60_000;
+
+        const cancelTimer = () => {
+          if (controllerState.timer !== null) {
+            window.clearTimeout(controllerState.timer);
+            controllerState.timer = null;
+          }
+        };
+
+        const scheduleRefresh = () => {
+          cancelTimer();
+          controllerState.timer = window.setTimeout(() => {
+            void fetchSummary(true);
+          }, REFRESH_INTERVAL_MS);
+        };
+
+        const stopActiveRequest = () => {
+          controllerState.controller?.abort();
+          controllerState.controller = null;
+        };
+
+        const fetchSummary = async (isRefresh = false) => {
+          if (!(form instanceof HTMLFormElement)) {
+            return;
+          }
+
+          setStatus(isRefresh ? 'Veriler yenileniyor…' : 'Rapor verileri alınıyor…');
+          stopActiveRequest();
+          const controller = new AbortController();
+          controllerState.controller = controller;
+          const params = buildQuery();
+
+          try {
+            const query = params.toString();
+            const response = await fetch(`/v1/reports/summary${query ? `?${query}` : ''}`, {
+              cache: 'no-store',
+              headers: { Accept: 'application/json' },
+              signal: controller.signal
+            });
+
+            if (!response?.ok) {
+              throw new Error(`Beklenmeyen yanıt: ${response?.status ?? 'bilinmiyor'}`);
+            }
+
+            const payload = await response.json();
+            const data = payload?.data ?? {};
+
+            if (metricMap.has('total-scans')) {
+              metricMap.get('total-scans').textContent = Number.isFinite(data.total_scans)
+                ? numberFormatter.format(data.total_scans)
+                : '--';
+            }
+
+            const policySummary = formatPolicySummary(data.policy);
+            if (metricMap.has('policy-breakdown')) {
+              metricMap.get('policy-breakdown').textContent = policySummary;
+            }
+            if (metricMap.has('policy-detail')) {
+              metricMap.get('policy-detail').textContent = 'Pass / Warn / Fail';
+            }
+            if (metricMap.has('license-violations')) {
+              metricMap.get('license-violations').textContent = Number.isFinite(data.license_violations)
+                ? numberFormatter.format(data.license_violations)
+                : '--';
+            }
+            if (metricMap.has('avg-duration')) {
+              const duration = Number.isFinite(data.average_duration_ms)
+                ? `${numberFormatter.format(Math.round(data.average_duration_ms))} ms`
+                : '--';
+              metricMap.get('avg-duration').textContent = duration;
+            }
+
+            const vulnerabilities = data.vulnerabilities ?? {};
+            vulnMap.forEach((element, key) => {
+              if (!(element instanceof HTMLElement)) {
+                return;
+              }
+              const value = Number.isFinite(vulnerabilities[key]) ? vulnerabilities[key] : null;
+              element.textContent = value != null ? numberFormatter.format(value) : '--';
+            });
+
+            const vex = data.vex_noise_reduction ?? {};
+            const total = Number.isFinite(vex.total) ? vex.total : null;
+            const downgraded = Number.isFinite(vex.downgraded) ? vex.downgraded : null;
+            const ratio = Number.isFinite(vex.ratio) ? vex.ratio : null;
+
+            if (vexMap.has('total')) {
+              vexMap.get('total').textContent = total != null ? numberFormatter.format(total) : '--';
+            }
+            if (vexMap.has('downgraded')) {
+              vexMap.get('downgraded').textContent = downgraded != null ? numberFormatter.format(downgraded) : '--';
+            }
+            if (vexMap.has('ratio')) {
+              const displayRatio = ratio != null ? `${Math.round(ratio * 100)}%` : '--';
+              vexMap.get('ratio').textContent = displayRatio;
+            }
+
+            if (vexPill instanceof HTMLElement) {
+              if (ratio != null && ratio >= 0.3) {
+                vexPill.dataset.variant = 'info';
+              } else if (ratio != null) {
+                vexPill.dataset.variant = 'warning';
+              } else {
+                vexPill.dataset.variant = 'info';
+              }
+            }
+            if (vexLabel instanceof HTMLElement) {
+              if (ratio == null) {
+                vexLabel.textContent = 'Veri bekleniyor';
+              } else if (ratio >= 0.3) {
+                vexLabel.textContent = 'VEX etkinliği yüksek';
+              } else {
+                vexLabel.textContent = 'VEX etkisi sınırlı';
+              }
+            }
+            if (vexSr instanceof HTMLElement) {
+              if (ratio == null) {
+                vexSr.textContent = 'Henüz veri yok';
+              } else {
+                vexSr.textContent = `Gürültü azaltım oranı yüzde ${Math.round(ratio * 100)}`;
+              }
+            }
+
+            setStatus('Rapor verileri güncellendi.');
+            updateExportLink();
+          } catch (error) {
+            if (controller.signal.aborted) {
+              return;
+            }
+            console.error('Rapor verileri alınamadı', error);
+            resetSummary();
+            setStatus('Rapor verileri alınamadı. Lütfen tekrar deneyin.', true);
+            if (exportLink instanceof HTMLAnchorElement) {
+              exportLink.setAttribute('aria-disabled', 'true');
+            }
+          } finally {
+            if (controllerState.controller === controller) {
+              controllerState.controller = null;
+            }
+            if (autoRefreshToggle instanceof HTMLInputElement && autoRefreshToggle.checked) {
+              scheduleRefresh();
+            }
+          }
+        };
+
+        const populateProjects = async () => {
+          if (!(projectSelect instanceof HTMLSelectElement)) {
+            return;
+          }
+
+          try {
+            const response = await fetch('/v1/projects?limit=200', { cache: 'no-store', headers: { Accept: 'application/json' } });
+            if (!response?.ok) {
+              throw new Error('projects fetch failed');
+            }
+            const payload = await response.json();
+            const records = Array.isArray(payload?.data) ? payload.data : [];
+            for (const record of records) {
+              if (!record || typeof record !== 'object') {
+                continue;
+              }
+              const option = document.createElement('option');
+              option.value = record.id ?? '';
+              option.textContent = record.name ?? record.id ?? 'Proje';
+              projectSelect.appendChild(option);
+            }
+          } catch (error) {
+            console.warn('Proje listesi yüklenemedi', error);
+          }
+        };
+
+        form?.addEventListener('submit', (event) => {
+          event.preventDefault();
+          cancelTimer();
+          void fetchSummary();
+        });
+
+        resetButton?.addEventListener('click', () => {
+          if (projectSelect instanceof HTMLSelectElement) {
+            projectSelect.value = '';
+          }
+          if (fromInput instanceof HTMLInputElement) {
+            fromInput.value = '';
+          }
+          if (toInput instanceof HTMLInputElement) {
+            toInput.value = '';
+          }
+          cancelTimer();
+          void fetchSummary();
+        });
+
+        autoRefreshToggle?.addEventListener('change', () => {
+          if (!(autoRefreshToggle instanceof HTMLInputElement)) {
+            return;
+          }
+          if (autoRefreshToggle.checked) {
+            scheduleRefresh();
+          } else {
+            cancelTimer();
+          }
+        });
+
+        window.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'hidden') {
+            cancelTimer();
+            stopActiveRequest();
+          } else if (autoRefreshToggle instanceof HTMLInputElement && autoRefreshToggle.checked) {
+            void fetchSummary();
+          }
+        });
+
+        window.addEventListener('pagehide', () => {
+          cancelTimer();
+          stopActiveRequest();
+        });
+
+        resetSummary();
+        void populateProjects();
+        void fetchSummary();
+      })();
+    </script>
+  </body>
+</html>

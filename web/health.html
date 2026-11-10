@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>OSS Uyumluluk Health Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #0f172a;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 16px;
+      }
+
+      nav.app-nav {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      nav.app-nav a {
+        color: #38bdf8;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .card {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 18px;
+        padding: 32px;
+        max-width: 560px;
+        width: 100%;
+        box-shadow: 0 24px 50px rgba(15, 23, 42, 0.4);
+      }
+
+      h1 {
+        margin-top: 0;
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(45, 212, 191, 0.2);
+        color: #5eead4;
+        font-size: 0.95rem;
+        font-weight: 600;
+      }
+
+      .badge[data-status='degraded'] {
+        background: rgba(250, 204, 21, 0.2);
+        color: #facc15;
+      }
+
+      .badge[data-status='down'] {
+        background: rgba(248, 113, 113, 0.2);
+        color: #f87171;
+      }
+
+      section {
+        margin-top: 24px;
+      }
+
+      dt {
+        font-weight: 600;
+        margin-top: 12px;
+        color: #e2e8f0;
+      }
+
+      dd {
+        margin: 4px 0 0;
+        color: #cbd5f5;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 16px 0 0;
+        display: grid;
+        gap: 12px;
+      }
+
+      li {
+        background: rgba(30, 41, 59, 0.65);
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        color: #f1f5f9;
+      }
+
+      .muted {
+        color: #94a3b8;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="app-nav" aria-label="Atlas gezinme">
+      <a href="dashboard.html">Kontrol Paneli</a>
+      <a href="projects.html">Projeler</a>
+      <a href="scans.html">Taramalar</a>
+      <a href="findings.html">Bulgular</a>
+      <a href="legal-review.html">Hukuk İncelemesi</a>
+      <a href="policies.html">Politikalar</a>
+      <a href="exceptions.html">İstisnalar</a>
+      <a href="notice-builder.html">NOTICE</a>
+      <a href="feeds.html">Feed Yönetimi</a>
+      <a href="reports.html">Raporlar</a>
+      <a href="audit-log.html">Audit Log</a>
+      <a href="integrations.html">Entegrasyonlar</a>
+      <a href="health.html" aria-current="page">Health</a>
+      <a href="settings.html">Ayarlar</a>
+    </nav>
+    <div class="card" role="region" aria-live="polite">
+      <h1>
+        Sistem Durumu
+        <span class="badge" id="status-label" data-status="unknown">Yükleniyor</span>
+      </h1>
+      <p id="status-description" class="muted">
+        Platform servislerinden gelen telemetri bekleniyor. Panel 15 saniyede bir güncellenir.
+      </p>
+
+      <section aria-labelledby="metrics-heading">
+        <h2 id="metrics-heading" class="sr-only">Metrikler</h2>
+        <dl>
+          <dt>Son Sağlık Kontrolü</dt>
+          <dd id="last-checked" aria-live="polite">-</dd>
+          <dt>Worker Kapasitesi</dt>
+          <dd id="worker-capacity">-</dd>
+          <dt>Kuyruk Derinliği</dt>
+          <dd id="queue-depth">-</dd>
+          <dt>Rapor SLO (p95 ms)</dt>
+          <dd id="summary-p95">-</dd>
+          <dt>Orkestrasyon SLO (p95 ms)</dt>
+          <dd id="orchestration-p95">-</dd>
+        </dl>
+      </section>
+
+      <section aria-labelledby="failures-heading">
+        <h2 id="failures-heading">Son 10 Hata</h2>
+        <p class="muted" id="failure-empty">Aktif hata yok.</p>
+        <ul id="failure-list" aria-live="polite" aria-busy="true"></ul>
+      </section>
+    </div>
+    <script>
+      const statusLabel = document.getElementById('status-label');
+      const statusDescription = document.getElementById('status-description');
+      const lastChecked = document.getElementById('last-checked');
+      const workerCapacity = document.getElementById('worker-capacity');
+      const queueDepth = document.getElementById('queue-depth');
+      const summaryP95 = document.getElementById('summary-p95');
+      const orchestrationP95 = document.getElementById('orchestration-p95');
+      const failureList = document.getElementById('failure-list');
+      const failureEmpty = document.getElementById('failure-empty');
+
+      const formatTime = (isoString) => {
+        if (!isoString) {
+          return '-';
+        }
+
+        const date = new Date(isoString);
+        if (Number.isNaN(date.getTime())) {
+          return '-';
+        }
+
+        return new Intl.DateTimeFormat('tr-TR', {
+          dateStyle: 'medium',
+          timeStyle: 'medium'
+        }).format(date);
+      };
+
+      const setStatus = (status, description) => {
+        statusLabel.dataset.status = status;
+        statusLabel.textContent =
+          status === 'healthy' ? 'Sağlıklı' : status === 'degraded' ? 'Kısmi Sorun' : status === 'down' ? 'Erişim Yok' : 'Bilinmiyor';
+        statusDescription.textContent = description;
+      };
+
+      const renderFailures = (items) => {
+        failureList.innerHTML = '';
+        if (!items || items.length === 0) {
+          failureEmpty.hidden = false;
+          failureList.setAttribute('aria-busy', 'false');
+          return;
+        }
+
+        failureEmpty.hidden = true;
+        items.forEach((item) => {
+          const li = document.createElement('li');
+          const timestamp = formatTime(item.occurred_at ?? item.created_at);
+          li.innerHTML = `<strong>${timestamp}</strong><br /><span class="muted">${item.message ?? 'Bilinmeyen hata'}</span>`;
+          failureList.appendChild(li);
+        });
+        failureList.setAttribute('aria-busy', 'false');
+      };
+
+      let isRefreshing = false;
+
+      const refresh = async () => {
+        if (isRefreshing) {
+          return;
+        }
+
+        isRefreshing = true;
+        try {
+          failureList.setAttribute('aria-busy', 'true');
+          const response = await fetch('/v1/health', { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error(`Beklenmeyen yanıt: ${response.status}`);
+          }
+
+          const payload = await response.json();
+          const {
+            status,
+            queue = {},
+            worker_capacity,
+            last_failures = [],
+            details,
+            slo = { summary_p95_ms: null, orchestration_p95_ms: null }
+          } = payload;
+
+          const queueDetails = `${queue.waiting ?? 0} bekleyen / ${queue.active ?? 0} aktif / ${queue.delayed ?? 0} gecikmiş`;
+          queueDepth.textContent = queueDetails;
+          workerCapacity.textContent = typeof worker_capacity === 'number' ? `${worker_capacity} eşzamanlı iş` : '-';
+          summaryP95.textContent = slo.summary_p95_ms != null ? `${slo.summary_p95_ms} ms` : '-';
+          orchestrationP95.textContent = slo.orchestration_p95_ms != null ? `${slo.orchestration_p95_ms} ms` : '-';
+          lastChecked.textContent = formatTime(payload.checked_at ?? new Date().toISOString());
+
+          const statusMessage = details?.summary ?? 'Platform bileşenleri sağlıklı şekilde yanıt veriyor.';
+          if (status === 'healthy') {
+            setStatus('healthy', statusMessage);
+          } else if (status === 'degraded') {
+            setStatus('degraded', statusMessage);
+          } else if (status === 'down') {
+            setStatus('down', statusMessage);
+          } else {
+            setStatus('unknown', 'Sağlık bilgisi alınamadı.');
+          }
+
+          renderFailures(last_failures.slice(0, 10));
+        } catch (error) {
+          console.error(error);
+          setStatus('down', 'Health API yanıt vermiyor. Altyapı ekiplerini bilgilendirin.');
+          queueDepth.textContent = '-';
+          workerCapacity.textContent = '-';
+          summaryP95.textContent = '-';
+          orchestrationP95.textContent = '-';
+          lastChecked.textContent = formatTime();
+          renderFailures([]);
+        } finally {
+          isRefreshing = false;
+        }
+      };
+
+      const scheduleRefresh = () => {
+        void refresh().finally(() => {
+          window.setTimeout(scheduleRefresh, 15000);
+        });
+      };
+
+      scheduleRefresh();
+    </script>
+  </body>
+</html>

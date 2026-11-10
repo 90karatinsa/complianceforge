@@ -1,0 +1,74 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: oss_compliance
+      POSTGRES_USER: oss
+      POSTGRES_PASSWORD: oss
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "oss"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    environment:
+      DATABASE_URL: postgres://oss:oss@postgres:5432/oss_compliance
+      REDIS_URL: redis://redis:6379
+      API_KEYS_SALT: dev-salt-please-change # demo seed salt; replace in production
+      FEED_CACHE_DIR: /var/lib/atlas/feeds
+      EVIDENCE_EXPORT_DIR: /var/lib/atlas/evidence
+      COSIGN_PUBLIC_KEY: /var/lib/atlas/cosign/atlas-feed.pub
+      AIRGAP_MODE: 'true'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - feed-cache:/var/lib/atlas/feeds
+      - evidence-packs:/var/lib/atlas/evidence
+      - cosign-keys:/var/lib/atlas/cosign:ro
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    environment:
+      DATABASE_URL: postgres://oss:oss@postgres:5432/oss_compliance
+      REDIS_URL: redis://redis:6379
+      API_KEYS_SALT: dev-salt-please-change
+      FEED_CACHE_DIR: /var/lib/atlas/feeds
+      EVIDENCE_EXPORT_DIR: /var/lib/atlas/evidence
+      AIRGAP_MODE: 'true'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - feed-cache:/var/lib/atlas/feeds
+      - evidence-packs:/var/lib/atlas/evidence
+      - cosign-keys:/var/lib/atlas/cosign:ro
+volumes:
+  pgdata:
+  feed-cache:
+  evidence-packs:
+  cosign-keys:

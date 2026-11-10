@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bulgular - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.95);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-warning: #fbbf24;
+        --color-danger: #ef4444;
+        --color-success: #22c55e;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-warning: #92400e;
+        --color-danger: #7f1d1d;
+        --color-success: #166534;
+      }
+
+      body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 56px;
+        display: grid;
+        gap: 28px;
+      }
+
+      section.panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(1.2rem, 3vw, 1.6rem);
+      }
+
+      form.filters {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      select,
+      input[type='search'] {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        padding: 10px 12px;
+      }
+
+      select:focus,
+      input[type='search']:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .bulk-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .bulk-actions button {
+        background: var(--color-surface-alt);
+        border: 1px solid var(--color-border);
+        color: inherit;
+        border-radius: 10px;
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+
+      .vex-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+
+      .vex-actions button {
+        background: var(--color-surface-alt);
+        border: 1px solid var(--color-border);
+        color: inherit;
+        border-radius: 10px;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+
+      .vex-actions button[aria-disabled='true'],
+      .vex-actions button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .bulk-summary {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--color-muted);
+      }
+
+      .bulk-summary strong {
+        font-size: 1.1rem;
+        color: var(--color-text);
+      }
+
+      .bulk-feedback {
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(30, 41, 59, 0.6);
+        padding: 12px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--color-surface);
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+      }
+
+      thead {
+        background: rgba(15, 23, 42, 0.85);
+        text-align: left;
+      }
+
+      :root[data-theme='contrast'] thead {
+        background: rgba(15, 23, 42, 0.12);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        vertical-align: top;
+      }
+
+      tbody tr:last-of-type td {
+        border-bottom: none;
+      }
+
+      .vex-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+        background: rgba(56, 189, 248, 0.22);
+        color: #bae6fd;
+      }
+
+      .vex-badge[data-state='not-affected'] {
+        background: rgba(34, 197, 94, 0.25);
+        color: #bbf7d0;
+      }
+
+      .vex-badge[data-state='under-investigation'] {
+        background: rgba(251, 191, 36, 0.25);
+        color: #fef08a;
+      }
+
+      .vex-badge[data-state='fixed'] {
+        background: rgba(34, 197, 94, 0.22);
+        color: #bbf7d0;
+      }
+
+      .severity {
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .severity[data-level='critical'] {
+        color: var(--color-danger);
+      }
+
+      .severity[data-level='high'] {
+        color: var(--color-warning);
+      }
+
+      footer.global-footer {
+        padding: 24px clamp(16px, 3vw, 48px) 48px;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
+      .vex-dialog-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.75);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        z-index: 999;
+      }
+
+      .vex-dialog {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: clamp(20px, 4vw, 28px);
+        max-width: min(520px, 100%);
+        width: 100%;
+        display: grid;
+        gap: 18px;
+        box-shadow: 0 18px 60px rgba(15, 23, 42, 0.55);
+      }
+
+      .vex-dialog h2 {
+        margin: 0;
+        font-size: clamp(1.4rem, 3.6vw, 1.8rem);
+      }
+
+      .vex-dialog form {
+        display: grid;
+        gap: 16px;
+      }
+
+      .vex-dialog fieldset {
+        border: 1px solid var(--color-border);
+        border-radius: 16px;
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .vex-dialog legend {
+        padding: 0 6px;
+        font-weight: 600;
+      }
+
+      .vex-dialog label.option {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .vex-dialog textarea {
+        min-height: 96px;
+        resize: vertical;
+        background: var(--color-surface-alt);
+        border: 1px solid var(--color-border);
+        border-radius: 12px;
+        color: inherit;
+        padding: 10px 12px;
+      }
+
+      .vex-dialog textarea:focus-visible,
+      .vex-actions button:focus-visible,
+      .vex-dialog button:focus-visible {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .vex-dialog .dialog-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: flex-end;
+      }
+
+      .vex-dialog .dialog-actions button {
+        border-radius: 10px;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        padding: 8px 16px;
+        cursor: pointer;
+      }
+
+      .vex-dialog .dialog-actions button[data-variant='primary'] {
+        background: var(--color-accent);
+        border-color: transparent;
+        color: var(--color-bg);
+      }
+
+      .vex-dialog .dialog-actions button[aria-disabled='true'],
+      .vex-dialog .dialog-actions button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .vex-dialog [data-vex-feedback] {
+        min-height: 1.2em;
+        color: var(--color-muted);
+      }
+
+      @media (max-width: 720px) {
+        .vex-dialog {
+          max-width: 100%;
+          border-radius: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Bulgular</h1>
+        <p id="findings-description" class="sr-only">
+          Lisans ve CVE bulguları filtrelenebilir, toplu işlemler erişilebilir klavye kısayollarını destekler.
+        </p>
+      </div>
+      <nav aria-labelledby="findings-description">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html" aria-current="page">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <section class="panel" aria-labelledby="filters-heading">
+        <h2 id="filters-heading">Filtreler</h2>
+        <form class="filters" aria-describedby="findings-description">
+          <label for="finding-search">
+            Bulgu ara
+            <input
+              id="finding-search"
+              type="search"
+              name="q"
+              placeholder="CVE, paket veya lisans"
+              autocomplete="off"
+              data-filter="search"
+            />
+          </label>
+          <label for="finding-type">
+            Tür
+            <select id="finding-type" name="type" data-filter="type">
+              <option value="all">Tümü</option>
+              <option value="license">Lisans</option>
+              <option value="vulnerability">Zafiyet</option>
+            </select>
+          </label>
+          <label for="finding-severity">
+            CVE şiddeti
+            <select id="finding-severity" name="severity" data-filter="severity">
+              <option value="all">Tümü</option>
+              <option value="critical">Kritik</option>
+              <option value="high">Yüksek</option>
+              <option value="medium">Orta</option>
+              <option value="low">Düşük</option>
+            </select>
+          </label>
+          <label for="finding-license">
+            Lisans kategorisi
+            <select id="finding-license" name="license" data-filter="license">
+              <option value="all">Tümü</option>
+              <option value="copyleft">Copyleft</option>
+              <option value="permissive">Permissive</option>
+              <option value="proprietary">Proprietary</option>
+            </select>
+          </label>
+        </form>
+        <p class="sr-only" data-filter-feedback aria-live="polite">
+          Tüm bulgular gösteriliyor (3 kayıt).
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="bulk-heading">
+        <h2 id="bulk-heading">Toplu İşlemler</h2>
+        <div class="bulk-actions" aria-describedby="bulk-shortcuts">
+          <button type="button" data-bulk="assign">Sahip ata</button>
+          <button type="button" data-bulk="mark-allow">Allow</button>
+          <button type="button" data-bulk="mark-deny">Deny</button>
+          <button type="button" data-bulk="send-legal">Hukuka gönder</button>
+        </div>
+        <div class="bulk-summary" data-bulk-summary aria-live="polite">
+          <strong data-selected-count>0</strong> kayıt seçildi.
+          <span>Seçimleri klavye ile güncellemek için tablo satırlarına boşluk tuşu ile işaret koyabilirsiniz.</span>
+        </div>
+        <p id="bulk-shortcuts" class="bulk-feedback" data-shortcuts>
+          Kısayollar: <kbd>A</kbd> Allow, <kbd>D</kbd> Deny, <kbd>V</kbd> VEX durumunu aç.
+        </p>
+        <div class="bulk-feedback" role="status" aria-live="assertive" data-bulk-feedback>
+          Henüz işlem yapılmadı.
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="table-heading">
+        <h2 id="table-heading">Bulgu Listesi</h2>
+        <table aria-describedby="findings-description findings-table-caption" data-table="findings">
+          <caption id="findings-table-caption" class="sr-only">
+            Bulgu türü, şiddet, VEX durumu ve notlar için detaylı liste.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Seç</th>
+              <th scope="col">Bulgu</th>
+              <th scope="col">Şiddet</th>
+              <th scope="col">Durum</th>
+              <th scope="col">VEX</th>
+              <th scope="col">Notlar</th>
+            </tr>
+          </thead>
+          <tbody data-findings-body>
+            <tr data-empty-row>
+              <td colspan="6">Bulgular yükleniyor...</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="bulk-feedback" data-findings-status hidden aria-live="polite"></p>
+      </section>
+    </main>
+    <div class="vex-dialog-backdrop" data-vex-dialog hidden aria-hidden="true">
+      <section class="vex-dialog" role="dialog" aria-modal="true" aria-labelledby="vex-dialog-title">
+        <h2 id="vex-dialog-title">VEX durumunu yönet</h2>
+        <p class="muted" data-vex-summary></p>
+        <form data-vex-form>
+          <fieldset>
+            <legend>Durum seçin</legend>
+            <label class="option">
+              <input type="radio" name="vex-status" value="not_affected" />
+              <span>
+                <strong>Not Affected</strong>
+                <span class="muted">Bileşen etkilenmiyor veya kullanılmıyor.</span>
+              </span>
+            </label>
+            <label class="option">
+              <input type="radio" name="vex-status" value="fixed" />
+              <span>
+                <strong>Fixed</strong>
+                <span class="muted">Güncelleme veya konfigürasyon ile giderildi.</span>
+              </span>
+            </label>
+            <label class="option">
+              <input type="radio" name="vex-status" value="under_investigation" />
+              <span>
+                <strong>Under Investigation</strong>
+                <span class="muted">Ekip etkisini değerlendiriyor.</span>
+              </span>
+            </label>
+          </fieldset>
+          <label>
+            Gerekçe
+            <textarea name="vex-justification" data-vex-justification placeholder="Kısa bir açıklama girin"></textarea>
+          </label>
+          <p data-vex-feedback aria-live="polite"></p>
+          <div class="dialog-actions">
+            <button type="button" data-vex-close>İptal</button>
+            <button type="button" data-vex-revoke hidden aria-hidden="true">Beyanı kaldır</button>
+            <button type="submit" data-vex-submit data-variant="primary">Kaydet</button>
+          </div>
+        </form>
+      </section>
+    </div>
+    <footer class="global-footer">
+      © Alterra-Solutions. Telemetri kapalı, tüm hareketler denetim kaydına yazılır.
+    </footer>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+
+        const applyTheme = (theme) => {
+          if (theme === 'contrast') {
+            root.dataset.theme = 'contrast';
+            toggle?.setAttribute('aria-pressed', 'true');
+            if (label) {
+              label.textContent = 'Standart temaya dön';
+            }
+          } else {
+            root.dataset.theme = 'default';
+            toggle?.setAttribute('aria-pressed', 'false');
+            if (label) {
+              label.textContent = 'Yüksek kontrast modunu aç';
+            }
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema tercihi okunamadı', error);
+        }
+
+        const detectSystemTheme = () => {
+          if (typeof window.matchMedia !== 'function') {
+            return null;
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'contrast';
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'default';
+          }
+
+          return null;
+        };
+
+        const initialTheme =
+          savedTheme === 'contrast' || savedTheme === 'default'
+            ? savedTheme
+            : detectSystemTheme() ?? 'default';
+
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        const searchInput = document.querySelector('[data-filter="search"]');
+        const typeSelect = document.querySelector('[data-filter="type"]');
+        const severitySelect = document.querySelector('[data-filter="severity"]');
+        const licenseSelect = document.querySelector('[data-filter="license"]');
+        const filterFeedback = document.querySelector('[data-filter-feedback]');
+
+        const getFindingRows = () => Array.from(document.querySelectorAll('[data-finding-row]'));
+
+        const labelMapFromSelect = (select) =>
+          select instanceof HTMLSelectElement
+            ? new Map(Array.from(select.options).map((option) => [option.value, option.textContent?.trim() ?? option.value]))
+            : new Map();
+
+        const typeLabels = labelMapFromSelect(typeSelect);
+        const severityLabels = labelMapFromSelect(severitySelect);
+        const licenseLabels = labelMapFromSelect(licenseSelect);
+
+        const applyFilters = () => {
+          const query = (searchInput instanceof HTMLInputElement ? searchInput.value : '').trim().toLowerCase();
+          const typeValue = typeSelect instanceof HTMLSelectElement ? typeSelect.value : 'all';
+          const severityValue = severitySelect instanceof HTMLSelectElement ? severitySelect.value : 'all';
+          const licenseValue = licenseSelect instanceof HTMLSelectElement ? licenseSelect.value : 'all';
+          let visibleCount = 0;
+
+          getFindingRows().forEach((row) => {
+            const matchesQuery =
+              query.length === 0 || (row.textContent?.toLowerCase().includes(query) ?? false);
+            const matchesType = typeValue === 'all' || row.getAttribute('data-finding-type') === typeValue;
+            const matchesSeverity =
+              severityValue === 'all' || row.getAttribute('data-finding-severity') === severityValue;
+            const matchesLicense =
+              licenseValue === 'all' || row.getAttribute('data-license-category') === licenseValue;
+            const shouldShow = matchesQuery && matchesType && matchesSeverity && matchesLicense;
+            row.toggleAttribute('hidden', !shouldShow);
+            row.tabIndex = shouldShow ? 0 : -1;
+            if (shouldShow) {
+              visibleCount += 1;
+            }
+          });
+
+          if (filterFeedback instanceof HTMLElement) {
+            if (state.loading) {
+              filterFeedback.textContent = 'Bulgular yükleniyor...';
+              return;
+            }
+
+            if (visibleCount === 0) {
+              filterFeedback.textContent = 'Seçili filtrelerle eşleşen bulgu bulunamadı.';
+              return;
+            }
+
+            const parts = [];
+            if (query.length > 0) {
+              parts.push(`Arama "${query}"`);
+            }
+            if (typeValue !== 'all') {
+              parts.push(typeLabels.get(typeValue) ?? typeValue);
+            }
+            if (severityValue !== 'all') {
+              const severityLabel = severityLabels.get(severityValue) ?? severityValue;
+              parts.push(`${severityLabel} şiddet`);
+            }
+            if (licenseValue !== 'all') {
+              const licenseLabel = licenseLabels.get(licenseValue) ?? licenseValue;
+              parts.push(`${licenseLabel} lisans`);
+            }
+
+            if (parts.length === 0) {
+              filterFeedback.textContent = `Tüm bulgular gösteriliyor (${visibleCount} kayıt).`;
+            } else {
+              filterFeedback.textContent = `${parts.join(', ')} ile ${visibleCount} bulgu gösteriliyor.`;
+            }
+          }
+        };
+
+        if (searchInput instanceof HTMLInputElement) {
+          searchInput.addEventListener('input', applyFilters);
+        }
+
+        if (typeSelect instanceof HTMLSelectElement) {
+          typeSelect.addEventListener('change', applyFilters);
+        }
+
+        if (severitySelect instanceof HTMLSelectElement) {
+          severitySelect.addEventListener('change', applyFilters);
+        }
+
+        if (licenseSelect instanceof HTMLSelectElement) {
+          licenseSelect.addEventListener('change', applyFilters);
+        }
+
+        const tenantId = document.documentElement.dataset.tenantId ?? '';
+        const findingsBody = document.querySelector('[data-findings-body]');
+        const findingsStatus = document.querySelector('[data-findings-status]');
+        const bulkButtons = Array.from(document.querySelectorAll('[data-bulk]'));
+        const selectedCountElement = document.querySelector('[data-selected-count]');
+        const feedbackRegion = document.querySelector('[data-bulk-feedback]');
+        const vexDialog = document.querySelector('[data-vex-dialog]');
+        const vexForm = vexDialog?.querySelector('[data-vex-form]');
+        const vexSummary = vexDialog?.querySelector('[data-vex-summary]');
+        const vexJustificationInput = vexDialog?.querySelector('[data-vex-justification]');
+        const vexFeedback = vexDialog?.querySelector('[data-vex-feedback]');
+        const vexRevokeButton = vexDialog?.querySelector('[data-vex-revoke]');
+        const vexCloseButton = vexDialog?.querySelector('[data-vex-close]');
+        const vexSubmitButton = vexDialog?.querySelector('[data-vex-submit]');
+        const vexStatusInputs =
+          vexForm instanceof HTMLFormElement
+            ? Array.from(vexForm.querySelectorAll('input[name="vex-status"]'))
+            : [];
+        let selectedCount = 0;
+        let selectionCheckboxes = Array.from(document.querySelectorAll('[data-select]'));
+        let activeVexFindingId = null;
+        let lastFocusedElement = null;
+        let activeVexAbortController = null;
+        const state = {
+          loading: false,
+          findings: []
+        };
+
+        const dispatchLoaded = () => {
+          document.dispatchEvent(
+            new CustomEvent('findings:data-loaded', {
+              detail: { count: state.findings.length }
+            })
+          );
+        };
+
+        const toRecord = (value) => (value && typeof value === 'object' ? value : {});
+
+        const readString = (value, fallback = '') =>
+          typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+
+        const readNumber = (value) => {
+          const parsed = typeof value === 'number' ? value : Number(value);
+          return Number.isFinite(parsed) ? parsed : null;
+        };
+
+        const readBoolean = (value, fallback = false) => {
+          if (typeof value === 'boolean') {
+            return value;
+          }
+
+          if (typeof value === 'string') {
+            const normalized = value.trim().toLowerCase();
+            if (['true', '1', 'yes', 'on'].includes(normalized)) {
+              return true;
+            }
+            if (['false', '0', 'no', 'off'].includes(normalized)) {
+              return false;
+            }
+          }
+
+          return fallback;
+        };
+
+        const normalizeVexState = (value) => {
+          const normalized = readString(value).toLowerCase();
+          switch (normalized) {
+            case 'not-affected':
+            case 'not_affected':
+              return 'not-affected';
+            case 'under-investigation':
+            case 'under_investigation':
+              return 'under-investigation';
+            case 'fixed':
+              return 'fixed';
+            case 'affected':
+              return 'affected';
+            case 'unknown':
+              return 'unknown';
+            default:
+              return normalized || null;
+          }
+        };
+
+        const toApiVexStatus = (value) => {
+          switch (value) {
+            case 'not-affected':
+              return 'not_affected';
+            case 'under-investigation':
+              return 'under_investigation';
+            default:
+              return (value ?? 'unknown').replace(/-/g, '_');
+          }
+        };
+
+        const formatVexLabel = (value) => {
+          switch (value) {
+            case 'not-affected':
+              return 'Not Affected';
+            case 'fixed':
+              return 'Fixed';
+            case 'under-investigation':
+              return 'VEX Bekleniyor';
+            case 'affected':
+              return 'Affected';
+            default:
+              return 'İzleme';
+          }
+        };
+
+        const isAbortError = (error) =>
+          error && typeof error === 'object' && 'name' in error && error.name === 'AbortError';
+
+        const formatSeverityLabel = (severity) => {
+          switch (severity) {
+            case 'critical':
+              return { icon: '🚨', label: 'Kritik' };
+            case 'high':
+              return { icon: '⚠️', label: 'Yüksek' };
+            case 'medium':
+              return { icon: 'ℹ️', label: 'Orta' };
+            case 'low':
+              return { icon: '✅', label: 'Düşük' };
+            default:
+              return { icon: 'ℹ️', label: 'Bilinmiyor' };
+          }
+        };
+
+        const normalizeLicenseCategory = (value) => {
+          const normalized = readString(value).toLowerCase();
+          if (!normalized) {
+            return 'unknown';
+          }
+          if (['permissive', 'copyleft', 'proprietary'].includes(normalized)) {
+            return normalized;
+          }
+          return 'unknown';
+        };
+
+        const createVexBadge = (stateValue, label) => {
+          const badge = document.createElement('span');
+          badge.className = 'vex-badge';
+          if (stateValue) {
+            badge.dataset.state = stateValue;
+          }
+          const icon = document.createElement('span');
+          icon.setAttribute('aria-hidden', 'true');
+          const text = document.createElement('span');
+          text.textContent = label;
+
+          switch (stateValue) {
+            case 'not-affected':
+              icon.textContent = '✅';
+              break;
+            case 'under-investigation':
+              icon.textContent = '⏳';
+              break;
+            case 'fixed':
+              icon.textContent = '🛠️';
+              break;
+            default:
+              icon.textContent = '👁️';
+          }
+
+          badge.append(icon, text);
+          badge.setAttribute('aria-label', `VEX durumu: ${label}`);
+          badge.title = `VEX durumu: ${label}`;
+          return badge;
+        };
+
+        const clearFindingsBody = () => {
+          if (!(findingsBody instanceof HTMLElement)) {
+            return;
+          }
+          while (findingsBody.firstChild) {
+            findingsBody.removeChild(findingsBody.firstChild);
+          }
+        };
+
+        const renderEmptyRow = (message) => {
+          if (!(findingsBody instanceof HTMLElement)) {
+            return;
+          }
+
+          const row = document.createElement('tr');
+          row.setAttribute('data-empty-row', '');
+          const cell = document.createElement('td');
+          cell.colSpan = 6;
+          cell.textContent = message;
+          row.append(cell);
+          findingsBody.append(row);
+        };
+
+        const createFindingRow = (finding) => {
+          const row = document.createElement('tr');
+          row.setAttribute('data-finding-row', '');
+          row.dataset.findingType = finding.type;
+          row.dataset.findingSeverity = finding.severity ?? 'unknown';
+          row.dataset.licenseCategory = finding.licenseCategory ?? 'unknown';
+          row.tabIndex = 0;
+
+          const selectCell = document.createElement('td');
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.setAttribute('data-select', '');
+          checkbox.value = finding.id ?? '';
+          selectCell.append(checkbox);
+
+          const infoCell = document.createElement('td');
+          const title = document.createElement('strong');
+          title.textContent = finding.title;
+          infoCell.append(title);
+          if (finding.component) {
+            const component = document.createElement('p');
+            component.className = 'muted';
+            component.textContent = finding.component;
+            infoCell.append(component);
+          }
+
+          const severityCell = document.createElement('td');
+          severityCell.className = 'severity';
+          severityCell.dataset.level = finding.severity ?? 'unknown';
+          const severityMeta = formatSeverityLabel(finding.severity);
+          const icon = document.createElement('span');
+          icon.setAttribute('aria-hidden', 'true');
+          icon.textContent = severityMeta.icon;
+          const label = document.createElement('span');
+          label.textContent = severityMeta.label;
+          const sr = document.createElement('span');
+          sr.className = 'sr-only';
+          sr.textContent = `Şiddet seviyesi: ${severityMeta.label}`;
+          severityCell.append(icon, label, sr);
+
+          const statusCell = document.createElement('td');
+          if (finding.vexLabel) {
+            const badge = createVexBadge(finding.vexState, finding.vexLabel);
+            statusCell.append(badge);
+          } else {
+            statusCell.textContent = finding.statusText ?? 'Durum bilgisi yok';
+          }
+
+          const actionsCell = document.createElement('td');
+          actionsCell.className = 'vex-actions';
+          actionsCell.dataset.actions = 'vex';
+
+          if (finding.canEditVex && finding.componentPurl) {
+            const actionButton = document.createElement('button');
+            actionButton.type = 'button';
+            actionButton.dataset.action = 'open-vex';
+            actionButton.dataset.findingId = finding.id ?? '';
+            actionButton.textContent = finding.vexState
+              ? 'VEX durumunu güncelle'
+              : 'VEX durumu ekle';
+            const sr = document.createElement('span');
+            sr.className = 'sr-only';
+            sr.textContent = `${finding.title} kaydı için VEX işlemleri`;
+            actionButton.append(sr);
+            actionsCell.append(actionButton);
+          } else {
+            const hint = document.createElement('span');
+            hint.className = 'muted';
+            hint.textContent = finding.componentPurl
+              ? 'VEX düzenleme yetkiniz yok.'
+              : 'Bileşen bilgisi eksik.';
+            actionsCell.append(hint);
+          }
+
+          const notesCell = document.createElement('td');
+          notesCell.textContent = finding.notes ?? 'Not eklenmemiş.';
+
+          row.append(selectCell, infoCell, severityCell, statusCell, actionsCell, notesCell);
+          return row;
+        };
+
+        const refreshCheckboxRefs = () => {
+          selectionCheckboxes = Array.from(document.querySelectorAll('[data-select]'));
+        };
+
+        const showFindingsStatus = (message, stateName) => {
+          if (!(findingsStatus instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!message) {
+            findingsStatus.textContent = '';
+            findingsStatus.setAttribute('hidden', '');
+            findingsStatus.removeAttribute('data-state');
+            return;
+          }
+
+          findingsStatus.textContent = message;
+          findingsStatus.dataset.state = stateName ?? '';
+          findingsStatus.removeAttribute('hidden');
+        };
+
+        const renderFindings = () => {
+          clearFindingsBody();
+
+          if (state.findings.length === 0) {
+            renderEmptyRow(state.loading ? 'Bulgular yükleniyor...' : 'Bulgu bulunamadı.');
+            refreshCheckboxRefs();
+            return;
+          }
+
+          state.findings.forEach((finding) => {
+            const row = createFindingRow(finding);
+            findingsBody?.append(row);
+          });
+
+          refreshCheckboxRefs();
+        };
+
+        const formatCount = (count) => new Intl.NumberFormat('tr-TR').format(count);
+
+        const updateBulkState = () => {
+          selectedCount = selectionCheckboxes.filter(
+            (element) => element instanceof HTMLInputElement && element.checked
+          ).length;
+
+          if (selectedCountElement) {
+            selectedCountElement.textContent = formatCount(selectedCount);
+          }
+
+          bulkButtons.forEach((button) => {
+            const disabled = selectedCount === 0;
+            if (button instanceof HTMLButtonElement) {
+              button.disabled = disabled;
+              button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+            } else {
+              button.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+            }
+          });
+
+          if (selectedCount === 0 && feedbackRegion) {
+            feedbackRegion.textContent = 'Henüz işlem yapılmadı.';
+          }
+        };
+
+        const handleCheckboxChange = () => {
+          updateBulkState();
+        };
+
+        const toggleRowSelection = (row) => {
+          if (!(row instanceof HTMLElement)) {
+            return;
+          }
+
+          const checkbox = row.querySelector('[data-select]');
+          if (!(checkbox instanceof HTMLInputElement)) {
+            return;
+          }
+
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new window.Event('change', { bubbles: true }));
+        };
+
+        const bindRowInteractions = () => {
+          const rows = Array.from(document.querySelectorAll('[data-finding-row]'));
+          rows.forEach((row) => {
+            row.addEventListener('keydown', (event) => {
+              const key = event.key;
+              if (key !== ' ' && key !== 'Spacebar' && key !== 'Enter') {
+                return;
+              }
+
+              const target = event.target;
+              if (target instanceof HTMLElement && target.closest('input, button, a, textarea, select')) {
+                return;
+              }
+
+              event.preventDefault();
+              toggleRowSelection(row);
+            });
+          });
+
+          selectionCheckboxes.forEach((checkbox) => {
+            if (checkbox instanceof HTMLInputElement) {
+              checkbox.removeEventListener('change', handleCheckboxChange);
+              checkbox.addEventListener('change', handleCheckboxChange);
+            }
+          });
+        };
+
+        bulkButtons.forEach((button) => {
+          if (button instanceof HTMLButtonElement) {
+            button.addEventListener('click', () => {
+              if (button.disabled) {
+                return;
+              }
+
+              const label = button.textContent?.trim() ?? button.getAttribute('data-bulk') ?? 'işlem';
+              if (feedbackRegion) {
+                feedbackRegion.textContent = `${formatCount(selectedCount)} kayıt için ${label} işlemi hazırlanıyor.`;
+              }
+            });
+          }
+        });
+
+        const getFindingById = (id) => state.findings.find((finding) => finding.id === id);
+
+        const updateFinding = (id, updates) => {
+          const index = state.findings.findIndex((finding) => finding.id === id);
+          if (index === -1) {
+            return;
+          }
+
+          state.findings[index] = { ...state.findings[index], ...updates };
+        };
+
+        const setVexFeedback = (message, stateName) => {
+          if (!(vexFeedback instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!message) {
+            vexFeedback.textContent = '';
+            vexFeedback.removeAttribute('data-state');
+            return;
+          }
+
+          vexFeedback.textContent = message;
+          if (stateName) {
+            vexFeedback.dataset.state = stateName;
+          } else {
+            vexFeedback.removeAttribute('data-state');
+          }
+        };
+
+        const setDialogBusy = (busy) => {
+          vexStatusInputs.forEach((input) => {
+            if (input instanceof HTMLInputElement) {
+              input.disabled = busy;
+            }
+          });
+
+          if (vexJustificationInput instanceof HTMLTextAreaElement) {
+            vexJustificationInput.readOnly = busy;
+          }
+
+          if (vexSubmitButton instanceof HTMLButtonElement) {
+            vexSubmitButton.disabled = busy;
+            vexSubmitButton.setAttribute('aria-disabled', busy ? 'true' : 'false');
+          }
+
+          if (vexCloseButton instanceof HTMLButtonElement) {
+            vexCloseButton.disabled = busy;
+            vexCloseButton.setAttribute('aria-disabled', busy ? 'true' : 'false');
+          }
+
+          if (vexRevokeButton instanceof HTMLButtonElement && !vexRevokeButton.hidden) {
+            vexRevokeButton.disabled = busy;
+            vexRevokeButton.setAttribute('aria-disabled', busy ? 'true' : 'false');
+          }
+        };
+
+        const closeVexDialog = ({ restoreFocus = true } = {}) => {
+          activeVexAbortController?.abort();
+          activeVexAbortController = null;
+
+          if (!(vexDialog instanceof HTMLElement)) {
+            return;
+          }
+
+          vexDialog.setAttribute('hidden', '');
+          vexDialog.setAttribute('aria-hidden', 'true');
+          vexDialog.removeAttribute('data-open');
+          setVexFeedback('');
+          setDialogBusy(false);
+
+          if (vexForm instanceof HTMLFormElement) {
+            vexForm.reset();
+            vexForm.removeAttribute('data-finding-id');
+          }
+
+          if (vexRevokeButton instanceof HTMLButtonElement) {
+            vexRevokeButton.hidden = true;
+            vexRevokeButton.setAttribute('aria-hidden', 'true');
+            vexRevokeButton.setAttribute('aria-disabled', 'true');
+            vexRevokeButton.disabled = true;
+          }
+
+          const restoreTarget = lastFocusedElement;
+          activeVexFindingId = null;
+          lastFocusedElement = null;
+
+          if (restoreFocus && restoreTarget instanceof HTMLElement) {
+            restoreTarget.focus();
+          }
+        };
+
+        const openVexDialog = (finding) => {
+          if (!(vexDialog instanceof HTMLElement) || !(vexForm instanceof HTMLFormElement)) {
+            return;
+          }
+
+          activeVexAbortController?.abort();
+          activeVexAbortController = null;
+          activeVexFindingId = finding?.id ?? null;
+          lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+          vexDialog.removeAttribute('hidden');
+          vexDialog.setAttribute('aria-hidden', 'false');
+          vexDialog.dataset.open = 'true';
+          vexForm.dataset.findingId = finding?.id ?? '';
+          setDialogBusy(false);
+          setVexFeedback('');
+
+          if (vexSummary instanceof HTMLElement) {
+            const componentLabel = finding.component || finding.componentPurl || 'Bileşen bilgisi yok';
+            vexSummary.textContent = `${finding.title} • ${componentLabel}`;
+          }
+
+          const apiState = finding.vexState ? toApiVexStatus(finding.vexState) : '';
+          let hasSelection = false;
+          vexStatusInputs.forEach((input, index) => {
+            if (!(input instanceof HTMLInputElement)) {
+              return;
+            }
+
+            const shouldCheck = input.value === apiState || (!apiState && index === 0);
+            input.checked = shouldCheck;
+            if (shouldCheck) {
+              hasSelection = true;
+            }
+          });
+
+          if (!hasSelection && vexStatusInputs[0] instanceof HTMLInputElement) {
+            vexStatusInputs[0].checked = true;
+          }
+
+          if (vexJustificationInput instanceof HTMLTextAreaElement) {
+            vexJustificationInput.value = finding.vexJustification ?? '';
+          }
+
+          const hasStatement = Boolean(finding.vexStatementId);
+          if (vexRevokeButton instanceof HTMLButtonElement) {
+            vexRevokeButton.hidden = !hasStatement;
+            vexRevokeButton.setAttribute('aria-hidden', hasStatement ? 'false' : 'true');
+            vexRevokeButton.disabled = !hasStatement;
+            vexRevokeButton.setAttribute('aria-disabled', hasStatement ? 'false' : 'true');
+          }
+
+          const focusTarget = vexStatusInputs.find(
+            (input) => input instanceof HTMLInputElement && input.checked
+          );
+          if (focusTarget instanceof HTMLInputElement) {
+            focusTarget.focus();
+          } else if (vexJustificationInput instanceof HTMLTextAreaElement) {
+            vexJustificationInput.focus();
+          }
+        };
+
+        if (vexDialog instanceof HTMLElement) {
+          vexDialog.addEventListener('click', (event) => {
+            if (event.target === vexDialog) {
+              const busy = vexSubmitButton instanceof HTMLButtonElement && vexSubmitButton.disabled;
+              if (!busy) {
+                closeVexDialog();
+              }
+            }
+          });
+
+          vexDialog.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+              event.preventDefault();
+              if (!vexSubmitButton?.disabled) {
+                closeVexDialog();
+              }
+              return;
+            }
+
+            if (event.key !== 'Tab') {
+              return;
+            }
+
+            const focusable = Array.from(
+              vexDialog.querySelectorAll(
+                'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])'
+              )
+            ).filter((element) =>
+              element instanceof HTMLElement &&
+              !element.hasAttribute('disabled') &&
+              element.getAttribute('aria-hidden') !== 'true'
+            );
+
+            if (focusable.length === 0) {
+              return;
+            }
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            const active = document.activeElement;
+
+            if (event.shiftKey) {
+              if (active === first || !focusable.includes(active)) {
+                event.preventDefault();
+                if (last instanceof HTMLElement) {
+                  last.focus();
+                }
+              }
+            } else if (active === last || !focusable.includes(active)) {
+              event.preventDefault();
+              if (first instanceof HTMLElement) {
+                first.focus();
+              }
+            }
+          });
+        }
+
+        vexCloseButton?.addEventListener('click', () => closeVexDialog());
+
+        if (vexRevokeButton instanceof HTMLButtonElement) {
+          vexRevokeButton.addEventListener('click', async () => {
+            if (!activeVexFindingId) {
+              setVexFeedback('Güncellenecek kayıt bulunamadı.', 'error');
+              return;
+            }
+
+            const finding = getFindingById(activeVexFindingId);
+            if (!finding?.vexStatementId) {
+              setVexFeedback('Aktif VEX beyanı bulunamadı.', 'error');
+              return;
+            }
+
+            if (!tenantId) {
+              setVexFeedback('Tenant kimliği bulunamadı.', 'error');
+              return;
+            }
+
+            activeVexAbortController?.abort();
+            const controller = new AbortController();
+            activeVexAbortController = controller;
+            setDialogBusy(true);
+            setVexFeedback('VEX beyanı kaldırılıyor...', 'loading');
+
+            try {
+              const response = await fetch(`/v1/vex/${finding.vexStatementId}`, {
+                method: 'DELETE',
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ tenant_id: tenantId }),
+                signal: controller.signal
+              });
+
+              if (!response.ok) {
+                let message = `VEX isteği ${response.status} ile başarısız oldu.`;
+                try {
+                  const payload = await response.json();
+                  const errorMessage = readString(payload?.error?.message);
+                  if (errorMessage) {
+                    message = errorMessage;
+                  }
+                } catch (parseError) {
+                  console.warn('VEX silme yanıtı parse edilemedi', parseError);
+                }
+                setVexFeedback(message, 'error');
+                setDialogBusy(false);
+                return;
+              }
+
+              updateFinding(activeVexFindingId, {
+                vexState: null,
+                vexLabel: null,
+                vexStatementId: null,
+                vexJustification: ''
+              });
+              renderFindings();
+              bindRowInteractions();
+              applyFilters();
+              updateBulkState();
+              dispatchLoaded();
+              showFindingsStatus('VEX beyanı kaldırıldı.', 'success');
+              closeVexDialog();
+            } catch (error) {
+              if (controller.signal.aborted || isAbortError(error)) {
+                return;
+              }
+              console.error('VEX beyanı silinemedi', error);
+              setVexFeedback('VEX beyanı kaldırılırken hata oluştu.', 'error');
+            } finally {
+              setDialogBusy(false);
+              if (activeVexAbortController === controller) {
+                activeVexAbortController = null;
+              }
+            }
+          });
+        }
+
+        findingsBody?.addEventListener('click', (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLElement)) {
+            return;
+          }
+
+          const button = target.closest('button[data-action="open-vex"]');
+          if (!(button instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          const findingId = button.dataset.findingId ?? '';
+          const finding = getFindingById(findingId);
+          if (!finding) {
+            setVexFeedback('Kayıt bulunamadı.', 'error');
+            return;
+          }
+
+          if (!finding.canEditVex) {
+            setVexFeedback('Bu bulgu için VEX düzenleme yetkiniz yok.', 'error');
+            return;
+          }
+
+          if (!finding.componentPurl) {
+            setVexFeedback('Bileşen bilgisi eksik olduğu için VEX beyanı oluşturulamıyor.', 'error');
+            return;
+          }
+
+          openVexDialog(finding);
+        });
+
+        if (vexForm instanceof HTMLFormElement) {
+          vexForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            if (!activeVexFindingId) {
+              setVexFeedback('Güncellenecek kayıt bulunamadı.', 'error');
+              return;
+            }
+
+            const finding = getFindingById(activeVexFindingId);
+            if (!finding) {
+              setVexFeedback('Güncellenecek kayıt bulunamadı.', 'error');
+              return;
+            }
+
+            const formData = new FormData(vexForm);
+            const statusValue = String(formData.get('vex-status') ?? '').trim();
+            const justificationValue = String(formData.get('vex-justification') ?? '').trim();
+
+            if (!statusValue) {
+              setVexFeedback('Lütfen bir VEX durumu seçin.', 'error');
+              return;
+            }
+
+            if (!tenantId) {
+              setVexFeedback('Tenant kimliği bulunamadı.', 'error');
+              return;
+            }
+
+            if (!finding.componentPurl) {
+              setVexFeedback('Bileşen bilgisi eksik olduğu için VEX beyanı oluşturulamıyor.', 'error');
+              return;
+            }
+
+            activeVexAbortController?.abort();
+            const controller = new AbortController();
+            activeVexAbortController = controller;
+            setDialogBusy(true);
+            setVexFeedback('VEX durumu gönderiliyor...', 'loading');
+
+            const payload = {
+              tenant_id: tenantId,
+              component_purl: finding.componentPurl,
+              status: statusValue,
+              justification: justificationValue.length > 0 ? justificationValue : undefined,
+              advisory_id: finding.advisoryId ?? undefined
+            };
+
+            const hasStatement = Boolean(finding.vexStatementId);
+            const endpoint = hasStatement ? `/v1/vex/${finding.vexStatementId}` : '/v1/vex';
+            const method = hasStatement ? 'PUT' : 'POST';
+
+            try {
+              const response = await fetch(endpoint, {
+                method,
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+              });
+
+              if (!response.ok) {
+                let message = `VEX isteği ${response.status} ile başarısız oldu.`;
+                try {
+                  const body = await response.json();
+                  const errorMessage = readString(body?.error?.message);
+                  if (errorMessage) {
+                    message = errorMessage;
+                  }
+                } catch (parseError) {
+                  console.warn('VEX yanıtı parse edilemedi', parseError);
+                }
+                setVexFeedback(message, 'error');
+                setDialogBusy(false);
+                return;
+              }
+
+              const responseBody = await response.json().catch(() => null);
+              const data = toRecord(responseBody?.data ?? {});
+              const nextState = normalizeVexState(data.status ?? statusValue);
+              const nextLabel = nextState ? formatVexLabel(nextState) : null;
+
+              updateFinding(activeVexFindingId, {
+                vexState: nextState,
+                vexLabel: nextLabel,
+                vexStatementId: readString(data.id) || finding.vexStatementId,
+                vexJustification: readString(data.justification) || justificationValue,
+                componentPurl: readString(data.component_purl) || finding.componentPurl,
+                advisoryId: readString(data.advisory_id) || finding.advisoryId
+              });
+
+              renderFindings();
+              bindRowInteractions();
+              applyFilters();
+              updateBulkState();
+              dispatchLoaded();
+              showFindingsStatus('VEX durumu güncellendi.', 'success');
+              closeVexDialog();
+            } catch (error) {
+              if (controller.signal.aborted || isAbortError(error)) {
+                return;
+              }
+              console.error('VEX durumu gönderilemedi', error);
+              setVexFeedback('VEX durumu gönderilirken hata oluştu.', 'error');
+            } finally {
+              setDialogBusy(false);
+              if (activeVexAbortController === controller) {
+                activeVexAbortController = null;
+              }
+            }
+          });
+        }
+
+        const loadFindings = async () => {
+          state.loading = true;
+          showFindingsStatus('Bulgular yükleniyor...', 'loading');
+          renderFindings();
+
+          const legalParams = new URLSearchParams({
+            tenant_id: tenantId,
+            status: 'pending',
+            page: '1',
+            page_size: '50'
+          });
+
+          const vulnParams = new URLSearchParams({
+            page: '1',
+            page_size: '50'
+          });
+
+          try {
+            const [legalResponse, vulnResponse] = await Promise.all([
+              fetch(`/v1/legal/findings?${legalParams.toString()}`, { headers: { Accept: 'application/json' } }),
+              fetch(`/v1/vulns?${vulnParams.toString()}`, { headers: { Accept: 'application/json' } })
+            ]);
+
+            if (!legalResponse.ok) {
+              throw new Error(`Legal findings failed with status ${legalResponse.status}`);
+            }
+
+            if (!vulnResponse.ok) {
+              throw new Error(`Vulnerability list failed with status ${vulnResponse.status}`);
+            }
+
+            const legalPayload = await legalResponse.json();
+            const vulnPayload = await vulnResponse.json();
+
+            const legalFindings = Array.isArray(legalPayload?.data) ? legalPayload.data : [];
+            const vulns = Array.isArray(vulnPayload?.data) ? vulnPayload.data : [];
+
+            const normalizedLegal = legalFindings.map((finding) => {
+              const obligations = toRecord(finding?.obligations);
+              const metadata = toRecord(finding?.notes_metadata ?? {});
+              const severityRaw =
+                readString(obligations.severity) || readString(metadata.severity) || 'high';
+              const severity = severityRaw.toLowerCase();
+              const licenseCategory = normalizeLicenseCategory(
+                obligations.license_category ?? obligations.category
+              );
+              const rawVexState =
+                obligations.vex_state ??
+                obligations.vexState ??
+                finding?.vex_state ??
+                metadata.vex_state ??
+                metadata.vexState;
+              const normalizedVexState = normalizeVexState(rawVexState);
+              const vexRecord = toRecord(obligations.vex ?? finding?.vex ?? {});
+              const componentPurl =
+                readString(obligations.component_purl ?? obligations.componentPurl ?? vexRecord.component_purl ?? finding?.component_purl) ||
+                '';
+              const advisoryId =
+                readString(finding?.advisory_id) ||
+                readString(finding?.vuln_id) ||
+                readString(obligations.advisory_id) ||
+                readString(vexRecord.advisory_id) ||
+                null;
+              const vexStatementId =
+                readString(finding?.vex_statement_id) || readString(vexRecord.id) || null;
+              const vexJustification =
+                readString(vexRecord.justification) ||
+                readString(obligations.vex_justification) ||
+                readString(metadata.vex_justification) ||
+                '';
+              const permissionHints = []
+                .concat(Array.isArray(finding?.permissions) ? finding.permissions : [])
+                .concat(Array.isArray(obligations.permissions) ? obligations.permissions : [])
+                .concat(Array.isArray(metadata.permissions) ? metadata.permissions : []);
+              const normalizedPermissions = permissionHints
+                .map((value) => readString(value).toLowerCase())
+                .filter((value) => value.length > 0);
+              let canEditVex =
+                normalizedPermissions.length === 0
+                  ? true
+                  : normalizedPermissions.some((value) =>
+                      ['vex:write', 'vex:admin', 'security:write', 'admin'].includes(value)
+                    );
+              const editableHint =
+                obligations.vex_editable ?? metadata.vex_editable ?? finding?.vex_editable;
+              if (typeof editableHint !== 'undefined') {
+                canEditVex = readBoolean(editableHint, canEditVex);
+              }
+              const vexLabelOverride =
+                readString(obligations.vex_label) ||
+                readString(obligations.vexLabel) ||
+                readString(vexRecord.label);
+
+              return {
+                id: finding?.id ?? '',
+                type: 'license',
+                severity,
+                licenseCategory,
+                title:
+                  readString(obligations.license) ||
+                  readString(finding?.license_id) ||
+                  'Lisans bulgusu',
+                component: readString(obligations.component),
+                componentPurl: componentPurl || null,
+                advisoryId,
+                vexState: normalizedVexState,
+                vexLabel: normalizedVexState
+                  ? vexLabelOverride || formatVexLabel(normalizedVexState)
+                  : null,
+                vexStatementId,
+                vexJustification,
+                canEditVex,
+                statusText: readString(finding?.status, 'İnceleme bekliyor'),
+                notes:
+                  readString(finding?.notes) ||
+                  readString(obligations.notes) ||
+                  'Hukuk incelemesi bekliyor.'
+              };
+            });
+
+            const normalizedVulns = vulns.map((vuln) => {
+              const severity = readString(vuln?.severity, 'medium').toLowerCase();
+              const cvss = readNumber(vuln?.cvss);
+              const rawVexState =
+                vuln?.vex_state ??
+                vuln?.vexState ??
+                (typeof vuln?.vex === 'object' ? toRecord(vuln?.vex).status : null);
+              const normalizedVexState = normalizeVexState(rawVexState);
+              const vexRecord = toRecord(vuln?.vex ?? {});
+              const componentPurl =
+                readString(vuln?.component_purl) ||
+                readString(vexRecord.component_purl) ||
+                '';
+              const advisoryId =
+                readString(vuln?.cve_id) ||
+                readString(vuln?.advisory_id) ||
+                readString(vexRecord.advisory_id) ||
+                null;
+              const vexStatementId =
+                readString(vuln?.vex_statement_id) || readString(vexRecord.id) || null;
+              const justification =
+                readString(vexRecord.justification) ||
+                readString(vuln?.vex_justification) ||
+                '';
+              const permissionHints = []
+                .concat(Array.isArray(vuln?.permissions) ? vuln.permissions : [])
+                .concat(Array.isArray(vexRecord.permissions) ? vexRecord.permissions : []);
+              const normalizedPermissions = permissionHints
+                .map((value) => readString(value).toLowerCase())
+                .filter((value) => value.length > 0);
+              let canEditVex =
+                normalizedPermissions.length === 0
+                  ? true
+                  : normalizedPermissions.some((value) =>
+                      ['vex:write', 'vex:admin', 'security:write', 'admin'].includes(value)
+                    );
+              const editableHint = vuln?.vex_editable ?? vexRecord.editable;
+              if (typeof editableHint !== 'undefined') {
+                canEditVex = readBoolean(editableHint, canEditVex);
+              }
+              const vexLabelOverride =
+                readString(vuln?.vex_label) ||
+                readString(vuln?.vexLabel) ||
+                readString(vexRecord.label);
+
+              return {
+                id: vuln?.id ?? '',
+                type: 'vulnerability',
+                severity,
+                licenseCategory: 'permissive',
+                title: readString(vuln?.cve_id) || readString(vuln?.source) || 'CVE kaydı',
+                component: readString(vuln?.component_purl),
+                componentPurl: componentPurl || null,
+                advisoryId,
+                vexState: normalizedVexState,
+                vexLabel: normalizedVexState
+                  ? vexLabelOverride || formatVexLabel(normalizedVexState)
+                  : null,
+                vexStatementId,
+                vexJustification: justification,
+                canEditVex,
+                statusText: normalizedVexState
+                  ? undefined
+                  : readString(vuln?.source, 'Analiz ediliyor'),
+                notes:
+                  readString(vuln?.summary) ||
+                  (cvss ? `CVSS ${cvss.toFixed(1)}` : 'Politika incelemesi için sırada.')
+              };
+            });
+
+            state.findings = [...normalizedVulns, ...normalizedLegal];
+            showFindingsStatus('');
+          } catch (error) {
+            console.error('Bulgu listesi yüklenemedi', error);
+            state.findings = [];
+            showFindingsStatus('Bulgular yüklenirken hata oluştu. Lütfen tekrar deneyin.', 'error');
+          } finally {
+            state.loading = false;
+            renderFindings();
+            bindRowInteractions();
+            applyFilters();
+            updateBulkState();
+            dispatchLoaded();
+          }
+        };
+
+        state.loading = true;
+        applyFilters();
+        updateBulkState();
+        void loadFindings();
+      })();
+    </script>
+  </body>
+</html>

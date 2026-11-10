@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Hukuk İncelemesi - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.95);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-success: #22c55e;
+        --color-warning: #f59e0b;
+        --color-danger: #ef4444;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-success: #166534;
+        --color-warning: #92400e;
+        --color-danger: #7f1d1d;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 56px;
+        display: grid;
+        gap: 24px;
+      }
+
+      section.panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(1.2rem, 3vw, 1.6rem);
+      }
+
+      .queue-counters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+      }
+
+      .counter {
+        background: var(--color-surface-alt);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 16px;
+        padding: 14px;
+      }
+
+      .counter strong {
+        font-size: 1.6rem;
+        display: block;
+      }
+
+      .layout {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+      }
+
+      .review-list,
+      .decision-panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      .legal-disclaimer {
+        border-radius: 12px;
+        border: 1px solid var(--color-warning);
+        background: rgba(245, 158, 11, 0.12);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .legal-disclaimer strong {
+        color: var(--color-warning);
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .review-item {
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        padding: 14px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .review-item.is-active {
+        border-color: rgba(56, 189, 248, 0.8);
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        background: rgba(56, 189, 248, 0.12);
+      }
+
+      .review-item[data-state='priority'] {
+        border-color: rgba(249, 158, 11, 0.8);
+      }
+
+      .review-item[data-state='blocking'] {
+        border-color: rgba(34, 197, 94, 0.8);
+      }
+
+      fieldset {
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 14px;
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+      }
+
+      legend {
+        font-weight: 700;
+      }
+
+      textarea,
+      input[type='text'],
+      input[type='email'],
+      input[type='password'] {
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        background: var(--color-surface-alt);
+        color: inherit;
+        padding: 10px 12px;
+      }
+
+      textarea:focus,
+      input:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      button[type='submit'] {
+        background: var(--color-accent);
+        color: var(--color-bg);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .error-summary {
+        border-radius: 14px;
+        border: 2px solid var(--color-danger);
+        background: rgba(239, 68, 68, 0.15);
+        padding: 16px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .error-summary ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      footer.global-footer {
+        padding: 24px clamp(16px, 3vw, 48px) 48px;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Hukuk İncelemesi</h1>
+        <p id="legal-summary" class="sr-only">
+          Lisans bulguları için karar oluşturma, imza ve audit izlerini içerir. Kuyrukta bekleyen bulgulara öncelik verilir.
+        </p>
+      </div>
+      <nav aria-labelledby="legal-summary">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html" aria-current="page">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <section class="panel" aria-labelledby="queue-heading">
+        <h2 id="queue-heading">Kuyruk Durumu</h2>
+        <p class="muted">Karar SLA: kritik bulgular için 24 saat, diğerleri için 72 saat.</p>
+        <div class="queue-counters" role="list">
+          <div class="counter" role="listitem" data-counter="priority">
+            <span class="muted">Kritik Bekleyen</span>
+            <strong aria-live="polite">3</strong>
+          </div>
+          <div class="counter" role="listitem" data-counter="standard">
+            <span class="muted">Standart Kuyruk</span>
+            <strong aria-live="polite">8</strong>
+          </div>
+          <div class="counter" role="listitem" data-counter="approved">
+            <span class="muted">Son 7 günde onaylanan</span>
+            <strong aria-live="polite">12</strong>
+          </div>
+        </div>
+      </section>
+
+      <div class="layout" role="region" aria-label="İnceleme ve karar paneli">
+        <section class="review-list" aria-labelledby="pending-heading">
+          <h2 id="pending-heading">Bekleyen Bulgular</h2>
+          <p class="muted">Klavye ile satıra odaklanıp <kbd>A</kbd> (Allow), <kbd>D</kbd> (Deny) kısayolları kullanılabilir.</p>
+          <div class="review-status" data-review-status role="status" aria-live="polite"></div>
+          <div data-review-list role="list"></div>
+        </section>
+
+        <section class="decision-panel" aria-labelledby="decision-heading">
+          <h2 id="decision-heading">Karar Formu</h2>
+          <div class="error-summary" role="alert" aria-live="assertive" data-error-summary hidden>
+            <h3>Eksik alanlar</h3>
+            <p>Form gönderilemedi, aşağıdaki alanları kontrol edin:</p>
+            <ul data-error-list></ul>
+          </div>
+          <div class="success-summary" role="status" aria-live="polite" data-success hidden></div>
+          <p class="sr-only" data-selection-feedback aria-live="polite">
+            Bekleyen bulgular arasından seçim yapın.
+          </p>
+          <div
+            class="legal-disclaimer"
+            id="legal-disclaimer"
+            role="note"
+            aria-live="polite"
+            data-legal-disclaimer
+          >
+            <strong aria-hidden="true">Uyarı</strong>
+            <span>
+              Bu arayüzde sunulan içerik bilgilendirme amaçlıdır ve Atlas SCA sonuçları hukuki tavsiye değildir.
+              Nihai kararlar kuruluşunuzun onaylı hukuk süreçleri ve yetkili kişileri tarafından verilmelidir.
+            </span>
+          </div>
+          <form class="decision-form" aria-describedby="legal-disclaimer legal-summary decision-errors" id="legal-form">
+            <fieldset>
+              <legend>Bulgu Bilgileri</legend>
+              <label for="finding-id">Bulgu ID</label>
+              <input id="finding-id" name="finding-id" type="text" data-field="finding-id" placeholder="CVE-2024-12345" />
+              <label for="finding-package">Paket</label>
+              <input id="finding-package" name="finding-package" type="text" data-field="finding-package" placeholder="core-lib" />
+            </fieldset>
+            <fieldset id="decision-options">
+              <legend>Karar</legend>
+              <label>
+                <input type="radio" name="decision" value="allow" data-decision aria-describedby="decision-hint" /> Allow
+              </label>
+              <label>
+                <input type="radio" name="decision" value="deny" data-decision aria-describedby="decision-hint" /> Deny
+              </label>
+              <label>
+                <input type="radio" name="decision" value="conditional" data-decision aria-describedby="decision-hint" /> Conditional
+              </label>
+              <p id="decision-hint" class="muted">Karar gerekçesi aşağıdaki kutuya yazılmalıdır.</p>
+              <label for="decision-notes" class="sr-only">Gerekçe</label>
+              <textarea id="decision-notes" name="notes" rows="4" placeholder="Gerekçe ve uygulanacak yükümlülükler"></textarea>
+            </fieldset>
+            <fieldset aria-describedby="signoff-hint">
+              <legend>E-imza</legend>
+              <p id="signoff-hint" class="muted">Kurumsal hesapla imza atılmalı, kayıt audit log'una yazılır.</p>
+              <label for="signer-name">İmzalayan</label>
+              <input id="signer-name" name="signer-name" type="text" data-signoff="name" placeholder="Ad Soyad" aria-describedby="signoff-hint" />
+              <label for="signer-email">Kurumsal e-posta</label>
+              <input id="signer-email" name="signer-email" type="email" data-signoff="email" placeholder="legal@example.com" aria-describedby="signoff-hint" />
+              <label for="signer-passcode">Onay kodu</label>
+              <input id="signer-passcode" name="signer-passcode" type="password" data-signoff="passcode" placeholder="••••" aria-describedby="signoff-hint" />
+            </fieldset>
+            <div id="decision-errors" class="sr-only">Karar veya imza alanları eksik olduğunda bildirim yapılır.</div>
+            <button type="submit" data-action="submit-decision">Kararı Kaydet</button>
+          </form>
+        </section>
+      </div>
+    </main>
+    <footer class="global-footer">
+      © Alterra-Solutions. Telemetri kapalı, tüm hareketler denetim kaydına yazılır.
+    </footer>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+
+        const applyTheme = (theme) => {
+          if (theme === 'contrast') {
+            root.dataset.theme = 'contrast';
+            toggle?.setAttribute('aria-pressed', 'true');
+            if (label) {
+              label.textContent = 'Standart temaya dön';
+            }
+          } else {
+            root.dataset.theme = 'default';
+            toggle?.setAttribute('aria-pressed', 'false');
+            if (label) {
+              label.textContent = 'Yüksek kontrast modunu aç';
+            }
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema tercihi okunamadı', error);
+        }
+
+        const detectSystemTheme = () => {
+          if (typeof window.matchMedia !== 'function') {
+            return null;
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'contrast';
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'default';
+          }
+
+          return null;
+        };
+
+        const initialTheme =
+          savedTheme === 'contrast' || savedTheme === 'default'
+            ? savedTheme
+            : detectSystemTheme() ?? 'default';
+
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        const tenantId = root.getAttribute('data-tenant-id') ?? '55555555-5555-4555-8555-555555555555';
+        const queueList = document.querySelector('[data-review-list]');
+        const queueStatus = document.querySelector('[data-review-status]');
+        const counterPriority = document.querySelector('[data-counter="priority"] strong');
+        const counterStandard = document.querySelector('[data-counter="standard"] strong');
+        const counterApproved = document.querySelector('[data-counter="approved"] strong');
+        const selectionFeedback = document.querySelector('[data-selection-feedback]');
+        const findingIdField = document.querySelector('[data-field="finding-id"]');
+        const findingPackageField = document.querySelector('[data-field="finding-package"]');
+        const decisionRadios = Array.from(document.querySelectorAll('[data-decision]'));
+        const decisionNotesField = document.querySelector('#decision-notes');
+        const form = document.getElementById('legal-form');
+        const errorSummary = document.querySelector('[data-error-summary]');
+        const errorList = errorSummary?.querySelector('[data-error-list]');
+        const successSummary = document.querySelector('[data-success]');
+        const signerNameField = document.querySelector('[data-signoff="name"]');
+        const signerEmailField = document.querySelector('[data-signoff="email"]');
+        const signerPasscodeField = document.querySelector('[data-signoff="passcode"]');
+
+        const numberFormatter = new Intl.NumberFormat('tr-TR');
+        const severityLabels = {
+          critical: 'Kritik',
+          high: 'Yüksek',
+          medium: 'Orta',
+          low: 'Düşük',
+          unknown: 'Bilinmiyor'
+        };
+
+        const readString = (value, fallback = '') =>
+          typeof value === 'string' && value.trim().length > 0 ? value.trim() : fallback;
+
+        const toRecord = (value) => (value && typeof value === 'object' ? value : {});
+
+        const setCounterValue = (element, value) => {
+          if (!(element instanceof HTMLElement)) {
+            return;
+          }
+
+          element.textContent = numberFormatter.format(value);
+        };
+
+        const setQueueStatus = (message, state = 'info') => {
+          if (!(queueStatus instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!message) {
+            queueStatus.textContent = '';
+            queueStatus.setAttribute('hidden', '');
+            queueStatus.removeAttribute('data-state');
+            return;
+          }
+
+          queueStatus.textContent = message;
+          queueStatus.dataset.state = state;
+          queueStatus.removeAttribute('hidden');
+        };
+
+        const findingMap = new Map();
+        let findingsData = [];
+        let queueItems = [];
+        let activeQueueItem = null;
+        let pendingController = null;
+
+        const refreshCounters = () => {
+          const priorityCount = findingsData.filter((finding) => finding.priority).length;
+          const standardCount = findingsData.length - priorityCount;
+          const approvedCount = findingsData.filter((finding) => finding.decision === 'allow').length;
+
+          setCounterValue(counterPriority, priorityCount);
+          setCounterValue(counterStandard, standardCount);
+          setCounterValue(counterApproved, approvedCount);
+        };
+
+        const announceSelection = (item) => {
+          if (!(selectionFeedback instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!item) {
+            selectionFeedback.textContent = 'Bekleyen bulgular arasından seçim yapın.';
+            return;
+          }
+
+          const findingId = item.getAttribute('data-finding-id') ?? '';
+          const finding = findingMap.get(findingId);
+          if (!finding) {
+            selectionFeedback.textContent = 'Bulgu seçimi yapılamadı.';
+            return;
+          }
+
+          const recommendation = finding.recommendedLabel
+            ? `Önerilen karar: ${finding.recommendedLabel.toUpperCase()}.`
+            : 'Önerilen karar bulunmuyor.';
+          selectionFeedback.textContent = `${finding.context} seçildi. ${recommendation}`;
+        };
+
+        const bindQueueInteractions = () => {
+          queueItems.forEach((item) => {
+            if (!(item instanceof HTMLElement)) {
+              return;
+            }
+
+            item.addEventListener('click', () => {
+              applyQueueSelection(item);
+            });
+
+            item.addEventListener('keydown', (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                applyQueueSelection(item);
+              }
+            });
+          });
+        };
+
+        const applyQueueSelection = (item) => {
+          queueItems.forEach((queueItem) => {
+            if (queueItem instanceof HTMLElement) {
+              const isActive = queueItem === item;
+              queueItem.classList.toggle('is-active', isActive);
+              queueItem.setAttribute('aria-current', isActive ? 'true' : 'false');
+            }
+          });
+
+          activeQueueItem = item ?? null;
+
+          const findingId = item?.getAttribute('data-finding-id') ?? '';
+          const finding = findingMap.get(findingId);
+
+          if (!finding) {
+            if (findingIdField instanceof HTMLInputElement) {
+              findingIdField.value = '';
+            }
+            if (findingPackageField instanceof HTMLInputElement) {
+              findingPackageField.value = '';
+            }
+            if (decisionNotesField instanceof HTMLTextAreaElement) {
+              decisionNotesField.value = '';
+            }
+            decisionRadios.forEach((radio) => {
+              if (radio instanceof HTMLInputElement) {
+                radio.checked = false;
+              }
+            });
+            announceSelection(null);
+            return;
+          }
+
+          if (findingIdField instanceof HTMLInputElement) {
+            findingIdField.value = finding.id;
+          }
+
+          if (findingPackageField instanceof HTMLInputElement) {
+            findingPackageField.value = finding.packageName ?? '';
+          }
+
+          if (decisionNotesField instanceof HTMLTextAreaElement) {
+            decisionNotesField.value = finding.notes ?? '';
+          }
+
+          decisionRadios.forEach((radio) => {
+            if (radio instanceof HTMLInputElement) {
+              radio.checked = finding.recommended === radio.value;
+            }
+          });
+
+          announceSelection(item);
+        };
+
+        const renderQueueItems = (items) => {
+          if (!(queueList instanceof HTMLElement)) {
+            return;
+          }
+
+          queueList.innerHTML = '';
+          findingMap.clear();
+          const renderedItems = [];
+
+          if (items.length === 0) {
+            setQueueStatus('Bekleyen bulgu bulunmuyor.', 'info');
+          }
+
+          items.forEach((finding) => {
+            const article = document.createElement('article');
+            article.className = 'review-item';
+            article.dataset.queue = 'item';
+            article.dataset.findingId = finding.id;
+            article.dataset.package = finding.packageName ?? '';
+            if (finding.recommended) {
+              article.dataset.recommended = finding.recommended;
+            }
+            if (finding.notes) {
+              article.dataset.notes = finding.notes;
+            }
+            article.dataset.context = finding.context;
+            article.dataset.state = finding.priority ? 'priority' : 'blocking';
+            article.tabIndex = 0;
+            article.setAttribute('role', 'listitem');
+
+            const title = document.createElement('h3');
+            title.textContent = finding.context;
+
+            const summary = document.createElement('p');
+            summary.className = 'muted';
+            summary.textContent = finding.summary;
+
+            const recommendation = document.createElement('p');
+            const strong = document.createElement('strong');
+            strong.textContent = 'Önerilen aksiyon:';
+            const recommendationText = finding.recommendedLabel ?? 'Hukuk incelemesi gerekli';
+            recommendation.append(strong, document.createTextNode(` ${recommendationText}`));
+
+            const severity = document.createElement('p');
+            severity.className = 'muted';
+            const severityLabel = severityLabels[finding.severity] ?? severityLabels.unknown;
+            severity.textContent = `Şiddet: ${severityLabel}`;
+
+            article.append(title, summary, recommendation, severity);
+            queueList.append(article);
+            findingMap.set(finding.id, finding);
+            renderedItems.push(article);
+          });
+
+          queueItems = renderedItems;
+          bindQueueInteractions();
+
+          if (queueItems[0]) {
+            applyQueueSelection(queueItems[0]);
+          } else {
+            announceSelection(null);
+          }
+        };
+
+        const normalizeFinding = (raw) => {
+          const obligations = toRecord(raw?.obligations);
+          const severity = readString(obligations.severity ?? raw?.severity, 'medium').toLowerCase();
+          const component = readString(obligations.component ?? raw?.component, '');
+          const licenseName = readString(obligations.license ?? raw?.license_id, 'Lisans bulgusu');
+          const recommendedRaw = readString(
+            obligations.recommended_decision ?? obligations.recommendedDecision ?? obligations.recommendation,
+            ''
+          ).toLowerCase();
+          const recommended = ['allow', 'deny', 'conditional'].includes(recommendedRaw)
+            ? recommendedRaw
+            : null;
+          const recommendedLabel = readString(
+            obligations.recommended_label ?? obligations.recommendedLabel ?? obligations.recommendation_label,
+            recommended ? `${recommended.charAt(0).toUpperCase()}${recommended.slice(1)}` : ''
+          );
+          const notes = readString(raw?.notes, readString(obligations.notes, 'Hukuk incelemesi bekliyor.'));
+          const summary = readString(obligations.summary, notes);
+          const context = [component || null, licenseName].filter(Boolean).join(' — ') || licenseName;
+          const decision = readString(raw?.decision).toLowerCase() || null;
+          const priority = severity === 'critical' || severity === 'high';
+
+          return {
+            id: readString(raw?.id),
+            severity,
+            recommended,
+            recommendedLabel: recommendedLabel || null,
+            notes,
+            summary,
+            context,
+            packageName: component,
+            decision,
+            priority,
+            status: readString(raw?.status, 'pending'),
+            raw
+          };
+        };
+
+        const loadFindings = async () => {
+          if (pendingController) {
+            pendingController.abort();
+          }
+
+          const controller = new AbortController();
+          pendingController = controller;
+
+          setQueueStatus('Bekleyen bulgular yükleniyor...', 'loading');
+          if (queueList instanceof HTMLElement) {
+            queueList.innerHTML = '';
+            queueList.setAttribute('aria-busy', 'true');
+          }
+
+          try {
+            const response = await fetch(
+              `/v1/legal/findings?tenant_id=${encodeURIComponent(tenantId)}&status=pending&page=1&page_size=20`,
+              {
+                headers: { Accept: 'application/json' },
+                signal: controller.signal
+              }
+            );
+
+            if (!response?.ok) {
+              throw new Error(`HTTP ${response?.status ?? 'bilinmiyor'}`);
+            }
+
+            const payload = await response.json();
+            const items = Array.isArray(payload?.data) ? payload.data : [];
+            findingsData = items.map(normalizeFinding).filter((finding) => finding.id);
+            refreshCounters();
+            renderQueueItems(findingsData);
+
+            if (findingsData.length > 0) {
+              setQueueStatus('', 'info');
+            }
+
+            document.dispatchEvent(
+              new CustomEvent('legal:queue-loaded', { detail: { count: findingsData.length } })
+            );
+          } catch (error) {
+            if (controller.signal.aborted) {
+              return;
+            }
+
+            findingsData = [];
+            refreshCounters();
+            renderQueueItems(findingsData);
+            const message = error instanceof Error ? error.message : 'Bekleyen bulgular alınamadı.';
+            setQueueStatus(`Bekleyen bulgular alınamadı: ${message}`, 'error');
+            document.dispatchEvent(
+              new CustomEvent('legal:queue-load-failed', { detail: { message } })
+            );
+          } finally {
+            if (queueList instanceof HTMLElement) {
+              queueList.removeAttribute('aria-busy');
+            }
+            if (pendingController === controller) {
+              pendingController = null;
+            }
+          }
+        };
+
+        const clearInvalidState = () => {
+          if (!(form instanceof HTMLFormElement)) {
+            return;
+          }
+
+          const fields = form.querySelectorAll('[data-decision], #decision-notes, [data-signoff]');
+          fields.forEach((field) => {
+            if (field instanceof HTMLElement) {
+              field.removeAttribute('aria-invalid');
+            }
+          });
+        };
+
+        const setFormBusy = (busy) => {
+          if (!(form instanceof HTMLFormElement)) {
+            return;
+          }
+
+          const controls = form.querySelectorAll('button, input, textarea, select');
+          controls.forEach((control) => {
+            if ('disabled' in control) {
+              control.disabled = busy;
+            }
+          });
+
+          if (busy) {
+            form.setAttribute('aria-busy', 'true');
+          } else {
+            form.removeAttribute('aria-busy');
+          }
+        };
+
+        if (form instanceof HTMLFormElement) {
+          form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            clearInvalidState();
+
+            const issues = [];
+            const selectedDecision = decisionRadios.find(
+              (input) => input instanceof HTMLInputElement && input.checked
+            );
+
+            if (!selectedDecision) {
+              const fallback = decisionRadios[0] ?? form;
+              if (fallback instanceof HTMLElement) {
+                fallback.setAttribute('aria-invalid', 'true');
+                issues.push({
+                  element: fallback,
+                  message: 'Karar seçin.',
+                  targetId: 'decision-options'
+                });
+              }
+            }
+
+            const notesField = decisionNotesField instanceof HTMLTextAreaElement ? decisionNotesField : null;
+            if (!notesField || notesField.value.trim().length === 0) {
+              const target = notesField ?? form;
+              target.setAttribute('aria-invalid', 'true');
+              issues.push({
+                element: target,
+                message: 'Karar gerekçesi girilmeli.',
+                targetId: 'decision-notes'
+              });
+            }
+
+            if (!(findingIdField instanceof HTMLInputElement) || findingIdField.value.trim().length === 0) {
+              const target = findingIdField instanceof HTMLElement ? findingIdField : form;
+              target.setAttribute('aria-invalid', 'true');
+              issues.push({
+                element: target,
+                message: 'Bulgu ID seçin.',
+                targetId: 'finding-id'
+              });
+            }
+
+            if (!(signerNameField instanceof HTMLInputElement) || signerNameField.value.trim().length === 0) {
+              signerNameField?.setAttribute('aria-invalid', 'true');
+              issues.push({
+                element: signerNameField ?? form,
+                message: 'İmzalayan adı zorunlu.',
+                targetId: 'signer-name'
+              });
+            }
+
+            if (!(signerEmailField instanceof HTMLInputElement) || signerEmailField.value.trim().length === 0) {
+              signerEmailField?.setAttribute('aria-invalid', 'true');
+              issues.push({
+                element: signerEmailField ?? form,
+                message: 'Kurumsal e-posta girilmeli.',
+                targetId: 'signer-email'
+              });
+            }
+
+            if (
+              !(signerPasscodeField instanceof HTMLInputElement) ||
+              signerPasscodeField.value.trim().length === 0
+            ) {
+              signerPasscodeField?.setAttribute('aria-invalid', 'true');
+              issues.push({
+                element: signerPasscodeField ?? form,
+                message: 'Onay kodu girilmeli.',
+                targetId: 'signer-passcode'
+              });
+            }
+
+            if (issues.length > 0) {
+              if (errorSummary instanceof HTMLElement && errorList instanceof HTMLElement) {
+                errorSummary.removeAttribute('hidden');
+                errorList.innerHTML = '';
+                issues.forEach((issue) => {
+                  const li = document.createElement('li');
+                  const link = document.createElement('a');
+                  link.href = `#${issue.targetId}`;
+                  link.textContent = issue.message;
+                  li.appendChild(link);
+                  errorList.appendChild(li);
+                });
+              }
+
+              if (successSummary instanceof HTMLElement) {
+                successSummary.setAttribute('hidden', '');
+              }
+
+              const firstIssue = issues[0];
+              if (firstIssue && firstIssue.element instanceof HTMLElement) {
+                firstIssue.element.focus();
+              }
+              return;
+            }
+
+            if (errorSummary instanceof HTMLElement && errorList instanceof HTMLElement) {
+              errorSummary.setAttribute('hidden', '');
+              errorList.innerHTML = '';
+            }
+
+            const payload = {
+              tenant_id: tenantId,
+              finding_id: findingIdField instanceof HTMLInputElement ? findingIdField.value.trim() : '',
+              decision:
+                selectedDecision instanceof HTMLInputElement ? selectedDecision.value : 'allow',
+              rationale:
+                notesField instanceof HTMLTextAreaElement ? notesField.value.trim() : undefined,
+              signoff: {
+                signer_name: signerNameField?.value.trim() ?? '',
+                signer_email: signerEmailField?.value.trim() ?? '',
+                signature: signerPasscodeField?.value.trim() ?? '',
+                payload: { issued_at: new Date().toISOString() }
+              }
+            };
+
+            setFormBusy(true);
+            try {
+              const response = await fetch('/v1/legal/decisions', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json'
+                },
+                body: JSON.stringify(payload)
+              });
+
+              if (!response?.ok) {
+                let message = `Karar gönderilemedi (HTTP ${response?.status ?? 'bilinmiyor'}).`;
+                try {
+                  const errorPayload = await response.json();
+                  const normalized =
+                    readString(errorPayload?.message) ||
+                    readString(errorPayload?.error?.message);
+                  if (normalized) {
+                    message = normalized;
+                  }
+                } catch {
+                  // ignore parse errors
+                }
+
+                throw new Error(message);
+              }
+
+              findingsData = findingsData.filter((finding) => finding.id !== payload.finding_id);
+              refreshCounters();
+              renderQueueItems(findingsData);
+
+              if (successSummary instanceof HTMLElement) {
+                const decisionLabel =
+                  selectedDecision instanceof HTMLInputElement
+                    ? selectedDecision.closest('label')?.textContent?.trim() ?? selectedDecision.value
+                    : 'Karar';
+                successSummary.textContent = `${decisionLabel} kararı kaydedildi — e-imza kaydı oluşturuldu.`;
+                successSummary.removeAttribute('hidden');
+              }
+
+              form.reset();
+              document.dispatchEvent(new CustomEvent('legal:decision-recorded', { detail: payload }));
+            } catch (error) {
+              const message = error instanceof Error ? error.message : 'Karar gönderilemedi.';
+              if (errorSummary instanceof HTMLElement && errorList instanceof HTMLElement) {
+                errorSummary.removeAttribute('hidden');
+                errorList.innerHTML = '';
+                const li = document.createElement('li');
+                li.textContent = message;
+                errorList.appendChild(li);
+              }
+
+              if (successSummary instanceof HTMLElement) {
+                successSummary.setAttribute('hidden', '');
+              }
+            } finally {
+              setFormBusy(false);
+            }
+          });
+        }
+
+        announceSelection(null);
+        void loadFindings();
+      })();
+    </script>
+  </body>
+</html>

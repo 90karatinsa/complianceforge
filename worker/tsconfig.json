@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "../",
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.cache/worker.tsbuildinfo",
+    "typeRoots": ["../types", "../node_modules/@types"]
+  },
+  "include": ["src", "../scripts/license-manager.ts", "../metrics/**/*.ts", "../types/**/*.d.ts"]
+}

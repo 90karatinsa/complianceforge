@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oss-licensing-worker
+  labels:
+    app: oss-licensing
+    component: worker
+spec:
+  replicas: 2
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: oss-licensing
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: oss-licensing
+        component: worker
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: worker
+          image: ghcr.io/alterra/oss-licensing/worker:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: oss-licensing-worker-config
+            - secretRef:
+                name: oss-licensing-secrets
+          env:
+            - name: NODE_ENV
+              value: production
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          livenessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - |
+                  const target = new URL(process.env.REDIS_URL);
+                  const net = require('node:net');
+                  const socket = net.createConnection({ host: target.hostname, port: Number(target.port) || 6379 });
+                  socket.on('connect', () => { socket.destroy(); process.exit(0); });
+                  socket.on('error', () => { process.exit(1); });
+                  setTimeout(() => { socket.destroy(); process.exit(1); }, 3000);
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - node
+                - -e
+                - |
+                  const target = new URL(process.env.REDIS_URL);
+                  const net = require('node:net');
+                  const socket = net.createConnection({ host: target.hostname, port: Number(target.port) || 6379 });
+                  socket.on('connect', () => { socket.destroy(); process.exit(0); });
+                  socket.on('error', () => { process.exit(1); });
+                  setTimeout(() => { socket.destroy(); process.exit(1); }, 3000);
+            periodSeconds: 20
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - key: "node.kubernetes.io/not-ready"
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 60
+        - key: "node.kubernetes.io/unreachable"
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 60

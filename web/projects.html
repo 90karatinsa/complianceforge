@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="default" data-tenant-id="55555555-5555-4555-8555-555555555555">
+  <head>
+    <meta charset="utf-8" />
+    <title>Projeler - Atlas SCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --color-bg: #020617;
+        --color-surface: rgba(15, 23, 42, 0.95);
+        --color-surface-alt: rgba(30, 41, 59, 0.7);
+        --color-border: rgba(148, 163, 184, 0.25);
+        --color-text: #f8fafc;
+        --color-muted: #94a3b8;
+        --color-accent: #38bdf8;
+        --color-critical: #ef4444;
+        --color-high: #f97316;
+        --color-medium: #eab308;
+        --color-low: #22c55e;
+      }
+
+      :root[data-theme='contrast'] {
+        color-scheme: light;
+        --color-bg: #ffffff;
+        --color-surface: #f8fafc;
+        --color-surface-alt: #e2e8f0;
+        --color-border: #0f172a;
+        --color-text: #0f172a;
+        --color-muted: #1f2937;
+        --color-accent: #0b4a6f;
+        --color-critical: #7f1d1d;
+        --color-high: #78350f;
+        --color-medium: #92400e;
+        --color-low: #166534;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        a.skip-link {
+          transition: none;
+        }
+      }
+
+      body {
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: 'Inter', system-ui, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      a.skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--color-accent);
+        color: var(--color-bg);
+        padding: 12px 16px;
+        transform: translateY(-150%);
+        transition: transform 0.2s ease-in-out;
+        font-weight: 600;
+        z-index: 100;
+      }
+
+      a.skip-link:focus {
+        transform: translateY(0);
+      }
+
+      header.global-header {
+        padding: clamp(16px, 3vw, 48px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      header.global-header nav ul {
+        display: flex;
+        gap: 18px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      header.global-header nav a {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--color-border);
+        background: var(--color-surface-alt);
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      main {
+        padding: 0 clamp(16px, 3vw, 48px) 56px;
+        display: grid;
+        gap: 28px;
+      }
+
+      section.panel {
+        background: var(--color-surface);
+        border-radius: 18px;
+        border: 1px solid var(--color-border);
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 2.4rem);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(1.2rem, 3vw, 1.6rem);
+      }
+
+      form.filters {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      input[type='search'],
+      select {
+        border-radius: 12px;
+        border: 1px solid var(--color-border);
+        padding: 10px 12px;
+        background: var(--color-surface-alt);
+        color: inherit;
+      }
+
+      input[type='search']:focus,
+      select:focus {
+        outline: 2px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .heatmap-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: 12px;
+      }
+
+      .heatmap-cell {
+        appearance: none;
+        padding: 12px;
+        border-radius: 14px;
+        background: var(--color-surface-alt);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        display: grid;
+        gap: 6px;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+      }
+
+      .heatmap-cell:focus-visible {
+        outline: 3px solid var(--color-accent);
+        outline-offset: 2px;
+      }
+
+      .heatmap-cell[aria-pressed='true'] {
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.6);
+      }
+
+      .heatmap-cell[data-risk='critical'] {
+        background: rgba(239, 68, 68, 0.25);
+      }
+
+      .heatmap-cell[data-risk='high'] {
+        background: rgba(249, 115, 22, 0.22);
+      }
+
+      .heatmap-cell[data-risk='medium'] {
+        background: rgba(234, 179, 8, 0.25);
+      }
+
+      .heatmap-cell[data-risk='low'] {
+        background: rgba(34, 197, 94, 0.2);
+      }
+
+      .heatmap-reset {
+        margin-top: 12px;
+        align-self: start;
+        background: transparent;
+        color: inherit;
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+
+      .heatmap-reset[aria-pressed='true'] {
+        background: var(--color-accent);
+        color: var(--color-bg);
+        border-color: var(--color-accent);
+      }
+
+      .table-status {
+        margin-top: 12px;
+        color: var(--color-muted);
+        font-size: 0.95rem;
+      }
+
+      .table-status[hidden] {
+        display: none;
+      }
+
+      .table-status[data-state='error'] {
+        color: var(--color-critical);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--color-surface);
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--color-border);
+      }
+
+      thead {
+        background: rgba(15, 23, 42, 0.85);
+        text-align: left;
+      }
+
+      :root[data-theme='contrast'] thead {
+        background: rgba(15, 23, 42, 0.12);
+      }
+
+      th,
+      td {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      }
+
+      tbody tr:last-of-type td {
+        border-bottom: none;
+      }
+
+      tbody tr {
+        transition: background 0.2s ease;
+      }
+
+      tbody tr:focus {
+        outline: 3px solid var(--color-accent);
+        outline-offset: -3px;
+      }
+
+      tbody tr:hover {
+        background: rgba(56, 189, 248, 0.15);
+      }
+
+      footer.global-footer {
+        padding: 24px clamp(16px, 3vw, 48px) 48px;
+        color: var(--color-muted);
+        font-size: 0.85rem;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">İçeriğe atla</a>
+    <header class="global-header">
+      <div>
+        <h1>Projeler</h1>
+        <p class="sr-only" id="projects-description">
+          Proje listesi araması, risk filtrasyonu ve klavye ile gezilebilir tablo görünümü içerir.
+        </p>
+      </div>
+      <nav aria-labelledby="projects-description">
+        <ul>
+          <li><a href="dashboard.html">Kontrol Paneli</a></li>
+          <li><a href="projects.html" aria-current="page">Projeler</a></li>
+          <li><a href="scans.html">Taramalar</a></li>
+          <li><a href="findings.html">Bulgular</a></li>
+          <li><a href="legal-review.html">Hukuk İncelemesi</a></li>
+          <li><a href="policies.html">Politikalar</a></li>
+          <li><a href="exceptions.html">İstisnalar</a></li>
+          <li><a href="notice-builder.html">NOTICE</a></li>
+          <li><a href="feeds.html">Feed Yönetimi</a></li>
+          <li><a href="reports.html">Raporlar</a></li>
+          <li><a href="audit-log.html">Audit Log</a></li>
+          <li><a href="integrations.html">Entegrasyonlar</a></li>
+          <li><a href="health.html">Health</a></li>
+          <li><a href="settings.html">Ayarlar</a></li>
+        </ul>
+      </nav>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true">🌓</span>
+        <span data-theme-label class="sr-only">Yüksek kontrast modunu aç</span>
+      </button>
+    </header>
+    <main id="main-content">
+      <section class="panel" aria-labelledby="filters-heading">
+        <h2 id="filters-heading">Arama ve Filtreler</h2>
+        <form class="filters" role="search" aria-describedby="projects-description">
+          <label for="project-search">
+            Proje ara
+            <input
+              id="project-search"
+              type="search"
+              name="q"
+              placeholder="Proje adı, repo veya sahip..."
+              autocomplete="off"
+              data-filter="search"
+            />
+          </label>
+          <label for="project-risk-filter">
+            Risk filtrele
+            <select id="project-risk-filter" name="risk" data-filter="risk">
+              <option value="all">Tümü</option>
+              <option value="critical">Kritik</option>
+              <option value="high">Yüksek</option>
+              <option value="medium">Orta</option>
+              <option value="low">Düşük</option>
+            </select>
+          </label>
+          <label for="project-owner-filter">
+            Sorumlu ekip
+            <select id="project-owner-filter" name="owner" data-filter="owner">
+              <option value="all">Tümü</option>
+              <option value="core">Core Platform</option>
+              <option value="mobile">Mobile</option>
+              <option value="embedded">Embedded</option>
+            </select>
+          </label>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="heatmap-heading">
+        <h2 id="heatmap-heading">Risk Isı Haritası</h2>
+        <div class="heatmap-grid">
+          <button
+            type="button"
+            class="heatmap-cell"
+            data-risk="critical"
+            data-risk-cell
+            aria-pressed="false"
+          >
+            <span class="muted">Kritik</span>
+            <strong>4</strong>
+            <span class="muted">Fail-build bloklayan</span>
+          </button>
+          <button
+            type="button"
+            class="heatmap-cell"
+            data-risk="high"
+            data-risk-cell
+            aria-pressed="false"
+          >
+            <span class="muted">Yüksek</span>
+            <strong>7</strong>
+            <span class="muted">Hukuk incelemesi bekliyor</span>
+          </button>
+          <button
+            type="button"
+            class="heatmap-cell"
+            data-risk="medium"
+            data-risk-cell
+            aria-pressed="false"
+          >
+            <span class="muted">Orta</span>
+            <strong>12</strong>
+            <span class="muted">NOTICE güncellemesi gerektiriyor</span>
+          </button>
+          <button
+            type="button"
+            class="heatmap-cell"
+            data-risk="low"
+            data-risk-cell
+            aria-pressed="false"
+          >
+            <span class="muted">Düşük</span>
+            <strong>18</strong>
+            <span class="muted">İzleme</span>
+          </button>
+        </div>
+        <button type="button" class="heatmap-reset" data-risk-reset aria-pressed="true">
+          Tüm risk seviyelerini göster
+        </button>
+        <p class="sr-only" data-risk-feedback aria-live="polite">
+          Tüm projeler gösteriliyor (3 kayıt).
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="projects-table-heading">
+        <h2 id="projects-table-heading">Proje Listesi</h2>
+        <table aria-describedby="projects-description projects-table-caption">
+          <caption id="projects-table-caption" class="sr-only">
+            Projelerin son tarama tarihi, risk seviyesi ve politika durumunu listeleyen tablo.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Proje</th>
+              <th scope="col">Son Tarama</th>
+              <th scope="col">Risk</th>
+              <th scope="col">Durum</th>
+            </tr>
+          </thead>
+          <tbody data-projects-body>
+            <tr data-empty-row>
+              <td colspan="4">Projeler yükleniyor...</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="table-status" data-projects-status hidden aria-live="polite"></p>
+      </section>
+    </main>
+    <div class="project-drawer-backdrop" data-project-drawer hidden aria-hidden="true">
+      <aside class="project-drawer" role="dialog" aria-modal="true" aria-labelledby="project-drawer-title">
+        <div class="drawer-header">
+          <h2 id="project-drawer-title">Proje detayı</h2>
+          <button type="button" data-project-close aria-label="Detayı kapat">Kapat</button>
+        </div>
+        <p class="sr-only" data-project-status aria-live="polite"></p>
+        <div class="drawer-content" data-project-content>
+          <p class="muted">Proje bilgisi yükleniyor...</p>
+        </div>
+      </aside>
+    </div>
+    <footer class="global-footer">
+      © Alterra-Solutions. Telemetri kapalı, tüm hareketler denetim kaydına yazılır.
+    </footer>
+    <script>
+      (() => {
+        const STORAGE_KEY = 'atlas-theme';
+        const root = document.documentElement;
+        const toggle = document.querySelector('[data-theme-toggle]');
+        const label = toggle?.querySelector('[data-theme-label]');
+
+        const applyTheme = (theme) => {
+          if (theme === 'contrast') {
+            root.dataset.theme = 'contrast';
+            toggle?.setAttribute('aria-pressed', 'true');
+            if (label) {
+              label.textContent = 'Standart temaya dön';
+            }
+          } else {
+            root.dataset.theme = 'default';
+            toggle?.setAttribute('aria-pressed', 'false');
+            if (label) {
+              label.textContent = 'Yüksek kontrast modunu aç';
+            }
+          }
+        };
+
+        let savedTheme = null;
+        try {
+          savedTheme = window.localStorage.getItem(STORAGE_KEY);
+        } catch (error) {
+          console.warn('Tema tercihi okunamadı', error);
+        }
+
+        const detectSystemTheme = () => {
+          if (typeof window.matchMedia !== 'function') {
+            return null;
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+            return 'contrast';
+          }
+
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'default';
+          }
+
+          return null;
+        };
+
+        const initialTheme =
+          savedTheme === 'contrast' || savedTheme === 'default'
+            ? savedTheme
+            : detectSystemTheme() ?? 'default';
+
+        applyTheme(initialTheme);
+
+        toggle?.addEventListener('click', () => {
+          const next = root.dataset.theme === 'contrast' ? 'default' : 'contrast';
+          applyTheme(next);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, next);
+          } catch (error) {
+            console.warn('Tema tercihi kaydedilemedi', error);
+          }
+        });
+
+        const tenantId = document.documentElement.dataset.tenantId ?? '';
+        const riskCells = Array.from(document.querySelectorAll('[data-risk-cell]')).filter((cell) =>
+          cell instanceof HTMLButtonElement
+        );
+        const riskReset = document.querySelector('[data-risk-reset]');
+        const riskFeedback = document.querySelector('[data-risk-feedback]');
+        const projectsBody = document.querySelector('[data-projects-body]');
+        const tableStatus = document.querySelector('[data-projects-status]');
+        const searchInput = document.querySelector('[data-filter="search"]');
+        const riskSelect = document.querySelector('[data-filter="risk"]');
+        const ownerSelect = document.querySelector('[data-filter="owner"]');
+        const riskLabels = new Map(
+          riskCells.map((cell) => {
+            const risk = cell.getAttribute('data-risk') ?? '';
+            const label = cell.querySelector('span')?.textContent?.trim() ?? risk;
+            return [risk, label];
+          })
+        );
+        const ownerLabels = new Map();
+
+        const refreshOwnerLabels = () => {
+          ownerLabels.clear();
+          if (!(ownerSelect instanceof HTMLSelectElement)) {
+            return;
+          }
+
+          Array.from(ownerSelect.options).forEach((option) => {
+            ownerLabels.set(option.value, option.textContent?.trim() ?? option.value);
+          });
+        };
+
+        refreshOwnerLabels();
+
+        const toRecord = (value) =>
+          value && typeof value === 'object' && !Array.isArray(value) ? (value ?? null) : null;
+        const readString = (value) =>
+          typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
+
+        const riskLabelMap = {
+          critical: 'Kritik',
+          high: 'Yüksek',
+          medium: 'Orta',
+          low: 'Düşük',
+          unknown: 'Bilinmiyor'
+        };
+
+        const formatDateTime = new Intl.DateTimeFormat('tr-TR', {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        });
+
+        const formatDate = (value) => {
+          if (!value) {
+            return '—';
+          }
+
+          const date = new Date(value);
+          if (Number.isNaN(date.getTime())) {
+            return '—';
+          }
+
+          return formatDateTime.format(date);
+        };
+
+        const getRiskValue = (metadata) => {
+          const record = toRecord(metadata);
+          const raw =
+            readString(record?.risk_level) ??
+            readString(record?.risk) ??
+            readString(record?.risk_category) ??
+            readString(record?.risk_score);
+          const normalized = raw?.toLowerCase();
+          return normalized && ['critical', 'high', 'medium', 'low'].includes(normalized)
+            ? normalized
+            : 'unknown';
+        };
+
+        const getOwnerValue = (metadata) => {
+          const record = toRecord(metadata);
+          return (
+            readString(record?.owner) ??
+            readString(record?.owner_id) ??
+            readString(record?.owner_slug) ??
+            readString(record?.team) ??
+            readString(record?.team_id) ??
+            readString(record?.group) ??
+            null
+          );
+        };
+
+        const toTitleCase = (value) =>
+          value
+            .replace(/[_-]+/g, ' ')
+            .split(' ')
+            .filter(Boolean)
+            .map((part) => part.charAt(0).toLocaleUpperCase('tr-TR') + part.slice(1))
+            .join(' ');
+
+        const getOwnerLabel = (metadata, fallbackValue) => {
+          const record = toRecord(metadata);
+          const label =
+            readString(record?.owner_label) ??
+            readString(record?.owner_name) ??
+            readString(record?.team_label) ??
+            readString(record?.group_label);
+          if (label) {
+            return label;
+          }
+
+          if (!fallbackValue) {
+            return 'Bilinmeyen ekip';
+          }
+
+          return toTitleCase(fallbackValue);
+        };
+
+        const getLastScan = (metadata) => {
+          const record = toRecord(metadata);
+          return (
+            readString(record?.last_scan_completed_at) ??
+            readString(record?.last_scan_at) ??
+            readString(record?.last_scan) ??
+            null
+          );
+        };
+
+        const getPolicyStatus = (metadata) => {
+          const record = toRecord(metadata);
+          return (
+            readString(record?.policy_status_label) ??
+            readString(record?.policy_status) ??
+            readString(record?.policy_result) ??
+            readString(record?.compliance_status) ??
+            'Durum bilinmiyor'
+          );
+        };
+
+        const drawerBackdrop = document.querySelector('[data-project-drawer]');
+        const drawerDialog =
+          drawerBackdrop instanceof HTMLElement ? drawerBackdrop.querySelector('[role="dialog"]') : null;
+        const drawerContent =
+          drawerBackdrop instanceof HTMLElement
+            ? drawerBackdrop.querySelector('[data-project-content]')
+            : null;
+        const drawerStatus =
+          drawerBackdrop instanceof HTMLElement
+            ? drawerBackdrop.querySelector('[data-project-status]')
+            : null;
+        const drawerClose =
+          drawerBackdrop instanceof HTMLElement
+            ? drawerBackdrop.querySelector('[data-project-close]')
+            : null;
+        const drawerFocusableSelector =
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        const projectDetailCache = new Map();
+        let drawerVisible = false;
+        let drawerAbort = null;
+        let drawerActiveRow = null;
+        let drawerLastFocus = null;
+
+        const dispatchProjectDetailEvent = (detail) => {
+          queueMicrotask(() => {
+            document.dispatchEvent(new CustomEvent('projects:detail-loaded', { detail }));
+          });
+        };
+
+        const dispatchProjectDrawerClosed = (detail) => {
+          queueMicrotask(() => {
+            document.dispatchEvent(new CustomEvent('projects:detail-closed', { detail }));
+          });
+        };
+
+        const setDrawerStatus = (message, state = 'info') => {
+          if (!(drawerStatus instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!message) {
+            drawerStatus.textContent = '';
+            drawerStatus.setAttribute('hidden', '');
+            drawerStatus.removeAttribute('data-state');
+            return;
+          }
+
+          drawerStatus.textContent = message;
+          drawerStatus.dataset.state = state;
+          drawerStatus.removeAttribute('hidden');
+        };
+
+        const renderDrawerPlaceholder = (projectName) => {
+          if (!(drawerContent instanceof HTMLElement)) {
+            return;
+          }
+
+          drawerContent.innerHTML = '';
+          const placeholder = document.createElement('p');
+          placeholder.className = 'muted';
+          placeholder.textContent = `${projectName} için proje bilgisi yükleniyor...`;
+          drawerContent.append(placeholder);
+        };
+
+        const renderDrawerMessage = (message, tone = 'muted') => {
+          if (!(drawerContent instanceof HTMLElement)) {
+            return;
+          }
+
+          drawerContent.innerHTML = '';
+          const paragraph = document.createElement('p');
+          paragraph.className = tone;
+          paragraph.textContent = message;
+          drawerContent.append(paragraph);
+        };
+
+        const getDrawerFocusableElements = () => {
+          if (!(drawerDialog instanceof HTMLElement)) {
+            return [];
+          }
+
+          const elements = Array.from(drawerDialog.querySelectorAll(drawerFocusableSelector));
+          return elements.filter((element) => {
+            if (!(element instanceof HTMLElement)) {
+              return false;
+            }
+
+            if (element.hasAttribute('disabled')) {
+              return false;
+            }
+
+            if (element.getAttribute('aria-hidden') === 'true') {
+              return false;
+            }
+
+            return element.closest('[hidden]') === null;
+          });
+        };
+
+        const focusDrawer = () => {
+          if (drawerClose instanceof HTMLElement) {
+            drawerClose.focus();
+            return;
+          }
+
+          const focusable = getDrawerFocusableElements();
+          if (focusable.length > 0) {
+            const candidate = focusable[0];
+            if (candidate instanceof HTMLElement) {
+              candidate.focus();
+              return;
+            }
+          }
+
+          if (drawerDialog instanceof HTMLElement) {
+            drawerDialog.setAttribute('tabindex', '-1');
+            drawerDialog.focus();
+          }
+        };
+
+        const handleDrawerKeydown = (event) => {
+          if (!drawerVisible || !(event instanceof KeyboardEvent)) {
+            return;
+          }
+
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            closeProjectDrawer();
+            return;
+          }
+
+          if (event.key !== 'Tab') {
+            return;
+          }
+
+          const focusable = getDrawerFocusableElements();
+          if (focusable.length === 0) {
+            event.preventDefault();
+            return;
+          }
+
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+          if (event.shiftKey) {
+            if (!active || active === first) {
+              event.preventDefault();
+              last.focus();
+            }
+            return;
+          }
+
+          if (active === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        };
+
+        const enforceDrawerFocus = (event) => {
+          if (!drawerVisible || !(drawerDialog instanceof HTMLElement)) {
+            return;
+          }
+
+          const target = event?.target;
+          if (target instanceof Node && drawerDialog.contains(target)) {
+            return;
+          }
+
+          const focusable = getDrawerFocusableElements();
+          const fallback = focusable[0] ?? drawerDialog;
+          if (fallback instanceof HTMLElement) {
+            fallback.focus();
+          }
+        };
+
+        const closeProjectDrawer = () => {
+          if (!(drawerBackdrop instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!drawerVisible) {
+            return;
+          }
+
+          drawerVisible = false;
+          drawerBackdrop.setAttribute('aria-hidden', 'true');
+          drawerBackdrop.hidden = true;
+          drawerBackdrop.classList.remove('is-visible');
+          setDrawerStatus('', 'info');
+
+          if (drawerAbort) {
+            drawerAbort.abort();
+            drawerAbort = null;
+          }
+
+          const closedProjectId =
+            drawerActiveRow instanceof HTMLElement ? drawerActiveRow.dataset.projectId ?? null : null;
+
+          if (drawerActiveRow instanceof HTMLElement) {
+            drawerActiveRow.setAttribute('aria-expanded', 'false');
+          }
+
+          document.removeEventListener('keydown', handleDrawerKeydown, true);
+          document.removeEventListener('focusin', enforceDrawerFocus, true);
+
+          const focusTarget =
+            drawerActiveRow instanceof HTMLElement && drawerActiveRow.isConnected
+              ? drawerActiveRow
+              : drawerLastFocus instanceof HTMLElement && drawerLastFocus.isConnected
+              ? drawerLastFocus
+              : null;
+
+          drawerActiveRow = null;
+          drawerLastFocus = null;
+
+          if (focusTarget) {
+            focusTarget.focus();
+          }
+
+          dispatchProjectDrawerClosed({ projectId: closedProjectId });
+        };
+
+        if (drawerBackdrop instanceof HTMLElement) {
+          drawerBackdrop.addEventListener('click', (event) => {
+            if (event.target === drawerBackdrop) {
+              closeProjectDrawer();
+            }
+          });
+        }
+
+        if (drawerClose instanceof HTMLElement) {
+          drawerClose.addEventListener('click', () => {
+            closeProjectDrawer();
+          });
+        }
+
+        const formatPolicyResult = (value) => {
+          const normalized = readString(value)?.toLowerCase();
+          switch (normalized) {
+            case 'pass':
+              return 'Geçti';
+            case 'fail':
+              return 'Engellendi';
+            case 'warn':
+              return 'Uyarı';
+            case 'conditional':
+              return 'Koşullu';
+            default:
+              return normalized ? toTitleCase(normalized) : 'Bilinmiyor';
+          }
+        };
+
+        const formatScanStatus = (value) => {
+          const normalized = readString(value)?.toLowerCase();
+          switch (normalized) {
+            case 'completed':
+              return 'Tamamlandı';
+            case 'running':
+              return 'Devam ediyor';
+            case 'failed':
+              return 'Başarısız';
+            case 'queued':
+              return 'Kuyrukta';
+            case 'pending':
+              return 'Bekliyor';
+            default:
+              return normalized ? toTitleCase(normalized) : 'Bilinmiyor';
+          }
+        };
+
+        const getScanTrigger = (findings) => {
+          const record = toRecord(findings);
+          return (
+            readString(record?.triggered_by) ??
+            readString(record?.started_by) ??
+            readString(record?.initiator) ??
+            readString(record?.requested_by) ??
+            null
+          );
+        };
+
+        const getScanQueuePosition = (findings) => {
+          const record = toRecord(findings);
+          const direct = record?.queue_position;
+          if (typeof direct === 'number' && Number.isFinite(direct)) {
+            return direct;
+          }
+
+          const nested = toRecord(record?.queue);
+          if (typeof nested?.position === 'number' && Number.isFinite(nested.position)) {
+            return nested.position;
+          }
+
+          return null;
+        };
+
+        const renderProjectDetail = (detail) => {
+          if (!(drawerContent instanceof HTMLElement)) {
+            return;
+          }
+
+          const project = detail?.project ?? detail;
+          const scans = Array.isArray(detail?.scans) ? detail.scans : [];
+          const scansError = detail?.scansError ?? null;
+          const metadata = toRecord(project?.metadata) ?? {};
+
+          drawerContent.innerHTML = '';
+
+          const overview = document.createElement('section');
+          overview.className = 'drawer-section drawer-overview';
+
+          const title = document.createElement('h3');
+          title.textContent = readString(project?.name) ?? 'Proje detayı';
+          overview.append(title);
+
+          const description = readString(project?.description);
+          if (description) {
+            const descriptionParagraph = document.createElement('p');
+            descriptionParagraph.className = 'drawer-description';
+            descriptionParagraph.textContent = description;
+            overview.append(descriptionParagraph);
+          }
+
+          const summary = document.createElement('dl');
+          summary.className = 'drawer-summary';
+
+          const appendSummary = (label, value, options = {}) => {
+            if (!value) {
+              return;
+            }
+
+            const term = document.createElement('dt');
+            term.textContent = label;
+            const definition = document.createElement('dd');
+
+            if (options.href) {
+              const link = document.createElement('a');
+              link.href = options.href;
+              link.rel = 'noreferrer noopener';
+              link.target = '_blank';
+              link.textContent = value;
+              definition.append(link);
+            } else {
+              definition.textContent = value;
+            }
+
+            summary.append(term, definition);
+          };
+
+          const ownerValue = getOwnerValue(metadata);
+          const ownerLabel = getOwnerLabel(metadata, ownerValue ?? 'unknown');
+          const riskValue = getRiskValue(metadata);
+          const policyStatus = getPolicyStatus(metadata);
+          const lastScan = getLastScan(metadata);
+          const repoUrl = readString(project?.repo_url);
+          const ociRef = readString(project?.oci_ref);
+          const createdAt = readString(project?.created_at);
+          const updatedAt = readString(project?.updated_at);
+
+          appendSummary('Sorumlu ekip', ownerLabel);
+          appendSummary('Risk seviyesi', riskLabelMap[riskValue] ?? riskLabelMap.unknown);
+          appendSummary('Politika durumu', policyStatus);
+          appendSummary('Son tarama', formatDate(lastScan));
+          if (repoUrl) {
+            appendSummary('Repo', repoUrl, { href: repoUrl });
+          }
+          if (ociRef) {
+            appendSummary('OCI imajı', ociRef);
+          }
+          if (createdAt) {
+            appendSummary('Oluşturulma', formatDate(createdAt));
+          }
+          if (updatedAt) {
+            appendSummary('Güncellenme', formatDate(updatedAt));
+          }
+
+          overview.append(summary);
+          drawerContent.append(overview);
+
+          const scansSection = document.createElement('section');
+          scansSection.className = 'drawer-section drawer-scans';
+
+          const scansHeading = document.createElement('h3');
+          scansHeading.textContent = 'Son taramalar';
+          scansSection.append(scansHeading);
+
+          if (scansError) {
+            const errorParagraph = document.createElement('p');
+            errorParagraph.className = 'error';
+            errorParagraph.textContent = scansError;
+            scansSection.append(errorParagraph);
+          } else if (scans.length === 0) {
+            const emptyParagraph = document.createElement('p');
+            emptyParagraph.className = 'muted';
+            emptyParagraph.textContent = 'Bu proje için henüz tarama kaydı bulunmuyor.';
+            scansSection.append(emptyParagraph);
+          } else {
+            const list = document.createElement('ul');
+            list.className = 'drawer-scan-list';
+
+            scans.slice(0, 5).forEach((scan) => {
+              const item = document.createElement('li');
+              item.className = 'drawer-scan-item';
+
+              const scheduleLine = document.createElement('p');
+              scheduleLine.className = 'drawer-scan-meta';
+              const scheduledAt =
+                readString(scan?.completed_at) ??
+                readString(scan?.started_at) ??
+                readString(scan?.created_at);
+              scheduleLine.textContent = `${formatDate(scheduledAt)} • ${formatScanStatus(scan?.status)}`;
+              item.append(scheduleLine);
+
+              const policyLine = document.createElement('p');
+              policyLine.className = 'drawer-scan-policy';
+              policyLine.textContent = `Politika sonucu: ${formatPolicyResult(scan?.policy_result)}`;
+              item.append(policyLine);
+
+              const findingsRecord = toRecord(scan?.findings);
+              const feedVersion = readString(findingsRecord?.feed_version);
+              if (feedVersion) {
+                const feedLine = document.createElement('p');
+                feedLine.className = 'drawer-scan-feed';
+                feedLine.textContent = `Feed sürümü: ${feedVersion}`;
+                item.append(feedLine);
+              }
+
+              const trigger = getScanTrigger(findingsRecord);
+              if (trigger) {
+                const triggerLine = document.createElement('p');
+                triggerLine.className = 'drawer-scan-trigger';
+                triggerLine.textContent = `Tetikleyen: ${trigger}`;
+                item.append(triggerLine);
+              }
+
+              const queuePosition = getScanQueuePosition(findingsRecord);
+              if (queuePosition !== null) {
+                const queueLine = document.createElement('p');
+                queueLine.className = 'drawer-scan-queue';
+                queueLine.textContent = `Kuyruk sırası: ${queuePosition}`;
+                item.append(queueLine);
+              }
+
+              list.append(item);
+            });
+
+            scansSection.append(list);
+          }
+
+          drawerContent.append(scansSection);
+        };
+
+        const loadProjectDetail = async (projectId, fallbackProject) => {
+          if (!tenantId) {
+            renderDrawerMessage('Tenant kimliği bulunamadı.', 'error');
+            setDrawerStatus('Tenant kimliği bulunamadı.', 'error');
+            dispatchProjectDetailEvent({ status: 'error', projectId, message: 'Tenant kimliği bulunamadı.' });
+            return;
+          }
+
+          const controller = new AbortController();
+          drawerAbort = controller;
+          const projectName = readString(fallbackProject?.name) ?? 'Proje detayı';
+
+          try {
+            const detailResponse = await fetch(
+              `/v1/projects/${encodeURIComponent(projectId)}?tenant_id=${encodeURIComponent(tenantId)}`,
+              {
+                headers: { Accept: 'application/json' },
+                signal: controller.signal
+              }
+            );
+
+            if (!detailResponse?.ok) {
+              throw new Error(`Proje detayı alınamadı (HTTP ${detailResponse?.status ?? 'bilinmiyor'}).`);
+            }
+
+            const payload = await detailResponse.json();
+            const project = payload?.data;
+            if (!project) {
+              throw new Error('Proje detayı alınamadı.');
+            }
+
+            let scans = [];
+            let scansError = null;
+
+            try {
+              const scansResponse = await fetch(
+                `/v1/scans?tenant_id=${encodeURIComponent(tenantId)}&project_id=${encodeURIComponent(projectId)}&page=1&page_size=5`,
+                {
+                  headers: { Accept: 'application/json' },
+                  signal: controller.signal
+                }
+              );
+
+              if (scansResponse?.ok) {
+                const scansPayload = await scansResponse.json();
+                scans = Array.isArray(scansPayload?.data) ? scansPayload.data : [];
+              } else if (scansResponse?.status === 404) {
+                scans = [];
+              } else {
+                scansError = `Tarama geçmişi alınamadı (HTTP ${scansResponse?.status ?? 'bilinmiyor'}).`;
+              }
+            } catch (scanError) {
+              if (scanError instanceof DOMException && scanError.name === 'AbortError') {
+                return;
+              }
+              scansError =
+                scanError instanceof Error ? scanError.message : 'Tarama geçmişi alınamadı.';
+            }
+
+            if (controller.signal.aborted) {
+              return;
+            }
+
+            const detail = { project, scans, scansError: scansError ?? undefined };
+            projectDetailCache.set(projectId, detail);
+            renderProjectDetail(detail);
+            setDrawerStatus(
+              scansError ? 'Proje detayı yüklendi, ancak tarama geçmişi eksik.' : 'Proje detayı yüklendi.',
+              scansError ? 'warning' : 'success'
+            );
+            dispatchProjectDetailEvent({
+              status: 'success',
+              projectId,
+              source: 'network',
+              scansStatus: scansError ? 'error' : 'success'
+            });
+          } catch (error) {
+            if (controller.signal.aborted) {
+              return;
+            }
+
+            const message =
+              error instanceof Error ? error.message : `${projectName} detayı alınamadı.`;
+            renderDrawerMessage(message, 'error');
+            setDrawerStatus(message, 'error');
+            dispatchProjectDetailEvent({ status: 'error', projectId, message });
+          } finally {
+            if (drawerAbort === controller) {
+              drawerAbort = null;
+            }
+          }
+        };
+
+        const openProjectDrawer = (project, triggerRow) => {
+          if (!(drawerBackdrop instanceof HTMLElement) || !(drawerContent instanceof HTMLElement)) {
+            return;
+          }
+
+          const projectId = readString(project?.id);
+          const projectName = readString(project?.name) ?? 'Proje detayı';
+
+          drawerLastFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+          if (drawerAbort) {
+            drawerAbort.abort();
+            drawerAbort = null;
+          }
+
+          drawerBackdrop.hidden = false;
+          drawerBackdrop.setAttribute('aria-hidden', 'false');
+          drawerBackdrop.classList.add('is-visible');
+          drawerVisible = true;
+
+          document.addEventListener('keydown', handleDrawerKeydown, true);
+          document.addEventListener('focusin', enforceDrawerFocus, true);
+
+          if (drawerActiveRow instanceof HTMLElement && drawerActiveRow !== triggerRow) {
+            drawerActiveRow.setAttribute('aria-expanded', 'false');
+          }
+
+          if (triggerRow instanceof HTMLElement) {
+            triggerRow.setAttribute('aria-expanded', 'true');
+            drawerActiveRow = triggerRow;
+          } else {
+            drawerActiveRow = null;
+          }
+
+          if (!tenantId) {
+            renderDrawerMessage('Tenant kimliği bulunamadı.', 'error');
+            setDrawerStatus('Tenant kimliği bulunamadı.', 'error');
+            dispatchProjectDetailEvent({ status: 'error', projectId, message: 'Tenant kimliği bulunamadı.' });
+            focusDrawer();
+            return;
+          }
+
+          if (!projectId) {
+            renderDrawerMessage('Proje kimliği bulunamadı.', 'error');
+            setDrawerStatus('Proje kimliği bulunamadı.', 'error');
+            dispatchProjectDetailEvent({ status: 'error', message: 'Proje kimliği bulunamadı.' });
+            focusDrawer();
+            return;
+          }
+
+          const cached = projectDetailCache.get(projectId);
+          if (cached) {
+            renderProjectDetail(cached);
+            setDrawerStatus('Proje detayı yüklendi.', 'success');
+            focusDrawer();
+            dispatchProjectDetailEvent({ status: 'success', projectId, source: 'cache' });
+            return;
+          }
+
+          renderDrawerPlaceholder(projectName);
+          setDrawerStatus(`${projectName} bilgileri yükleniyor...`, 'loading');
+          focusDrawer();
+
+          void loadProjectDetail(projectId, project);
+        };
+
+        let activeRisk = null;
+        let projectRows = [];
+        let hasProjects = false;
+        let loadingProjects = false;
+
+        const buildFiltersDescription = (query, ownerValue) => {
+          const parts = [];
+          if (query.length > 0) {
+            parts.push(`Arama "${query}"`);
+          }
+          if (ownerValue !== 'all') {
+            const ownerLabel = ownerLabels.get(ownerValue) ?? ownerValue;
+            parts.push(`${ownerLabel} ekibi`);
+          }
+          if (activeRisk !== null) {
+            const label = riskLabels.get(activeRisk) ?? activeRisk;
+            parts.push(`${label} risk`);
+          }
+          return parts;
+        };
+
+        const updateTableStatus = (message, state = 'info') => {
+          if (!(tableStatus instanceof HTMLElement)) {
+            return;
+          }
+
+          if (!message) {
+            tableStatus.textContent = '';
+            tableStatus.setAttribute('hidden', '');
+            tableStatus.removeAttribute('data-state');
+            return;
+          }
+
+          tableStatus.textContent = message;
+          tableStatus.dataset.state = state;
+          tableStatus.removeAttribute('hidden');
+        };
+
+        const renderEmptyRow = (message) => {
+          if (!(projectsBody instanceof HTMLElement)) {
+            return;
+          }
+
+          const row = document.createElement('tr');
+          row.setAttribute('data-empty-row', '');
+          const cell = document.createElement('td');
+          cell.colSpan = 4;
+          cell.textContent = message;
+          row.append(cell);
+          projectsBody.append(row);
+        };
+
+        const ensureOwnerOption = (value, label) => {
+          if (!(ownerSelect instanceof HTMLSelectElement) || !value) {
+            return;
+          }
+
+          const existing = Array.from(ownerSelect.options).find((option) => option.value === value);
+          if (existing) {
+            if (!existing.textContent || existing.textContent.trim().length === 0) {
+              existing.textContent = label;
+            }
+            return;
+          }
+
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = label;
+          option.dataset.dynamic = 'true';
+          ownerSelect.append(option);
+        };
+
+        const syncOwnerOptions = (projects) => {
+          if (!(ownerSelect instanceof HTMLSelectElement) || !Array.isArray(projects)) {
+            return;
+          }
+
+          const required = new Map();
+          projects.forEach((project) => {
+            const metadata = toRecord(project?.metadata) ?? {};
+            const ownerValue = getOwnerValue(metadata);
+            if (!ownerValue) {
+              return;
+            }
+            const ownerLabel = getOwnerLabel(metadata, ownerValue);
+            required.set(ownerValue, ownerLabel);
+          });
+
+          required.forEach((label, value) => ensureOwnerOption(value, label));
+
+          refreshOwnerLabels();
+
+          const available = new Set(
+            Array.from(ownerSelect.options).map((option) => option.value)
+          );
+
+          if (!available.has(ownerSelect.value)) {
+            ownerSelect.value = 'all';
+          }
+        };
+
+        const createProjectRow = (project) => {
+          const row = document.createElement('tr');
+          row.setAttribute('data-project-row', '');
+          row.tabIndex = 0;
+          row.setAttribute('role', 'button');
+          row.setAttribute('aria-haspopup', 'dialog');
+          row.setAttribute('aria-expanded', 'false');
+
+          if (typeof project?.id === 'string') {
+            row.dataset.projectId = project.id;
+          }
+
+          const metadata = toRecord(project?.metadata) ?? {};
+          const ownerValue = getOwnerValue(metadata) ?? 'unknown';
+          const ownerLabel = getOwnerLabel(metadata, ownerValue);
+          const riskValue = getRiskValue(metadata);
+          const lastScan = getLastScan(metadata);
+          const policyStatus = getPolicyStatus(metadata);
+
+          row.dataset.owner = ownerValue;
+          row.dataset.risk = riskValue;
+
+          const nameCell = document.createElement('td');
+          nameCell.textContent = readString(project?.name) ?? 'İsimsiz proje';
+
+          const lastScanCell = document.createElement('td');
+          lastScanCell.textContent = formatDate(lastScan);
+
+          const riskCell = document.createElement('td');
+          riskCell.dataset.risk = riskValue;
+          riskCell.textContent = riskLabelMap[riskValue] ?? riskLabelMap.unknown;
+
+          const statusCell = document.createElement('td');
+          statusCell.textContent = policyStatus;
+
+          // Yardımcı verileri arama için satır metnine dahil et
+          const hiddenOwner = document.createElement('span');
+          hiddenOwner.className = 'sr-only';
+          hiddenOwner.textContent = `Sorumlu ekip: ${ownerLabel}`;
+          nameCell.append(hiddenOwner);
+
+          row.append(nameCell, lastScanCell, riskCell, statusCell);
+
+          const openDetail = () => {
+            openProjectDrawer(project, row);
+          };
+
+          row.addEventListener('click', (event) => {
+            const target = event.target;
+            if (
+              target instanceof HTMLElement &&
+              target.closest('a, button, input, select, textarea')
+            ) {
+              return;
+            }
+
+            openDetail();
+          });
+
+          row.addEventListener('keydown', (event) => {
+            if (!(event instanceof KeyboardEvent)) {
+              return;
+            }
+
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              openDetail();
+            }
+          });
+
+          return row;
+        };
+
+        const applyFilters = () => {
+          if (loadingProjects) {
+            if (riskFeedback instanceof HTMLElement) {
+              riskFeedback.textContent = 'Projeler yükleniyor...';
+            }
+            return;
+          }
+
+          const query = (searchInput instanceof HTMLInputElement ? searchInput.value : '')
+            .trim()
+            .toLowerCase();
+          const ownerValue = ownerSelect instanceof HTMLSelectElement ? ownerSelect.value : 'all';
+          const baseMatches = projectRows.filter((row) => {
+            const text = row.textContent?.toLowerCase() ?? '';
+            const matchesQuery = query.length === 0 || text.includes(query);
+            const matchesOwner = ownerValue === 'all' || row.getAttribute('data-owner') === ownerValue;
+            return matchesQuery && matchesOwner;
+          });
+          const baseSet = new Set(baseMatches);
+          const riskCounts = new Map(
+            ['critical', 'high', 'medium', 'low'].map((level) => [level, 0])
+          );
+
+          baseMatches.forEach((row) => {
+            const riskValue = row.dataset.risk ?? row.querySelector('[data-risk]')?.getAttribute('data-risk');
+            if (riskValue && riskCounts.has(riskValue)) {
+              riskCounts.set(riskValue, (riskCounts.get(riskValue) ?? 0) + 1);
+            }
+          });
+
+          riskCells.forEach((cell) => {
+            const riskValue = cell.getAttribute('data-risk');
+            const pressed = activeRisk !== null && riskValue === activeRisk;
+            cell.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+            const counter = cell.querySelector('strong');
+            if (counter) {
+              const nextCount = riskValue ? riskCounts.get(riskValue) ?? 0 : 0;
+              counter.textContent = new Intl.NumberFormat('tr-TR').format(nextCount);
+            }
+          });
+
+          if (riskReset instanceof HTMLElement) {
+            riskReset.setAttribute('aria-pressed', activeRisk === null ? 'true' : 'false');
+          }
+
+          if (riskSelect instanceof HTMLSelectElement) {
+            riskSelect.value = activeRisk ?? 'all';
+          }
+
+          let visibleCount = 0;
+          projectRows.forEach((row) => {
+            const riskValue = row.dataset.risk ?? row.querySelector('[data-risk]')?.getAttribute('data-risk') ?? '';
+            const matchesRisk = activeRisk === null || riskValue === activeRisk;
+            const shouldShow = baseSet.has(row) && matchesRisk;
+            row.toggleAttribute('hidden', !shouldShow);
+            row.tabIndex = shouldShow ? 0 : -1;
+            if (shouldShow) {
+              visibleCount += 1;
+            }
+          });
+
+          if (riskFeedback instanceof HTMLElement) {
+            if (!hasProjects) {
+              riskFeedback.textContent = 'Henüz proje bulunmuyor.';
+              return;
+            }
+
+            const filtersDescription = buildFiltersDescription(query, ownerValue);
+            if (visibleCount === 0) {
+              riskFeedback.textContent = filtersDescription.length === 0
+                ? 'Projeler bulunamadı.'
+                : 'Seçili filtrelerle eşleşen proje bulunamadı.';
+            } else if (filtersDescription.length === 0) {
+              riskFeedback.textContent = `Tüm projeler gösteriliyor (${visibleCount} kayıt).`;
+            } else {
+              riskFeedback.textContent = `${filtersDescription.join(', ')} ile ${visibleCount} proje gösteriliyor.`;
+            }
+          }
+        };
+
+        const setActiveRisk = (nextRisk) => {
+          activeRisk = nextRisk;
+          applyFilters();
+        };
+
+        const toggleRisk = (value) => {
+          if (value == null) {
+            setActiveRisk(null);
+            return;
+          }
+          setActiveRisk(activeRisk === value ? null : value);
+        };
+
+        riskCells.forEach((cell) => {
+          cell.addEventListener('click', () => {
+            const value = cell.getAttribute('data-risk');
+            toggleRisk(value);
+          });
+        });
+
+        if (riskReset instanceof HTMLElement) {
+          riskReset.addEventListener('click', () => {
+            setActiveRisk(null);
+          });
+        }
+
+        if (riskSelect instanceof HTMLSelectElement) {
+          riskSelect.addEventListener('change', () => {
+            const value = riskSelect.value;
+            setActiveRisk(value === 'all' ? null : value);
+          });
+        }
+
+        if (searchInput instanceof HTMLInputElement) {
+          searchInput.addEventListener('input', () => {
+            applyFilters();
+          });
+        }
+
+        if (ownerSelect instanceof HTMLSelectElement) {
+          ownerSelect.addEventListener('change', () => {
+            applyFilters();
+          });
+        }
+
+        const renderProjects = (projects) => {
+          if (!(projectsBody instanceof HTMLElement)) {
+            return;
+          }
+
+          projectsBody.innerHTML = '';
+
+          if (!Array.isArray(projects) || projects.length === 0) {
+            renderEmptyRow('Henüz proje bulunmuyor.');
+            projectRows = [];
+            hasProjects = false;
+            applyFilters();
+            return;
+          }
+
+          const rows = projects.map((project) => createProjectRow(project));
+          rows.forEach((row) => {
+            projectsBody.append(row);
+          });
+          projectRows = rows;
+          hasProjects = rows.length > 0;
+          applyFilters();
+        };
+
+        const loadProjects = async () => {
+          if (!(projectsBody instanceof HTMLElement)) {
+            return;
+          }
+
+          loadingProjects = true;
+          projectsBody.innerHTML = '';
+          renderEmptyRow('Projeler yükleniyor...');
+          if (riskFeedback instanceof HTMLElement) {
+            riskFeedback.textContent = 'Projeler yükleniyor...';
+          }
+          updateTableStatus('Projeler yükleniyor...', 'loading');
+
+          try {
+            if (!tenantId) {
+              throw new Error('Tenant kimliği bulunamadı.');
+            }
+
+            const response = await fetch(
+              `/v1/projects?tenant_id=${encodeURIComponent(tenantId)}&page=1&page_size=50`,
+              {
+                headers: { Accept: 'application/json' }
+              }
+            );
+
+            if (!response?.ok) {
+              throw new Error(`Projeler alınamadı: ${response?.status ?? 'bilinmeyen hata'}`);
+            }
+
+            const payload = await response.json();
+            const projects = Array.isArray(payload?.data) ? payload.data : [];
+            syncOwnerOptions(projects);
+            loadingProjects = false;
+            renderProjects(projects);
+            updateTableStatus('', 'info');
+            document.dispatchEvent(
+              new CustomEvent('projects:data-loaded', { detail: { status: 'success' } })
+            );
+          } catch (error) {
+            loadingProjects = false;
+            const message = error instanceof Error ? error.message : 'Projeler alınamadı.';
+            if (projectsBody instanceof HTMLElement) {
+              projectsBody.innerHTML = '';
+              renderEmptyRow('Projeler alınamadı.');
+            }
+            projectRows = [];
+            hasProjects = false;
+            applyFilters();
+            updateTableStatus(message, 'error');
+            if (riskFeedback instanceof HTMLElement) {
+              riskFeedback.textContent = 'Projeler alınamadı.';
+            }
+            document.dispatchEvent(
+              new CustomEvent('projects:data-loaded', { detail: { status: 'error' } })
+            );
+          }
+        };
+
+        void loadProjects();
+        applyFilters();
+      })();
+    </script>
+  </body>
+</html>
