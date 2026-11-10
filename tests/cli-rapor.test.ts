@@ -5,6 +5,7 @@ import type { PackageSummary, VulnerabilityFinding } from '../worker/src/scanner
 import {
   cikisKodu,
   duzeltilmisSurum,
+  surumKarsilastir,
   lisansSinifi,
   markdownRapor,
   ozetCikar,
@@ -60,6 +61,20 @@ describe('siddetBul ve duzeltilmisSurum', () => {
     expect(duzeltilmisSurum(lodashAyrinti, 'lodash')).toBe('4.17.21');
     expect(duzeltilmisSurum(lodashAyrinti, 'baska-paket')).toBeUndefined();
   });
+
+  it('kurulu surumun dalindaki duzeltmeyi secer', () => {
+    const next: OsvAyrinti = {
+      id: 'GHSA-next',
+      affected: [{
+        package: { name: 'next', ecosystem: 'npm' },
+        ranges: [{ events: [{ introduced: '15.0.0' }, { fixed: '15.5.28' }, { introduced: '16.0.0' }, { fixed: '16.4.1' }] }]
+      }]
+    };
+    expect(duzeltilmisSurum(next, 'next', '16.0.3')).toBe('16.4.1');
+    expect(duzeltilmisSurum(next, 'next', '15.2.0')).toBe('15.5.28');
+    expect(surumKarsilastir('1.10.2', '1.9.0')).toBeGreaterThan(0);
+    expect(surumKarsilastir('16.0.3', '16.0.3')).toBe(0);
+  });
 });
 
 describe('ozetCikar, cikisKodu ve markdownRapor', () => {
@@ -101,6 +116,8 @@ describe('ozetCikar, cikisKodu ve markdownRapor', () => {
     const temiz = { ...ozet, acikSayilari: { KRITIK: 0, YUKSEK: 0, ORTA: 3, DUSUK: 0, BILINMIYOR: 5 } };
     expect(cikisKodu(temiz, 'YUKSEK', false)).toBe(0);
     expect(cikisKodu(temiz, 'ORTA', false)).toBe(2);
+    expect(cikisKodu({ ...temiz, acikSorgusuHatasi: 'OSV 400' }, 'yok', false)).toBe(3);
+    expect(markdownRapor({ ...temiz, acikSorgusuHatasi: 'OSV 400' })).toContain('açık sorgusu tamamlanamadı');
   });
 
   it('Markdown rapor uretir', () => {

@@ -23,7 +23,8 @@ npm run scan -- /proje/klasoru --out rapor
 | `--fail-on <eşik>` | Bu şiddette ya da üstünde açık varsa çıkış kodu 2 (`kritik`, `yuksek` (varsayılan), `orta`, `dusuk`, `yok`) |
 | `--deny-copyleft` | Güçlü copyleft lisans (GPL, AGPL, SSPL) varsa çıkış kodu 2 |
 
-Çıkış kodları: `0` eşik aşılmadı, `1` kullanım hatası, `2` eşik aşıldı. CI'da doğrudan kullanılabilir.
+Çıkış kodları: `0` eşik aşılmadı, `1` kullanım hatası, `2` eşik aşıldı, `3` açık sorgusu tamamlanamadı (sonuç
+eksik; "açık yok" sanılmasın diye ayrı kod). CI'da doğrudan kullanılabilir.
 
 **Ne bulur:**
 
@@ -41,7 +42,6 @@ npm run scan -- /proje/klasoru --out rapor
 
 - Tek komutluk tarayıcı (`cli/`) ve tarama motoru (`worker/src/scanners.ts`) çalışıyor; 477 test geçiyor.
 - Lisanslar ancak bağımlılıkları kurulmuş projede (`node_modules` vb.) tam okunur.
-- OSV toplu sorgusu tek istekte gönderilir; çok büyük projelerde (1000+ paket) bölünmesi gerekecek.
 - **Sunucu platformu (`api/`, `worker/`) deneysel.** PostgreSQL, Redis ve imzalı bir lisans dosyası ister.
   `npm run build` sunucu kodunda tip hataları veriyor (çalışma zamanı `tsx`); Dockerfile'lar derlenmiş çıktı
   beklediği için şu an çalışmaz.

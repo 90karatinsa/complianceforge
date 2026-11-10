@@ -3,7 +3,7 @@
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { findProjectRoots, runScanners, type OsvVulnerability } from '../worker/src/scanners.ts';
 
 /** Ag kullanmamak icin: her paket "biliniyor, acigi yok". */
@@ -60,4 +60,29 @@ describe('alt projelerdeki kilit dosyalari', () => {
     const sonuc = await runScanners(kok, { cache: new BosOnbellek() });
     expect(sonuc.packages.filter((p) => p.purl === 'pkg:npm/lodash@4.17.21')).toHaveLength(1);
   });
+
+  it('OSV sorgusunu 1000lik parcalara boler; basarisiz parca hata olarak doner', async () => {
+    kok = await mkdtemp(path.join(tmpdir(), 'cf-kok-'));
+    const paketler: Record<string, string> = {};
+    for (let i = 0; i < 1500; i += 1) paketler[`paket-${i}`] = '1.0.0';
+    await writeFile(path.join(kok, 'package-lock.json'), kilit(paketler));
+    vi.stubEnv('ALLOW_NETWORK_FETCH', 'true');
+
+    const boyutlar: number[] = [];
+    const fetchImpl = vi.fn(async (_url: unknown, init?: RequestInit) => {
+      const govde = JSON.parse(String(init?.body)) as { queries: unknown[] };
+      boyutlar.push(govde.queries.length);
+      if (boyutlar.length > 1) return new Response('', { status: 400 });
+      return new Response(JSON.stringify({ results: govde.queries.map(() => ({ vulns: [{ id: 'GHSA-test' }] })) }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' }
+      });
+    }) as unknown as typeof fetch;
+
+    const sonuc = await runScanners(kok, { fetchImpl, osvRetryOptions: { maxAttempts: 1 } });
+    expect(boyutlar).toEqual([1000, 500]);
+    expect(sonuc.vulnerabilities.filter((v) => v.vulnerabilities.length > 0)).toHaveLength(1000);
+    expect(sonuc.vulnerabilityQueryError).toMatch(/500 paket/);
+  });
 });
+

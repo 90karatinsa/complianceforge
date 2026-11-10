@@ -78,16 +78,40 @@ export function siddetBul(ayrinti: OsvAyrinti | undefined): Siddet {
   return 'BILINMIYOR';
 }
 
-/** Ilgili paketin ilk "fixed" olayini dondurur (duzeltilmis surum). */
-export function duzeltilmisSurum(ayrinti: OsvAyrinti | undefined, paketAdi: string): string | undefined {
+/** "1.10.2" > "1.9.0" gibi noktali surumleri sayisal karsilastirir (on-surum eki yok sayilir). */
+export function surumKarsilastir(a: string, b: string): number {
+  const parca = (v: string) => v.replace(/^v/u, '').split(/[-+]/u)[0].split('.').map((x) => Number.parseInt(x, 10) || 0);
+  const [x, y] = [parca(a), parca(b)];
+  for (let i = 0; i < Math.max(x.length, y.length); i += 1) {
+    const fark = (x[i] ?? 0) - (y[i] ?? 0);
+    if (fark !== 0) return fark;
+  }
+  return 0;
+}
+
+/**
+ * Kurulu surumun bulundugu araligin "fixed" surumu: introduced <= kurulu < fixed. Boyle bir aralik yoksa
+ * kurulu surumden buyuk en kucuk "fixed" (ornegin 16.0.3 icin 15.x dalinin duzeltmesi degil, 16.x'inki).
+ */
+export function duzeltilmisSurum(ayrinti: OsvAyrinti | undefined, paketAdi: string, kurulu?: string): string | undefined {
+  const adaylar: string[] = [];
   for (const a of ayrinti?.affected ?? []) {
     if (a.package?.name && a.package.name !== paketAdi) continue;
     for (const r of a.ranges ?? []) {
-      const olay = r.events?.find((e) => typeof e.fixed === 'string');
-      if (olay) return olay.fixed;
+      let baslangic: string | undefined;
+      for (const olay of r.events ?? []) {
+        if (typeof olay.introduced === 'string') baslangic = olay.introduced;
+        if (typeof olay.fixed === 'string') {
+          if (!kurulu) return olay.fixed;
+          const icinde = (baslangic === undefined || baslangic === '0' || surumKarsilastir(kurulu, baslangic) >= 0)
+            && surumKarsilastir(kurulu, olay.fixed) < 0;
+          if (icinde) return olay.fixed;
+          adaylar.push(olay.fixed);
+        }
+      }
     }
   }
-  return undefined;
+  return adaylar.filter((f) => kurulu && surumKarsilastir(f, kurulu) > 0).sort(surumKarsilastir)[0];
 }
 
 export interface AcikSatiri {
@@ -109,6 +133,8 @@ export interface TaramaOzeti {
   readonly hedef: string;
   readonly zaman: string;
   readonly cevrimdisi: boolean;
+  /** Acik sorgusu tamamlanamadiysa nedeni; bu durumda acik listesi eksiktir. */
+  readonly acikSorgusuHatasi?: string;
   readonly paketSayisi: number;
   readonly ekosistemler: Record<string, number>;
   readonly lisansSayilari: Record<LisansSinifi, number>;
@@ -121,6 +147,7 @@ export function ozetCikar(args: {
   hedef: string;
   zaman: Date;
   cevrimdisi: boolean;
+  acikSorgusuHatasi?: string;
   paketler: readonly PackageSummary[];
   lisanslar: readonly LicenseFinding[];
   bulgular: readonly VulnerabilityFinding[];
@@ -157,7 +184,7 @@ export function ozetCikar(args: {
         takmaAdlar: ayrinti?.aliases ?? [],
         ozet: ayrinti?.summary ?? v.summary ?? '',
         siddet,
-        duzeltme: duzeltilmisSurum(ayrinti, b.package.name)
+        duzeltme: duzeltilmisSurum(ayrinti, b.package.name, b.package.version)
       });
     }
   }
@@ -167,6 +194,7 @@ export function ozetCikar(args: {
     hedef: args.hedef,
     zaman: args.zaman.toISOString(),
     cevrimdisi: args.cevrimdisi,
+    ...(args.acikSorgusuHatasi ? { acikSorgusuHatasi: args.acikSorgusuHatasi } : {}),
     paketSayisi: args.paketler.length,
     ekosistemler,
     lisansSayilari,
@@ -176,8 +204,9 @@ export function ozetCikar(args: {
   };
 }
 
-/** CI icin cikis kodu: 0 temiz, 2 esik asildi. */
+/** CI icin cikis kodu: 0 temiz, 2 esik asildi, 3 acik sorgusu tamamlanamadi (sonuc guvenilmez). */
 export function cikisKodu(ozet: TaramaOzeti, esik: Siddet | 'yok', copyleftEngelle: boolean): number {
+  if (ozet.acikSorgusuHatasi) return 3;
   if (copyleftEngelle && ozet.lisansSayilari['guclu-copyleft'] > 0) return 2;
   if (esik === 'yok') return 0;
   const sinir = SIDDET_SIRASI.indexOf(esik);
@@ -203,6 +232,7 @@ export function markdownRapor(ozet: TaramaOzeti, enFazlaSatir = 200): string {
   satirlar.push(`- Zaman: ${ozet.zaman}`);
   satirlar.push(`- Paket: ${ozet.paketSayisi} (${Object.entries(ozet.ekosistemler).map(([e, n]) => `${e} ${n}`).join(', ') || 'yok'})`);
   if (ozet.cevrimdisi) satirlar.push('- Çevrimdışı tarama: açık sorgusu yapılmadı.');
+  if (ozet.acikSorgusuHatasi) satirlar.push('', `> **Uyarı:** açık sorgusu tamamlanamadı; aşağıdaki liste eksik. ${ozet.acikSorgusuHatasi}`);
   satirlar.push('', '## Bilinen açıklar', '');
   satirlar.push(SIDDET_SIRASI.map((s) => `${s} ${ozet.acikSayilari[s]}`).join(' · '), '');
   if (ozet.aciklar.length > 0) {

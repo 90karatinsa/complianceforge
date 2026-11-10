@@ -5,7 +5,8 @@
 //   npm run scan -- <klasor> [--out <dizin>] [--offline] [--fail-on kritik|yuksek|orta|dusuk|yok] [--deny-copyleft]
 //
 // Paketler: npm, PyPI, Go, RubyGems, Cargo, Maven, NuGet (worker/src/scanners.ts). Acik sorgusu OSV.dev'e
-// gider; --offline ile hic ag kullanilmaz. Cikis kodu: 0 temiz, 1 kullanim hatasi, 2 esik asildi.
+// gider; --offline ile hic ag kullanilmaz. Cikis kodu: 0 temiz, 1 kullanim hatasi, 2 esik asildi,
+// 3 acik sorgusu tamamlanamadi (sonuc eksik).
 
 import { mkdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -90,6 +91,7 @@ function terminalOzeti(ozet: ReturnType<typeof ozetCikar>): string {
     `ComplianceForge · ${ozet.hedef}`,
     `  paket      : ${ozet.paketSayisi} (${Object.entries(ozet.ekosistemler).map(([e, n]) => `${e} ${n}`).join(', ') || 'bulunamadi'})`,
     `  aciklar    : ${ozet.cevrimdisi ? 'sorgulanmadi (--offline)' : SIDDET_SIRASI.map((s) => `${s} ${ozet.acikSayilari[s]}`).join(' · ')}`,
+    ...(ozet.acikSorgusuHatasi ? [`  ! UYARI    : acik sorgusu tamamlanamadi, liste eksik (${ozet.acikSorgusuHatasi})`] : []),
     `  lisanslar  : serbest ${ozet.lisansSayilari.serbest} · zayif copyleft ${ozet.lisansSayilari['zayif-copyleft']} · guclu copyleft ${ozet.lisansSayilari['guclu-copyleft']} · taninmayan ${ozet.lisansSayilari.bilinmiyor}`
   ];
   for (const a of ozet.aciklar.filter((x) => x.siddet === 'KRITIK' || x.siddet === 'YUKSEK').slice(0, 10)) {
@@ -121,7 +123,7 @@ async function main(): Promise<number> {
   const kimlikler = [...new Set(sonuc.vulnerabilities.flatMap((b) => b.vulnerabilities.map((v) => v.id)))];
   const ayrintilar = s.cevrimdisi || kimlikler.length === 0 ? new Map<string, OsvAyrinti>() : await ayrintilariGetir(kimlikler);
   const ozet = ozetCikar({
-    hedef, zaman, cevrimdisi: s.cevrimdisi, paketler: sonuc.packages, lisanslar: sonuc.licenses,
+    hedef, zaman, cevrimdisi: s.cevrimdisi, acikSorgusuHatasi: sonuc.vulnerabilityQueryError, paketler: sonuc.packages, lisanslar: sonuc.licenses,
     bulgular: sonuc.vulnerabilities, ayrintilar
   });
 

@@ -74,12 +74,15 @@ export interface ScannerResult {
   readonly bom: CycloneDxBom;
   readonly licenses: LicenseFinding[];
   readonly vulnerabilities: VulnerabilityFinding[];
+  /** OSV sorgusu (kismen) basarisizsa dolu; bu durumda acik listesi eksiktir. */
+  readonly vulnerabilityQueryError?: string;
 }
 
 const OSV_BATCH_ENDPOINT = 'https://api.osv.dev/v1/querybatch';
 const OSV_BATCH_TIMEOUT_MS = 10_000;
 const OSV_BATCH_MAX_ATTEMPTS = 3;
 const OSV_BATCH_RETRY_BASE_MS = 500;
+const OSV_BATCH_MAX_QUERIES = 1000;
 const LICENSE_PREFIXES = ['LICENSE', 'LICENCE', 'COPYING', 'COPYRIGHT'] as const;
 const DEFAULT_DISCOVERY_MAX_DEPTH = 4;
 const IGNORED_DISCOVERY_DIRECTORIES = new Set([
@@ -1384,7 +1387,7 @@ async function queryOsvBatch(
   cache: Map<string, OsvVulnerability[]>,
   persistCache: ((key: string, vulnerabilities: OsvVulnerability[]) => Promise<void>) | undefined,
   retryOptions: OsvRetryOptions | undefined
-): Promise<VulnerabilityFinding[]> {
+): Promise<{ findings: VulnerabilityFinding[]; error?: string }> {
   const timeoutMs = retryOptions?.timeoutMs ?? OSV_BATCH_TIMEOUT_MS;
   const maxAttempts = Math.max(1, retryOptions?.maxAttempts ?? OSV_BATCH_MAX_ATTEMPTS);
   const retryBaseMs = retryOptions?.baseDelayMs ?? OSV_BATCH_RETRY_BASE_MS;
@@ -1403,8 +1406,15 @@ async function queryOsvBatch(
     }
   }
 
+  const failures: string[] = [];
   if (queries.length > 0) {
     assertNetworkFetchAllowed('OSV vulnerability queries');
+  }
+
+  // OSV toplu sorgu ucu tek istekte en fazla 1000 sorgu kabul eder (1001'de HTTP 400).
+  for (let start = 0; start < queries.length; start += OSV_BATCH_MAX_QUERIES) {
+    const chunkQueries = queries.slice(start, start + OSV_BATCH_MAX_QUERIES);
+    const chunkKeys = pendingKeys.slice(start, start + OSV_BATCH_MAX_QUERIES);
     const persistOperations: Array<Promise<void>> = [];
 
     let lastError: unknown;
@@ -1417,7 +1427,7 @@ async function queryOsvBatch(
         const response = await fetchImpl(OSV_BATCH_ENDPOINT, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ queries }),
+          body: JSON.stringify({ queries: chunkQueries }),
           signal: controller.signal
         });
 
@@ -1432,7 +1442,7 @@ async function queryOsvBatch(
         };
 
         payload.results?.forEach((result, index) => {
-          const key = pendingKeys[index];
+          const key = chunkKeys[index];
 
           if (key) {
             const vulnerabilities = result.vulns ?? [];
@@ -1463,16 +1473,18 @@ async function queryOsvBatch(
     if (lastError) {
       const message = lastError instanceof Error ? lastError.message : String(lastError ?? '');
       console.warn(`Failed to query OSV batch endpoint: ${message}`);
+      failures.push(`${chunkQueries.length} paket: ${message}`);
     }
   }
 
-  return packages.map((pkg) => {
+  const findings = packages.map((pkg) => {
     const key = pkg.purl;
     return {
       package: pkg,
       vulnerabilities: cache.get(key) ?? []
     };
   });
+  return failures.length > 0 ? { findings, error: `OSV sorgusu tamamlanamadi (${failures.join('; ')})` } : { findings };
 }
 
 function buildCycloneDx(
@@ -1592,7 +1604,7 @@ export async function runScanners(workspacePath: string, options: ScannerOptions
   const licenseFindings = await detectLicenseFiles(workspacePath);
   const fetchImpl = options.fetchImpl ?? fetch;
   const cache = options.cache ?? new Map<string, OsvVulnerability[]>();
-  const vulnerabilities = await queryOsvBatch(
+  const { findings: vulnerabilities, error: vulnerabilityQueryError } = await queryOsvBatch(
     packages,
     fetchImpl,
     cache,
@@ -1606,6 +1618,7 @@ export async function runScanners(workspacePath: string, options: ScannerOptions
     packages,
     bom,
     licenses: licenseFindings,
-    vulnerabilities
+    vulnerabilities,
+    ...(vulnerabilityQueryError ? { vulnerabilityQueryError } : {})
   };
 }
